@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Commerce — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #7c5cfc;
+    --danger: #ff4757;
+    --warning: #ffa502;
+    --text: #f0f0f8;
+    --muted: #6b6b8a;
+    --card-glow: 0 0 30px rgba(0, 229, 160, 0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Layout ── */
+  .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 28px 0;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo h1 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+  .nav { padding: 20px 12px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 10px;
+    cursor: pointer; font-size: 14px; font-weight: 500;
+    color: var(--muted); transition: all 0.2s; margin-bottom: 4px;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); background: rgba(0,229,160,0.08); }
+  .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+  .merchant-badge {
+    margin: 12px; padding: 14px;
+    background: var(--surface2); border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .merchant-badge .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .merchant-badge .name { font-size: 13px; font-weight: 600; margin-top: 4px; color: var(--text); }
+  .merchant-badge .status { font-size: 11px; color: var(--accent); margin-top: 2px; }
+
+  /* ── Main ── */
+  .main { padding: 36px 40px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .page-header { margin-bottom: 32px; }
+  .page-header h2 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
+  .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* ── Stats ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px; box-shadow: var(--card-glow);
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-card .value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; margin-top: 8px; }
+  .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-card.green .value { color: var(--accent); }
+  .stat-card.purple .value { color: var(--accent2); }
+  .stat-card.red .value { color: var(--danger); }
+  .stat-card.orange .value { color: var(--warning); }
+
+  /* ── Tables ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; box-shadow: var(--card-glow);
+  }
+  .card-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-header h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 12px 24px; text-align: left; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+  td { padding: 14px 24px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge.pending { background: rgba(255,165,2,0.15); color: var(--warning); }
+  .badge.confirmed { background: rgba(0,229,160,0.15); color: var(--accent); }
+  .badge.preparing { background: rgba(124,92,252,0.15); color: var(--accent2); }
+  .badge.ready { background: rgba(0,229,160,0.2); color: var(--accent); }
+  .badge.delivered { background: rgba(255,255,255,0.08); color: var(--muted); }
+  .badge.cancelled { background: rgba(255,71,87,0.15); color: var(--danger); }
+  .badge::before { content: '●'; font-size: 8px; }
+
+  /* ── Forms ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  input, select, textarea {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: 10px; font-size: 14px;
+    font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #00ffb3; transform: translateY(-1px); }
+  .btn-danger { background: rgba(255,71,87,0.15); color: var(--danger); border: 1px solid rgba(255,71,87,0.3); }
+  .btn-danger:hover { background: rgba(255,71,87,0.25); }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; width: 100%; max-width: 520px;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 20px; font-size: 14px;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 200;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--accent); }
+  .toast.error { border-color: var(--danger); }
+
+  /* ── Empty state ── */
+  .empty { text-align: center; padding: 60px 24px; color: var(--muted); }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty p { font-size: 15px; }
+
+  /* ── Select status ── */
+  select.status-select { padding: 4px 10px; font-size: 12px; width: auto; }
+
+  /* ── Loader ── */
+  .loader { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>⚡ WA Commerce</h1>
+      <span>Dashboard Commerçant</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('stats')">
+        <span class="icon">📊</span> Statistiques
+      </div>
+      <div class="nav-item" onclick="showPage('orders')">
+        <span class="icon">📦</span> Commandes
+      </div>
+      <div class="nav-item" onclick="showPage('catalog')">
+        <span class="icon">🛍️</span> Catalogue
+      </div>
+      <div class="nav-item" onclick="showPage('customers')">
+        <span class="icon">👥</span> Clients
+      </div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <span class="icon">⚙️</span> Paramètres
+      </div>
+    </nav>
+    <div class="merchant-badge">
+      <div class="label">Boutique active</div>
+      <div class="name" id="sidebar-name">Chargement...</div>
+      <div class="status" id="sidebar-status">● Connecté</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── Stats ── -->
+    <div class="page active" id="page-stats">
+      <div class="page-header">
+        <h2>Vue d'ensemble</h2>
+        <p>Résumé de votre activité en temps réel</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="label">Revenus totaux</div>
+          <div class="value" id="stat-revenue">—</div>
+          <div class="sub">FCFA générés</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="label">Commandes</div>
+          <div class="value" id="stat-orders">—</div>
+          <div class="sub">Au total</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="label">En attente</div>
+          <div class="value" id="stat-pending">—</div>
+          <div class="sub">À traiter</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Clients</div>
+          <div class="value" id="stat-customers">—</div>
+          <div class="sub">Uniques</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Dernières commandes</h3>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('orders')">Voir tout →</button>
+        </div>
+        <table>
+          <thead><tr><th>N° Commande</th><th>Client</th><th>Total</th><th>Statut</th><th>Date</th></tr></thead>
+          <tbody id="recent-orders"><tr><td colspan="5" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Commandes ── -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <h2>Commandes</h2>
+        <p>Gérez et suivez toutes vos commandes</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Toutes les commandes</h3>
+          <select onchange="filterOrders(this.value)" style="width:auto;padding:6px 12px;font-size:13px;">
+            <option value="">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="confirmed">Confirmées</option>
+            <option value="preparing">En préparation</option>
+            <option value="ready">Prêtes</option>
+            <option value="delivered">Livrées</option>
+            <option value="cancelled">Annulées</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>N° Commande</th><th>Client</th><th>Articles</th><th>Total</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody id="orders-table"><tr><td colspan="6" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Catalogue ── -->
+    <div class="page" id="page-catalog">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h2>Catalogue</h2>
+          <p>Gérez vos produits</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddProduct()">+ Ajouter un produit</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Produit</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody id="catalog-table"><tr><td colspan="6" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Clients ── -->
+    <div class="page" id="page-customers">
+      <div class="page-header">
+        <h2>Clients</h2>
+        <p>Historique et profils de vos clients</p>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Numéro WhatsApp</th><th>Nom</th><th>Commandes</th><th>Total dépensé</th><th>Dernière interaction</th></tr></thead>
+          <tbody id="customers-table"><tr><td colspan="5" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Paramètres ── -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <h2>Paramètres</h2>
+        <p>Configurez votre boutique et votre assistant IA</p>
+      </div>
+      <div class="card" style="padding:28px;margin-bottom:20px;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:20px;">Informations boutique</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Nom de la boutique</label><input id="s-name" type="text"></div>
+          <div class="form-group"><label>Ville</label><input id="s-city" type="text"></div>
+          <div class="form-group"><label>Email</label><input id="s-email" type="email"></div>
+          <div class="form-group"><label>Devise</label><input id="s-currency" type="text"></div>
+          <div class="form-group full"><label>Description de la boutique</label><textarea id="s-desc"></textarea></div>
+          <div class="form-group full"><label>Personnalité de l'IA</label><textarea id="s-persona"></textarea></div>
+          <div class="form-group full"><label>Message d'accueil</label><textarea id="s-welcome"></textarea></div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
+        </div>
+      </div>
+      <div class="card" style="padding:28px;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;">Token WhatsApp</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Le token expire toutes les 24h. Mettez-le à jour régulièrement.</p>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Nouveau token d'accès</label>
+          <input id="s-token" type="text" placeholder="EAAd...">
+        </div>
+        <button class="btn btn-primary" onclick="updateToken()">Mettre à jour le token</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Modal Produit ── -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <h3 id="modal-title">Ajouter un produit</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>Nom du produit</label><input id="p-name" type="text"></div>
+      <div class="form-group"><label>Prix (FCFA)</label><input id="p-price" type="number"></div>
+      <div class="form-group"><label>Stock</label><input id="p-stock" type="number"></div>
+      <div class="form-group"><label>Catégorie</label><input id="p-category" type="text" placeholder="Vêtements, Chaussures..."></div>
+      <div class="form-group"><label>URL Image</label><input id="p-image" type="text"></div>
+      <div class="form-group full"><label>Description</label><textarea id="p-desc"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ──
+const API = 'http://localhost:3000/api';
+// Remplacez par votre vrai merchant ID
+const MERCHANT_ID = 'b1938447-6dff-4736-b04b-67a4f102983e';
+
+let editingProductId = null;
+
+// ── Navigation ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  loadPage(name);
+}
+
+function loadPage(name) {
+  if (name === 'stats') { loadStats(); loadRecentOrders(); }
+  else if (name === 'orders') loadOrders();
+  else if (name === 'catalog') loadCatalog();
+  else if (name === 'customers') loadCustomers();
+  else if (name === 'settings') loadSettings();
+}
+
+// ── API Helper ──
+async function api(path, method, body) {
+  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  return res.json();
+}
+
+// ── Toast ──
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  t.className = 'toast show ' + (type || 'success');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ── Stats ──
+async function loadStats() {
+  const data = await api('/merchants/' + MERCHANT_ID + '/stats');
+  document.getElementById('stat-revenue').textContent = (data.totalRevenue || 0).toLocaleString('fr-FR');
+  document.getElementById('stat-orders').textContent = data.totalOrders || 0;
+  document.getElementById('stat-pending').textContent = data.pendingOrders || 0;
+  document.getElementById('stat-customers').textContent = data.totalCustomers || 0;
+  const merchant = await api('/merchants/' + MERCHANT_ID);
+  document.getElementById('sidebar-name').textContent = merchant.name || '—';
+}
+
+async function loadRecentOrders() {
+  const orders = await api('/merchants/' + MERCHANT_ID + '/orders');
+  const tbody = document.getElementById('recent-orders');
+  if (!orders.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="icon">📭</div><p>Aucune commande</p></div></td></tr>'; return; }
+  tbody.innerHTML = orders.slice(0, 5).map(o => `
+    <tr>
+      <td><strong>${o.orderNumber}</strong></td>
+      <td>${o.customerId || '—'}</td>
+      <td>${(o.totalAmount || 0).toLocaleString('fr-FR')} FCFA</td>
+      <td><span class="badge ${o.status}">${statusLabel(o.status)}</span></td>
+      <td>${new Date(o.createdAt).toLocaleDateString('fr-FR')}</td>
+    </tr>`).join('');
+}
+
+// ── Commandes ──
+async function loadOrders(status) {
+  const path = '/merchants/' + MERCHANT_ID + '/orders' + (status ? '?status=' + status : '');
+  const orders = await api(path);
+  const tbody = document.getElementById('orders-table');
+  if (!orders.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="icon">📭</div><p>Aucune commande</p></div></td></tr>'; return; }
+  tbody.innerHTML = orders.map(o => {
+    const items = JSON.parse(typeof o.items === 'string' ? o.items : JSON.stringify(o.items || []));
+    const itemsText = items.map(i => i.name + ' x' + i.quantity).join(', ');
+    return `<tr>
+      <td><strong>${o.orderNumber}</strong></td>
+      <td>${o.customerId || '—'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${itemsText}">${itemsText}</td>
+      <td>${(o.totalAmount || 0).toLocaleString('fr-FR')} FCFA</td>
+      <td><span class="badge ${o.status}">${statusLabel(o.status)}</span></td>
+      <td>
+        <select class="status-select" onchange="changeStatus('${o.id}', this.value)">
+          <option value="">Changer...</option>
+          <option value="confirmed">Confirmer</option>
+          <option value="preparing">Préparer</option>
+          <option value="ready">Prête</option>
+          <option value="delivered">Livrée</option>
+          <option value="cancelled">Annuler</option>
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterOrders(status) { loadOrders(status); }
+
+async function changeStatus(orderId, status) {
+  if (!status) return;
+  await api('/orders/' + orderId + '/status', 'PATCH', { status });
+  toast('Statut mis à jour !', 'success');
+  loadOrders();
+}
+
+function statusLabel(s) {
+  const labels = { pending: 'En attente', confirmed: 'Confirmée', preparing: 'En préparation', ready: 'Prête', delivered: 'Livrée', cancelled: 'Annulée' };
+  return labels[s] || s;
+}
+
+// ── Catalogue ──
+async function loadCatalog() {
+  const products = await api('/merchants/' + MERCHANT_ID + '/products');
+  const tbody = document.getElementById('catalog-table');
+  if (!products.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="icon">🛍️</div><p>Aucun produit — ajoutez-en un !</p></div></td></tr>'; return; }
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td><strong>${p.name}</strong><br><small style="color:var(--muted)">${p.description || ''}</small></td>
+      <td>${p.category || '—'}</td>
+      <td>${(p.price || 0).toLocaleString('fr-FR')} FCFA</td>
+      <td>${p.stock}</td>
+      <td><span class="badge ${p.isAvailable ? 'confirmed' : 'cancelled'}">${p.isAvailable ? 'Disponible' : 'Indispo'}</span></td>
+      <td style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="editProduct(${JSON.stringify(p).replace(/"/g, '&quot;')})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddProduct() {
+  editingProductId = null;
+  document.getElementById('modal-title').textContent = 'Ajouter un produit';
+  ['p-name','p-price','p-stock','p-category','p-image','p-desc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function editProduct(p) {
+  editingProductId = p.id;
+  document.getElementById('modal-title').textContent = 'Modifier le produit';
+  document.getElementById('p-name').value = p.name || '';
+  document.getElementById('p-price').value = p.price || '';
+  document.getElementById('p-stock').value = p.stock || '';
+  document.getElementById('p-category').value = p.category || '';
+  document.getElementById('p-image').value = p.imageUrl || '';
+  document.getElementById('p-desc').value = p.description || '';
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('product-modal').classList.remove('open'); }
+
+async function saveProduct() {
+  const data = {
+    name: document.getElementById('p-name').value,
+    price: parseFloat(document.getElementById('p-price').value),
+    stock: parseInt(document.getElementById('p-stock').value),
+    category: document.getElementById('p-category').value,
+    imageUrl: document.getElementById('p-image').value,
+    description: document.getElementById('p-desc').value,
+    isAvailable: true,
+  };
+  if (!data.name || !data.price) { toast('Nom et prix obligatoires', 'error'); return; }
+  if (editingProductId) {
+    await api('/merchants/' + MERCHANT_ID + '/products/' + editingProductId, 'PATCH', data);
+    toast('Produit modifié !', 'success');
+  } else {
+    await api('/merchants/' + MERCHANT_ID + '/products', 'POST', data);
+    toast('Produit ajouté !', 'success');
+  }
+  closeModal();
+  loadCatalog();
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Supprimer ce produit ?')) return;
+  await api('/merchants/' + MERCHANT_ID + '/products/' + id, 'DELETE');
+  toast('Produit supprimé', 'success');
+  loadCatalog();
+}
+
+// ── Clients ──
+async function loadCustomers() {
+  const customers = await api('/merchants/' + MERCHANT_ID + '/customers');
+  const tbody = document.getElementById('customers-table');
+  if (!customers.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="icon">👥</div><p>Aucun client pour le moment</p></div></td></tr>'; return; }
+  tbody.innerHTML = customers.map(c => `
+    <tr>
+      <td>${c.whatsappNumber}</td>
+      <td>${c.name || '<span style="color:var(--muted)">Inconnu</span>'}</td>
+      <td>${c.totalOrders}</td>
+      <td>${(c.totalSpent || 0).toLocaleString('fr-FR')} FCFA</td>
+      <td>${new Date(c.lastInteraction).toLocaleDateString('fr-FR')}</td>
+    </tr>`).join('');
+}
+
+// ── Paramètres ──
+async function loadSettings() {
+  const m = await api('/merchants/' + MERCHANT_ID);
+  document.getElementById('s-name').value = m.name || '';
+  document.getElementById('s-city').value = m.city || '';
+  document.getElementById('s-email').value = m.email || '';
+  document.getElementById('s-currency').value = m.currency || 'FCFA';
+  document.getElementById('s-desc').value = m.businessDescription || '';
+  document.getElementById('s-persona').value = m.aiPersona || '';
+  document.getElementById('s-welcome').value = m.welcomeMessage || '';
+}
+
+async function saveSettings() {
+  await api('/merchants/' + MERCHANT_ID, 'PATCH', {
+    name: document.getElementById('s-name').value,
+    city: document.getElementById('s-city').value,
+    email: document.getElementById('s-email').value,
+    currency: document.getElementById('s-currency').value,
+    businessDescription: document.getElementById('s-desc').value,
+    aiPersona: document.getElementById('s-persona').value,
+    welcomeMessage: document.getElementById('s-welcome').value,
+  });
+  toast('Paramètres enregistrés !', 'success');
+  document.getElementById('sidebar-name').textContent = document.getElementById('s-name').value;
+}
+
+async function updateToken() {
+  const token = document.getElementById('s-token').value.trim();
+  if (!token) { toast('Token vide', 'error'); return; }
+  await api('/merchants/' + MERCHANT_ID, 'PATCH', { whatsappToken: token });
+  toast('Token mis à jour !', 'success');
+  document.getElementById('s-token').value = '';
+}
+
+// ── Init ──
+loadStats();
+loadRecentOrders();
+</script>
+</body>
+</html>
