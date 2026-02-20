@@ -26,7 +26,7 @@ router.post("/initiate", async (req, res) => {
   try {
     const { merchantId, plan } = req.body;
 
-    const merchant = await Merchant.findById(merchantId);
+   const merchant = await Merchant.findByPk(merchantId);
     if (!merchant) return res.status(404).json({ error: "Commerçant introuvable" });
     if (!merchant.email) return res.status(400).json({ error: "Email du commerçant requis pour le paiement." });
     if (!PLANS[plan]) return res.status(400).json({ error: `Plan invalide. Choisir parmi : ${Object.keys(PLANS).join(", ")}` });
