@@ -38,9 +38,8 @@ app.get("/dashboard", (req, res) => {
 
 // ─── Santé ───
 app.get("/", (req, res) => {
-  res.json({ status: "WhatsApp Commerce IA — En ligne", version: "1.0.0" });
+  res.sendFile(path.join(__dirname, "index.html"));
 });
-
 // ─── Erreurs ───
 app.use((err, req, res, next) => {
   console.error("Erreur :", err.message);
