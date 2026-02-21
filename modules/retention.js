@@ -1,186 +1,200 @@
-require("dotenv").config();
 const cron = require("node-cron");
-const { Merchant, Customer, Order } = require("../models/index");
+const { Merchant, Customer, Order, ConversationSession } = require("../models/index");
 const { sendText } = require("../core/whatsappClient");
+const { Op } = require("sequelize");
+const { canUseAutoRelance, canUseWeeklyReport } = require("./planLimits");
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /**
- * Messages de relance personnalisés
- */
-const RELANCE_7J = (boutique) =>
-  `👋 Bonjour ! Cela fait un moment qu'on ne vous a pas vu à la *${boutique}*.\n\nNos nouveaux produits vous attendent ! Tapez *catalogue* pour voir ce qu'on a pour vous aujourd'hui. 🛍️`;
-
-const RELANCE_14J = (boutique) =>
-  `🎁 Offre spéciale pour vous !\n\nLa *${boutique}* vous a réservé une surprise. Revenez nous voir et mentionnez ce message pour bénéficier d'une attention particulière ! 😊\n\nTapez *bonjour* pour commencer.`;
-
-const RAPPORT_MERCHANT = (stats) =>
-  `📊 *RAPPORT HEBDOMADAIRE — ${stats.boutique}*\n\n` +
-  `📦 Nouvelles commandes : *${stats.newOrders}*\n` +
-  `💰 Revenus cette semaine : *${stats.revenue.toLocaleString("fr-FR")} FCFA*\n` +
-  `👥 Nouveaux clients : *${stats.newCustomers}*\n` +
-  `🔔 Clients relancés : *${stats.relanced}*\n\n` +
-  `Bonne semaine ! 💪`;
-
-/**
- * Envoie une relance aux clients inactifs d'un commerçant.
+ * Envoie un message de relance aux clients inactifs
  */
 const relanceInactifs = async (merchant, joursInactif, messageTemplate) => {
   const cutoff = new Date(Date.now() - joursInactif * 24 * 60 * 60 * 1000);
   const recentCutoff = new Date(Date.now() - (joursInactif + 1) * 24 * 60 * 60 * 1000);
 
-  // Clients inactifs depuis exactement X jours (±24h) avec au moins 1 commande
-  const clients = await Customer.findAll({
+  const customers = await Customer.findAll({
     where: {
       merchantId: merchant.id,
-      totalOrders: { [require("sequelize").Op.gt]: 0 },
+      totalOrders: { [Op.gt]: 0 },
+      lastInteraction: { [Op.between]: [recentCutoff, cutoff] },
     },
   });
 
-  const ciblesFiltered = clients.filter(c => {
-    const lastInteraction = new Date(c.lastInteraction);
-    return lastInteraction <= cutoff && lastInteraction > recentCutoff;
-  });
-
   let count = 0;
-  for (const client of ciblesFiltered) {
+  for (const customer of customers) {
+    const name = customer.name || "cher client";
+    const message = messageTemplate.replace("{name}", name).replace("{boutique}", merchant.name);
     try {
-      await sendText(
-        merchant.phoneNumberId,
-        merchant.whatsappToken,
-        client.whatsappNumber,
-        messageTemplate(merchant.name)
-      );
+      await sendText(merchant.phoneNumberId, merchant.whatsappToken, customer.whatsappId, message);
       count++;
-      // Délai entre chaque message pour ne pas spammer l'API
       await sleep(1500);
     } catch (err) {
-      console.error(`❌ Relance échouée pour ${client.whatsappNumber} :`, err.message);
+      console.error("Erreur relance client:", err.message);
     }
-  }
-
-  if (count > 0) {
-    console.log(`📨 ${count} relances envoyées pour ${merchant.name} (J+${joursInactif})`);
   }
   return count;
 };
 
 /**
- * Génère et envoie le rapport hebdomadaire au commerçant.
+ * Envoie un WhatsApp au commerçant
  */
-const envoyerRapport = async (merchant) => {
-  const uneSemaine = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const { Op } = require("sequelize");
-
-  const [newOrders, newCustomers, allOrders] = await Promise.all([
-    Order.count({ where: { merchantId: merchant.id, createdAt: { [Op.gte]: uneSemaine } } }),
-    Customer.count({ where: { merchantId: merchant.id, createdAt: { [Op.gte]: uneSemaine } } }),
-    Order.findAll({ where: { merchantId: merchant.id, createdAt: { [Op.gte]: uneSemaine }, status: { [Op.ne]: "cancelled" } } }),
-  ]);
-
-  const revenue = allOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-
-  // Compter les relances envoyées cette semaine (approximation)
-  const relanced = await Customer.count({
-    where: {
-      merchantId: merchant.id,
-      lastInteraction: { [Op.lt]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-      totalOrders: { [Op.gt]: 0 },
-    },
-  });
-
-  const rapport = RAPPORT_MERCHANT({
-    boutique: merchant.name,
-    newOrders,
-    revenue,
-    newCustomers,
-    relanced,
-  });
-
-  // Envoyer au numéro du commerçant (son propre numéro WhatsApp)
-  // En prod : utiliser un champ ownerPhone dans Merchant
-  // Pour l'instant on log
-  console.log(`📊 Rapport ${merchant.name} :\n${rapport}`);
-
-  // TODO : await sendText(merchant.phoneNumberId, merchant.whatsappToken, merchant.ownerPhone, rapport);
+const notifyMerchant = async (merchant, message) => {
+  try {
+    // On envoie via notre propre numéro Meta vers le numéro perso du commerçant
+    const ADMIN_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const ADMIN_TOKEN = process.env.WHATSAPP_TOKEN;
+    if (!merchant.ownerPhone || !ADMIN_PHONE_ID || !ADMIN_TOKEN) return;
+    await sendText(ADMIN_PHONE_ID, ADMIN_TOKEN, merchant.ownerPhone, message);
+  } catch (err) {
+    console.error("Erreur notification commerçant:", err.message);
+  }
 };
 
-/**
- * Lance tous les jobs cron.
- * Appelé au démarrage de l'application.
- */
 const startCronJobs = () => {
   console.log("⏰ Cron jobs démarrés");
 
-  // ─── Relance J+7 — Tous les jours à 10h00 ───
+  // ─── RELANCE J+7 (10h quotidien) ───
   cron.schedule("0 10 * * *", async () => {
-    console.log("🔔 Cron : relances J+7");
-    try {
-      const merchants = await Merchant.findAll({ where: { isActive: true } });
-      for (const merchant of merchants) {
-        if (merchant.isSubscriptionActive()) {
-          await relanceInactifs(merchant, 7, RELANCE_7J);
-        }
-      }
-    } catch (err) {
-      console.error("❌ Erreur cron relance J+7 :", err.message);
+    console.log("🔔 Relance J+7...");
+    const merchants = await Merchant.findAll({ where: { isActive: true } });
+    for (const merchant of merchants) {
+      if (!canUseAutoRelance(merchant)) continue;
+      const count = await relanceInactifs(
+        merchant, 7,
+        "Bonjour {name} ! 👋\n\nCela fait quelques jours qu'on ne vous a pas vu chez {boutique}.\n\nNos nouveaux produits vous attendent ! Tapez *catalogue* pour voir les dernières nouveautés. 🛍️"
+      );
+      if (count > 0) console.log(`✅ ${merchant.name}: ${count} relances J+7 envoyées`);
     }
   }, { timezone: "Africa/Lome" });
 
-  // ─── Relance J+14 — Tous les jours à 11h00 ───
+  // ─── RELANCE J+14 (11h quotidien) ───
   cron.schedule("0 11 * * *", async () => {
-    console.log("🔔 Cron : relances J+14");
-    try {
-      const merchants = await Merchant.findAll({ where: { isActive: true } });
-      for (const merchant of merchants) {
-        if (merchant.isSubscriptionActive()) {
-          await relanceInactifs(merchant, 14, RELANCE_14J);
-        }
-      }
-    } catch (err) {
-      console.error("❌ Erreur cron relance J+14 :", err.message);
+    console.log("🔔 Relance J+14...");
+    const merchants = await Merchant.findAll({ where: { isActive: true } });
+    for (const merchant of merchants) {
+      if (!canUseAutoRelance(merchant)) continue;
+      const count = await relanceInactifs(
+        merchant, 14,
+        "Bonjour {name} ! 🎁\n\nVous nous manquez chez {boutique} !\n\nOffre spéciale pour votre retour : mentionnez *RETOUR* lors de votre prochaine commande pour une surprise. 😊\n\nTapez *catalogue* pour commander."
+      );
+      if (count > 0) console.log(`✅ ${merchant.name}: ${count} relances J+14 envoyées`);
     }
   }, { timezone: "Africa/Lome" });
 
-  // ─── Rapport hebdomadaire — Chaque lundi à 8h00 ───
-  cron.schedule("0 8 * * 1", async () => {
-    console.log("📊 Cron : rapports hebdomadaires");
-    try {
-      const merchants = await Merchant.findAll({ where: { isActive: true } });
-      for (const merchant of merchants) {
-        if (merchant.isSubscriptionActive()) {
-          await envoyerRapport(merchant);
-          await sleep(2000);
-        }
-      }
-    } catch (err) {
-      console.error("❌ Erreur cron rapport :", err.message);
+  // ─── RAPPEL ABONNEMENT J-3 (9h quotidien) ───
+  cron.schedule("0 9 * * *", async () => {
+    console.log("📅 Vérification abonnements J-3...");
+    const dans3jours = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const demain = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+
+    const merchants = await Merchant.findAll({
+      where: {
+        isActive: true,
+        subscriptionExpiresAt: { [Op.between]: [demain, dans3jours] },
+      },
+    });
+
+    for (const merchant of merchants) {
+      const expDate = new Date(merchant.subscriptionExpiresAt).toLocaleDateString("fr-FR");
+      const message =
+        `⚠️ *Rappel WaziBot* — Bonjour ${merchant.name} !\n\n` +
+        `Votre abonnement expire le *${expDate}*.\n\n` +
+        `Pour continuer à recevoir vos commandes automatiquement, renouvelez maintenant :\n` +
+        `👉 https://whatsapp-commerce-1roe.onrender.com/signup.html\n\n` +
+        `Des questions ? Contactez-nous au +228 71 45 40 79`;
+
+      await notifyMerchant(merchant, message);
+      console.log(`📩 Rappel J-3 envoyé à ${merchant.name}`);
+      await sleep(2000);
     }
   }, { timezone: "Africa/Lome" });
 
-  // ─── Vérification abonnements expirés — Tous les jours à minuit ───
+  // ─── RAPPEL ABONNEMENT J-1 (9h quotidien) ───
+  cron.schedule("0 9 * * *", async () => {
+    const demain = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const apresdemain = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+
+    const merchants = await Merchant.findAll({
+      where: {
+        isActive: true,
+        subscriptionExpiresAt: { [Op.between]: [demain, apresdemain] },
+      },
+    });
+
+    for (const merchant of merchants) {
+      const message =
+        `🚨 *URGENT — WaziBot* — Bonjour ${merchant.name} !\n\n` +
+        `Votre abonnement expire *demain* !\n\n` +
+        `Sans renouvellement, votre assistant WhatsApp sera suspendu et vos clients ne pourront plus commander.\n\n` +
+        `Renouvelez maintenant :\n` +
+        `👉 https://whatsapp-commerce-1roe.onrender.com/signup.html\n\n` +
+        `Paiement rapide via MTN ou Moov 📱`;
+
+      await notifyMerchant(merchant, message);
+      console.log(`🚨 Rappel J-1 envoyé à ${merchant.name}`);
+      await sleep(2000);
+    }
+  }, { timezone: "Africa/Lome" });
+
+  // ─── DÉSACTIVATION ABONNEMENTS EXPIRÉS (minuit) ───
   cron.schedule("0 0 * * *", async () => {
-    console.log("🔍 Cron : vérification abonnements");
-    try {
-      const { Op } = require("sequelize");
-      const expired = await Merchant.findAll({
-        where: {
-          subscriptionExpiresAt: { [Op.lt]: new Date() },
-          isActive: true,
-        },
+    console.log("🔍 Vérification abonnements expirés...");
+    const expired = await Merchant.findAll({
+      where: {
+        isActive: true,
+        subscriptionExpiresAt: { [Op.lt]: new Date() },
+      },
+    });
+
+    for (const merchant of expired) {
+      await merchant.update({ isActive: false });
+      console.log(`❌ Abonnement expiré : ${merchant.name}`);
+
+      // Notifier le commerçant
+      const message =
+        `😢 *WaziBot* — Bonjour ${merchant.name},\n\n` +
+        `Votre abonnement a expiré. Votre assistant WhatsApp est maintenant suspendu.\n\n` +
+        `Pour réactiver votre boutique, renouvelez ici :\n` +
+        `👉 https://whatsapp-commerce-1roe.onrender.com/signup.html\n\n` +
+        `Nous espérons vous revoir bientôt ! 🙏`;
+
+      await notifyMerchant(merchant, message);
+    }
+
+    if (expired.length > 0) console.log(`❌ ${expired.length} abonnement(s) désactivé(s)`);
+  }, { timezone: "Africa/Lome" });
+
+  // ─── RAPPORT HEBDOMADAIRE (lundi 8h) ───
+  cron.schedule("0 8 * * 1", async () => {
+    console.log("📊 Rapport hebdomadaire...");
+    const merchants = await Merchant.findAll({ where: { isActive: true } });
+
+    for (const merchant of merchants) {
+      if (!canUseWeeklyReport(merchant)) continue;
+
+      const semaineDerniere = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const orders = await Order.findAll({
+        where: { merchantId: merchant.id, createdAt: { [Op.gte]: semaineDerniere } },
       });
-      for (const merchant of expired) {
-        merchant.isActive = false;
-        await merchant.save();
-        console.log(`⚠️ Abonnement expiré : ${merchant.name}`);
-      }
-      if (expired.length > 0) {
-        console.log(`✅ ${expired.length} abonnement(s) désactivé(s)`);
-      }
-    } catch (err) {
-      console.error("❌ Erreur cron abonnements :", err.message);
+      const newCustomers = await Customer.count({
+        where: { merchantId: merchant.id, createdAt: { [Op.gte]: semaineDerniere } },
+      });
+      const revenue = orders.filter(o => o.status !== "cancelled").reduce((s, o) => s + o.totalAmount, 0);
+
+      const message =
+        `📊 *Rapport WaziBot — Semaine du ${semaineDerniere.toLocaleDateString("fr-FR")}*\n\n` +
+        `🏪 *${merchant.name}*\n\n` +
+        `📦 Commandes : *${orders.length}*\n` +
+        `💰 Revenus : *${revenue.toLocaleString("fr-FR")} ${merchant.currency}*\n` +
+        `👥 Nouveaux clients : *${newCustomers}*\n\n` +
+        `Bonne semaine ! 💪`;
+
+      await notifyMerchant(merchant, message);
+      console.log(`📊 Rapport envoyé à ${merchant.name}`);
+      await sleep(2000);
     }
   }, { timezone: "Africa/Lome" });
 };
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-module.exports = { startCronJobs, relanceInactifs, envoyerRapport };
+module.exports = { startCronJobs };

@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const Merchant = sequelize.define("Merchant", {
   id: { type: DataTypes.STRING, primaryKey: true, defaultValue: () => uuidv4() },
   name: { type: DataTypes.STRING, allowNull: false },
+  ownerPhone: { type: DataTypes.STRING, defaultValue: "" },
   email: { type: DataTypes.STRING, allowNull: true },
   phoneNumberId: { type: DataTypes.STRING, unique: true, allowNull: false },
   whatsappToken: { type: DataTypes.TEXT, allowNull: false },
