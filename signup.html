@@ -6,338 +6,134 @@
 <title>Démarrer avec WaziBot — Essai gratuit 7 jours</title>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@600;700&family=Cabinet+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f7f3ee;
-    --dark: #1a1208;
-    --accent: #e85c0e;
-    --accent2: #25D366;
-    --text: #2d2010;
-    --muted: #8a7560;
-    --border: #e8ddd0;
-    --card: #ffffff;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Cabinet Grotesk', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  nav {
-    padding: 20px 60px; display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border); background: var(--bg);
-  }
-  .logo { font-family: 'Clash Display', sans-serif; font-size: 22px; font-weight: 700; color: var(--dark); text-decoration: none; }
-  .logo span { color: var(--accent); }
-
-  .container {
-    max-width: 1100px; margin: 0 auto; padding: 60px 24px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
-  }
-
-  /* ── Left side ── */
-  .left .badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(37,211,102,0.1); color: var(--accent2);
-    border: 1px solid rgba(37,211,102,0.3);
-    padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 600;
-    margin-bottom: 24px;
-  }
-  .left h1 {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 42px; font-weight: 700; line-height: 1.2;
-    color: var(--dark); margin-bottom: 20px;
-  }
-  .left h1 em { color: var(--accent); font-style: normal; }
-  .left p { color: var(--muted); font-size: 16px; line-height: 1.7; margin-bottom: 36px; }
-
-  .benefits { list-style: none; }
-  .benefits li {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 14px 0; border-bottom: 1px solid var(--border);
-    font-size: 15px;
-  }
-  .benefits li:last-child { border-bottom: none; }
-  .benefits .icon {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: rgba(232,92,14,0.1); display: flex; align-items: center;
-    justify-content: center; font-size: 18px; flex-shrink: 0;
-  }
-  .benefits .text strong { display: block; font-weight: 700; margin-bottom: 2px; }
-  .benefits .text span { color: var(--muted); font-size: 13px; }
-
-  /* ── Form ── */
-  .form-card {
-    background: white; border-radius: 24px; padding: 40px;
-    border: 1px solid var(--border);
-    box-shadow: 0 20px 60px rgba(26,18,8,0.08);
-    position: sticky; top: 24px;
-  }
-  .form-card h2 {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 22px; font-weight: 700; margin-bottom: 6px;
-  }
-  .form-card .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
-
-  /* Steps */
-  .steps { display: flex; gap: 0; margin-bottom: 28px; }
-  .step {
-    flex: 1; text-align: center; padding: 8px 4px;
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    border-bottom: 2px solid var(--border); transition: all 0.3s;
-  }
-  .step.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .step.done { color: var(--accent2); border-bottom-color: var(--accent2); }
-
-  /* Form groups */
-  .form-page { display: none; }
-  .form-page.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  .form-group { margin-bottom: 16px; }
-  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-  input, select, textarea {
-    width: 100%; padding: 12px 16px;
-    background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: 12px; font-size: 15px; font-family: 'Cabinet Grotesk', sans-serif;
-    color: var(--text); transition: border-color 0.2s;
-  }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: white; }
-  textarea { resize: none; height: 80px; }
-
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* Type commerce grid */
-  .commerce-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-  .commerce-item {
-    border: 1.5px solid var(--border); border-radius: 12px;
-    padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s;
-    background: var(--bg);
-  }
-  .commerce-item:hover { border-color: var(--accent); background: rgba(232,92,14,0.05); }
-  .commerce-item.selected { border-color: var(--accent); background: rgba(232,92,14,0.08); }
-  .commerce-item .emoji { font-size: 24px; display: block; margin-bottom: 4px; }
-  .commerce-item .name { font-size: 11px; font-weight: 600; color: var(--text); }
-
-  /* Products */
-  .products-list { margin-bottom: 12px; }
-  .product-item {
-    display: grid; grid-template-columns: 1fr auto auto;
-    gap: 8px; align-items: center; margin-bottom: 8px;
-  }
-  .product-item input { padding: 10px 12px; font-size: 14px; }
-  .product-item .price-input { width: 100px; }
-  .remove-product {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: rgba(255,71,87,0.1); color: #ff4757;
-    border: none; cursor: pointer; font-size: 16px; display: flex;
-    align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .add-product {
-    width: 100%; padding: 10px; border: 1.5px dashed var(--border);
-    border-radius: 12px; background: none; cursor: pointer;
-    color: var(--muted); font-size: 14px; font-family: 'Cabinet Grotesk', sans-serif;
-    transition: all 0.2s;
-  }
-  .add-product:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* Boutons */
-  .btn-next {
-    width: 100%; padding: 16px; border-radius: 12px;
-    background: var(--accent); color: white; border: none;
-    font-size: 16px; font-weight: 700; cursor: pointer;
-    font-family: 'Cabinet Grotesk', sans-serif;
-    transition: all 0.2s; margin-top: 8px;
-  }
-  .btn-next:hover { background: #d14e00; transform: translateY(-1px); }
-  .btn-next:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
-  .btn-back {
-    width: 100%; padding: 12px; border-radius: 12px;
-    background: none; color: var(--muted); border: 1.5px solid var(--border);
-    font-size: 14px; font-weight: 600; cursor: pointer;
-    font-family: 'Cabinet Grotesk', sans-serif; margin-top: 8px;
-    transition: all 0.2s;
-  }
-  .btn-back:hover { border-color: var(--text); color: var(--text); }
-
-  /* Success */
-  .success-screen {
-    display: none; text-align: center; padding: 20px 0;
-  }
-  .success-screen.show { display: block; animation: fadeIn 0.5s ease; }
-  .success-icon { font-size: 64px; margin-bottom: 16px; }
-  .success-screen h3 { font-family: 'Clash Display', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-  .success-screen p { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
-  .success-info {
-    background: var(--bg); border-radius: 12px; padding: 20px;
-    text-align: left; margin-bottom: 20px;
-  }
-  .success-info .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .success-info .row:last-child { border-bottom: none; }
-  .success-info .row span:first-child { color: var(--muted); }
-  .success-info .row span:last-child { font-weight: 600; }
-  .whatsapp-btn {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; padding: 16px; border-radius: 12px;
-    background: var(--accent2); color: white; border: none;
-    font-size: 16px; font-weight: 700; cursor: pointer;
-    font-family: 'Cabinet Grotesk', sans-serif; text-decoration: none;
-  }
-
-  /* Error */
-  .error-msg { color: #ff4757; font-size: 13px; margin-top: 8px; display: none; }
-  .error-msg.show { display: block; }
-
-  /* Loading */
-  .loading { display: none; align-items: center; justify-content: center; gap: 12px; padding: 20px; }
-  .loading.show { display: flex; }
-  .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 768px) {
-    nav { padding: 16px 24px; }
-    .container { grid-template-columns: 1fr; gap: 40px; padding: 32px 16px; }
-    .left { display: none; }
-    .commerce-grid { grid-template-columns: repeat(3, 1fr); }
-  }
+  :root { --bg:#f7f3ee;--dark:#1a1208;--accent:#e85c0e;--accent2:#25D366;--text:#2d2010;--muted:#8a7560;--border:#e8ddd0; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  nav{padding:20px 60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg);}
+  .logo{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:var(--dark);text-decoration:none;}
+  .logo span{color:var(--accent);}
+  .container{max-width:1100px;margin:0 auto;padding:60px 24px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+  .left .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(37,211,102,0.1);color:var(--accent2);border:1px solid rgba(37,211,102,0.3);padding:6px 14px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:24px;}
+  .left h1{font-family:'Clash Display',sans-serif;font-size:42px;font-weight:700;line-height:1.2;color:var(--dark);margin-bottom:20px;}
+  .left h1 em{color:var(--accent);font-style:normal;}
+  .left p{color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:36px;}
+  .benefits{list-style:none;}
+  .benefits li{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);font-size:15px;}
+  .benefits li:last-child{border-bottom:none;}
+  .benefits .icon{width:36px;height:36px;border-radius:10px;background:rgba(232,92,14,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .benefits .text strong{display:block;font-weight:700;margin-bottom:2px;}
+  .benefits .text span{color:var(--muted);font-size:13px;}
+  .form-card{background:white;border-radius:24px;padding:40px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(26,18,8,0.08);position:sticky;top:24px;}
+  .form-card h2{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;}
+  .form-card .subtitle{color:var(--muted);font-size:14px;margin-bottom:28px;}
+  .steps{display:flex;margin-bottom:28px;}
+  .step{flex:1;text-align:center;padding:8px 4px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);transition:all 0.3s;}
+  .step.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .step.done{color:var(--accent2);border-bottom-color:var(--accent2);}
+  .form-page{display:none;}
+  .form-page.active{display:block;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .form-group{margin-bottom:16px;}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+  input,select,textarea{width:100%;padding:12px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Cabinet Grotesk',sans-serif;color:var(--text);transition:border-color 0.2s;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:white;}
+  textarea{resize:none;height:80px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .commerce-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+  .commerce-item{border:1.5px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg);}
+  .commerce-item:hover{border-color:var(--accent);background:rgba(232,92,14,0.05);}
+  .commerce-item.selected{border-color:var(--accent);background:rgba(232,92,14,0.08);}
+  .commerce-item .emoji{font-size:24px;display:block;margin-bottom:4px;}
+  .commerce-item .name{font-size:11px;font-weight:600;color:var(--text);}
+  .products-list{margin-bottom:12px;}
+  .product-item{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-bottom:8px;}
+  .product-item input{padding:10px 12px;font-size:14px;}
+  .price-input{width:100px;}
+  .remove-product{width:32px;height:32px;border-radius:8px;background:rgba(255,71,87,0.1);color:#ff4757;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .add-product{width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:12px;background:none;cursor:pointer;color:var(--muted);font-size:14px;font-family:'Cabinet Grotesk',sans-serif;transition:all 0.2s;}
+  .add-product:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-next{width:100%;padding:16px;border-radius:12px;background:var(--accent);color:white;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:all 0.2s;margin-top:8px;}
+  .btn-next:hover{background:#d14e00;transform:translateY(-1px);}
+  .btn-next:disabled{background:var(--muted);cursor:not-allowed;transform:none;}
+  .btn-back{width:100%;padding:12px;border-radius:12px;background:none;color:var(--muted);border:1.5px solid var(--border);font-size:14px;font-weight:600;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;margin-top:8px;transition:all 0.2s;}
+  .btn-back:hover{border-color:var(--text);color:var(--text);}
+  .success-screen{display:none;text-align:center;padding:20px 0;}
+  .success-screen.show{display:block;animation:fadeIn 0.5s ease;}
+  .success-icon{font-size:64px;margin-bottom:16px;}
+  .success-screen h3{font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;}
+  .success-screen p{color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:24px;}
+  .success-info{background:var(--bg);border-radius:12px;padding:20px;text-align:left;margin-bottom:20px;}
+  .success-info .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .success-info .row:last-child{border-bottom:none;}
+  .success-info .row span:first-child{color:var(--muted);}
+  .success-info .row span:last-child{font-weight:600;}
+  .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;background:var(--accent2);color:white;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;text-decoration:none;}
+  .error-msg{color:#ff4757;font-size:13px;margin-top:8px;display:none;}
+  .error-msg.show{display:block;}
+  .loading{display:none;align-items:center;justify-content:center;gap:12px;padding:20px;}
+  .loading.show{display:flex;}
+  .spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(max-width:768px){nav{padding:16px 24px;}.container{grid-template-columns:1fr;gap:40px;padding:32px 16px;}.left{display:none;}}
 </style>
 </head>
 <body>
-
 <nav>
-  <a href="/index.html" class="logo">Wazi<span>Bot</span></a>
+  <a href="/" class="logo">Wazi<span>Bot</span></a>
   <span style="font-size:13px;color:var(--muted);">🔒 Inscription sécurisée</span>
 </nav>
-
 <div class="container">
-  <!-- Left -->
   <div class="left">
     <div class="badge">🟢 Essai gratuit — 7 jours sans engagement</div>
     <h1>Votre assistant WhatsApp prêt en <em>5 minutes</em></h1>
     <p>Remplissez le formulaire et votre bot est opérationnel immédiatement. Pas besoin de carte bancaire.</p>
-
     <ul class="benefits">
-      <li>
-        <div class="icon">🤖</div>
-        <div class="text">
-          <strong>Assistant IA configuré pour vous</strong>
-          <span>Personnalité adaptée à votre type de commerce</span>
-        </div>
-      </li>
-      <li>
-        <div class="icon">📦</div>
-        <div class="text">
-          <strong>Catalogue importé automatiquement</strong>
-          <span>Ajoutez vos produits directement dans le formulaire</span>
-        </div>
-      </li>
-      <li>
-        <div class="icon">📊</div>
-        <div class="text">
-          <strong>Dashboard disponible immédiatement</strong>
-          <span>Gérez vos commandes dès la première seconde</span>
-        </div>
-      </li>
-      <li>
-        <div class="icon">💰</div>
-        <div class="text">
-          <strong>7 jours gratuits, puis 15 000 FCFA/mois</strong>
-          <span>Paiement MTN ou Moov — résiliez quand vous voulez</span>
-        </div>
-      </li>
+      <li><div class="icon">🤖</div><div class="text"><strong>Assistant IA configuré pour vous</strong><span>Personnalité adaptée à votre type de commerce</span></div></li>
+      <li><div class="icon">📦</div><div class="text"><strong>Catalogue importé automatiquement</strong><span>Ajoutez vos produits directement dans le formulaire</span></div></li>
+      <li><div class="icon">📊</div><div class="text"><strong>Dashboard disponible immédiatement</strong><span>Gérez vos commandes dès la première seconde</span></div></li>
+      <li><div class="icon">💰</div><div class="text"><strong>7 jours gratuits, puis 15 000 FCFA/mois</strong><span>Paiement MTN ou Moov — résiliez quand vous voulez</span></div></li>
     </ul>
   </div>
-
-  <!-- Form -->
   <div class="form-card">
     <div id="form-content">
       <h2>Créer votre boutique</h2>
       <p class="subtitle">Étape <span id="step-num">1</span> sur 3 — Complétez en moins de 5 minutes</p>
-
-      <!-- Steps indicator -->
       <div class="steps">
         <div class="step active" id="step-1">📋 Infos</div>
         <div class="step" id="step-2">🏪 Commerce</div>
         <div class="step" id="step-3">🛍️ Produits</div>
       </div>
-
-      <!-- Page 1 — Informations -->
       <div class="form-page active" id="page-1">
-        <div class="form-group">
-          <label>Nom de votre boutique *</label>
-          <input type="text" id="f-name" placeholder="Ex: Boutique Ama, Chez Koffi Mode..." maxlength="60">
-        </div>
+        <div class="form-group"><label>Nom de votre boutique *</label><input type="text" id="f-name" placeholder="Ex: Boutique Ama, Chez Koffi Mode..." maxlength="60"></div>
         <div class="form-row">
-          <div class="form-group">
-            <label>Votre prénom *</label>
-            <input type="text" id="f-owner" placeholder="Votre prénom">
-          </div>
-          <div class="form-group">
-            <label>Ville *</label>
-            <input type="text" id="f-city" placeholder="Lomé, Kpalimé...">
-          </div>
+          <div class="form-group"><label>Votre prénom *</label><input type="text" id="f-owner" placeholder="Votre prénom"></div>
+          <div class="form-group"><label>Ville *</label><input type="text" id="f-city" placeholder="Lomé, Kpalimé..."></div>
         </div>
-        <div class="form-group">
-          <label>WhatsApp (pour vous contacter) *</label>
-          <input type="tel" id="f-phone" placeholder="+228 XX XX XX XX">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="f-email" placeholder="votre@email.com">
-        </div>
+        <div class="form-group"><label>WhatsApp (pour vous contacter) *</label><input type="tel" id="f-phone" placeholder="+228 XX XX XX XX"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f-email" placeholder="votre@email.com"></div>
         <p class="error-msg" id="err-1">Veuillez remplir tous les champs obligatoires (*).</p>
         <button class="btn-next" onclick="goStep(2)">Continuer →</button>
       </div>
-
-      <!-- Page 2 — Type de commerce -->
       <div class="form-page" id="page-2">
         <div class="form-group">
           <label>Type de commerce *</label>
           <div class="commerce-grid">
-            <div class="commerce-item" onclick="selectCommerce('mode', this)">
-              <span class="emoji">👗</span>
-              <span class="name">Mode</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('food', this)">
-              <span class="emoji">🍽️</span>
-              <span class="name">Restauration</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('tech', this)">
-              <span class="emoji">📱</span>
-              <span class="name">High-Tech</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('beaute', this)">
-              <span class="emoji">💄</span>
-              <span class="name">Beauté</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('epicerie', this)">
-              <span class="emoji">🛒</span>
-              <span class="name">Épicerie</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('mobilier', this)">
-              <span class="emoji">🛋️</span>
-              <span class="name">Mobilier</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('pharmacie', this)">
-              <span class="emoji">💊</span>
-              <span class="name">Pharmacie</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('batiment', this)">
-              <span class="emoji">🔨</span>
-              <span class="name">Bâtiment</span>
-            </div>
-            <div class="commerce-item" onclick="selectCommerce('general', this)">
-              <span class="emoji">🏪</span>
-              <span class="name">Autre</span>
-            </div>
+            <div class="commerce-item" onclick="selectCommerce('mode',this)"><span class="emoji">👗</span><span class="name">Mode</span></div>
+            <div class="commerce-item" onclick="selectCommerce('food',this)"><span class="emoji">🍽️</span><span class="name">Restauration</span></div>
+            <div class="commerce-item" onclick="selectCommerce('tech',this)"><span class="emoji">📱</span><span class="name">High-Tech</span></div>
+            <div class="commerce-item" onclick="selectCommerce('beaute',this)"><span class="emoji">💄</span><span class="name">Beauté</span></div>
+            <div class="commerce-item" onclick="selectCommerce('epicerie',this)"><span class="emoji">🛒</span><span class="name">Épicerie</span></div>
+            <div class="commerce-item" onclick="selectCommerce('mobilier',this)"><span class="emoji">🛋️</span><span class="name">Mobilier</span></div>
+            <div class="commerce-item" onclick="selectCommerce('pharmacie',this)"><span class="emoji">💊</span><span class="name">Pharmacie</span></div>
+            <div class="commerce-item" onclick="selectCommerce('batiment',this)"><span class="emoji">🔨</span><span class="name">Bâtiment</span></div>
+            <div class="commerce-item" onclick="selectCommerce('general',this)"><span class="emoji">🏪</span><span class="name">Autre</span></div>
           </div>
         </div>
-        <div class="form-group">
-          <label>Décrivez votre boutique (optionnel)</label>
-          <textarea id="f-desc" placeholder="Ex: Je vends des vêtements tendance pour hommes à Adidogomé, livraison 24h..."></textarea>
-        </div>
+        <div class="form-group"><label>Décrivez votre boutique (optionnel)</label><textarea id="f-desc" placeholder="Ex: Je vends des vêtements tendance pour hommes à Adidogomé, livraison 24h..."></textarea></div>
         <p class="error-msg" id="err-2">Veuillez choisir un type de commerce.</p>
         <button class="btn-next" onclick="goStep(3)">Continuer →</button>
         <button class="btn-back" onclick="goStep(1)">← Retour</button>
       </div>
-
-      <!-- Page 3 — Produits -->
       <div class="form-page" id="page-3">
         <label style="display:block;margin-bottom:12px;">Vos produits (ajoutez au moins 1) *</label>
         <div class="products-list" id="products-list">
@@ -349,73 +145,46 @@
         </div>
         <button class="add-product" onclick="addProduct()">+ Ajouter un produit</button>
         <p class="error-msg" id="err-3">Ajoutez au moins un produit avec nom et prix.</p>
-
-        <div class="loading" id="loading">
-          <div class="spinner"></div>
-          <span style="color:var(--muted);font-size:14px;">Création de votre boutique...</span>
-        </div>
-
+        <div class="loading" id="loading"><div class="spinner"></div><span style="color:var(--muted);font-size:14px;">Création de votre boutique...</span></div>
         <button class="btn-next" onclick="submitForm()" id="btn-submit">🚀 Créer ma boutique gratuite</button>
         <button class="btn-back" onclick="goStep(2)">← Retour</button>
       </div>
     </div>
-
-    <!-- Success -->
     <div class="success-screen" id="success">
       <div class="success-icon">🎉</div>
       <h3>Votre boutique est prête !</h3>
       <p>Votre assistant WhatsApp est configuré et opérationnel. Vous avez <strong>7 jours gratuits</strong> pour tester.</p>
       <div class="success-info" id="success-info"></div>
-      <a href="https://wa.me/22871454079" class="whatsapp-btn" target="_blank">
-        💬 Contacter WaziBot pour la suite
-      </a>
+      <a href="https://wa.me/22871454079" class="whatsapp-btn" target="_blank">💬 Contacter WaziBot pour la suite</a>
     </div>
   </div>
 </div>
-
 <script>
 const API = 'https://whatsapp-commerce-1roe.onrender.com';
-// Token WhatsApp et Phone Number ID par défaut (vos identifiants Meta)
-const DEFAULT_PHONE_NUMBER_ID = '972509772616258';
-const DEFAULT_TOKEN = 'EAAdyN31ZBRQ8BQ3qbPQrhzFn7H5mZCbfAbZCSZBUR6L1ErtAwYGdA1gDhqNF1YXC66bi4TQkPTt6opYGQf1mpYaWZBryKiwAo0yL9nRrs7ZB5i80YaZB1EjzRt0Mcbb0EhDXJZC7oHFWovepQmyW2jTo7HSfqZBL1IRZAYXSBRSmSuZC7OZAAzeQbqLuqP3kBIBUpxR5PUPOvEXzsA12PypDDNaA6Doc1DGySkfvy0ZBLZCZBcGeKHbhgpIxFqTc28lfnvOKIDote7Kh6iBHufbwmvG3YtwNyvXt2AUYhUdJwZDZD'; // Sera rempli via votre dashboard
-
 let selectedCommerce = '';
 let currentStep = 1;
 
 function goStep(step) {
-  // Validation
   if (step === 2 && currentStep === 1) {
     const name = document.getElementById('f-name').value.trim();
     const owner = document.getElementById('f-owner').value.trim();
     const city = document.getElementById('f-city').value.trim();
     const phone = document.getElementById('f-phone').value.trim();
-    if (!name || !owner || !city || !phone) {
-      document.getElementById('err-1').classList.add('show');
-      return;
-    }
+    if (!name || !owner || !city || !phone) { document.getElementById('err-1').classList.add('show'); return; }
     document.getElementById('err-1').classList.remove('show');
   }
-
   if (step === 3 && currentStep === 2) {
-    if (!selectedCommerce) {
-      document.getElementById('err-2').classList.add('show');
-      return;
-    }
+    if (!selectedCommerce) { document.getElementById('err-2').classList.add('show'); return; }
     document.getElementById('err-2').classList.remove('show');
   }
-
-  // Mettre à jour les steps
   document.querySelectorAll('.form-page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + step).classList.add('active');
-
-  // Mettre à jour les indicateurs
   for (let i = 1; i <= 3; i++) {
     const el = document.getElementById('step-' + i);
     el.classList.remove('active', 'done');
     if (i < step) el.classList.add('done');
     else if (i === step) el.classList.add('active');
   }
-
   document.getElementById('step-num').textContent = step;
   currentStep = step;
 }
@@ -430,40 +199,23 @@ function addProduct() {
   const list = document.getElementById('products-list');
   const div = document.createElement('div');
   div.className = 'product-item';
-  div.innerHTML = `
-    <input type="text" placeholder="Nom du produit" class="product-name">
-    <input type="number" placeholder="Prix FCFA" class="price-input product-price">
-    <button class="remove-product" onclick="removeProduct(this)">×</button>
-  `;
+  div.innerHTML = '<input type="text" placeholder="Nom du produit" class="product-name"><input type="number" placeholder="Prix FCFA" class="price-input product-price"><button class="remove-product" onclick="removeProduct(this)">×</button>';
   list.appendChild(div);
 }
 
-function removeProduct(btn) {
-  btn.parentElement.remove();
-}
+function removeProduct(btn) { btn.parentElement.remove(); }
 
 async function submitForm() {
-  // Récupérer les produits
   const products = [];
   document.querySelectorAll('.product-item').forEach(item => {
     const name = item.querySelector('.product-name').value.trim();
     const price = item.querySelector('.product-price').value;
-    if (name && price) {
-      products.push({ name, price: parseFloat(price), stock: 20 });
-    }
+    if (name && price) products.push({ name, price: parseFloat(price), stock: 20 });
   });
-
-  if (products.length === 0) {
-    document.getElementById('err-3').classList.add('show');
-    return;
-  }
+  if (products.length === 0) { document.getElementById('err-3').classList.add('show'); return; }
   document.getElementById('err-3').classList.remove('show');
-
-  // Afficher le loader
   document.getElementById('loading').classList.add('show');
   document.getElementById('btn-submit').disabled = true;
-
-  const ownerPhone = document.getElementById('f-phone').value.trim().replace(/\s/g, '');
 
   const payload = {
     name: document.getElementById('f-name').value.trim(),
@@ -471,8 +223,6 @@ async function submitForm() {
     city: document.getElementById('f-city').value.trim(),
     currency: 'FCFA',
     type: selectedCommerce,
-    phoneNumberId: DEFAULT_PHONE_NUMBER_ID,
-    whatsappToken: DEFAULT_TOKEN,
     businessDescription: document.getElementById('f-desc').value.trim(),
     products,
   };
@@ -484,32 +234,19 @@ async function submitForm() {
       body: JSON.stringify(payload),
     });
     const data = await res.json();
-
     document.getElementById('loading').classList.remove('show');
-
     if (data.success) {
-      // Afficher le succès
       document.getElementById('form-content').style.display = 'none';
-      const success = document.getElementById('success');
-      success.classList.add('show');
-
+      document.getElementById('success').classList.add('show');
       const trialEnd = new Date(data.trialEndsAt).toLocaleDateString('fr-FR');
       document.getElementById('success-info').innerHTML = `
         <div class="row"><span>Boutique</span><span>${payload.name}</span></div>
         <div class="row"><span>Type</span><span>${selectedCommerce}</span></div>
         <div class="row"><span>Produits ajoutés</span><span>${data.productsCreated}</span></div>
         <div class="row"><span>Essai gratuit jusqu'au</span><span>${trialEnd}</span></div>
-        <div class="row"><span>Statut</span><span style="color:#25D366">✅ Actif</span></div>
-      `;
-
-      // Envoyer un WhatsApp au propriétaire de WaziBot
-      const msg = encodeURIComponent(
-        `Bonjour ! Je viens de créer ma boutique *${payload.name}* sur WaziBot. ` +
-        `Type : ${selectedCommerce}. ${products.length} produits ajoutés. ` +
-        `Je suis prêt pour la suite ! 🚀`
-      );
+        <div class="row"><span>Statut</span><span style="color:#25D366">✅ Actif</span></div>`;
+      const msg = encodeURIComponent(`Bonjour ! Je viens de créer ma boutique *${payload.name}* sur WaziBot. Type : ${selectedCommerce}. ${products.length} produits ajoutés. Je suis prêt pour la suite ! 🚀`);
       document.querySelector('.whatsapp-btn').href = `https://wa.me/22871454079?text=${msg}`;
-
     } else {
       document.getElementById('btn-submit').disabled = false;
       alert('Erreur : ' + (data.error || 'Réessayez dans un moment.'));
