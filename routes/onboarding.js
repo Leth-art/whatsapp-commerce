@@ -10,7 +10,9 @@ router.get("/templates", (req, res) => {
 
 router.post("/create", async (req, res) => {
   try {
-    const { name, email, city, phoneNumberId, whatsappToken, type, currency, products } = req.body;
+   const { name, email, city, type, currency, products } = req.body;
+const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '972509772616258';
+const whatsappToken = process.env.WHATSAPP_TOKEN || '';
 
     if (!name || !phoneNumberId || !whatsappToken) {
       return res.status(400).json({ error: "Nom, phoneNumberId et whatsappToken obligatoires." });
