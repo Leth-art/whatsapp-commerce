@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-const path = require("path");
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 const { connectDB } = require("./config/database");
 const webhookRouter = require("./routes/webhook");
 const apiRouter = require("./routes/api");
