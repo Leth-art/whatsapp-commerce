@@ -3,8 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Commerce — Dashboard</title>
+<title>WaziBot — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00e5a0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WaziBot">
+<link rel="apple-touch-icon" href="/wazibot-logo-1024.png">
 <style>
   :root {
     --bg: #0a0a0f;
@@ -21,11 +28,7 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  /* ── Layout ── */
   .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-
-  /* ── Sidebar ── */
   .sidebar {
     background: var(--surface);
     border-right: 1px solid var(--border);
@@ -33,11 +36,10 @@
     padding: 28px 0;
     position: sticky; top: 0; height: 100vh;
   }
-  .logo {
-    padding: 0 24px 32px;
-    border-bottom: 1px solid var(--border);
-  }
-  .logo h1 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); }
+  .logo h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo h1 .wazi { color: var(--text); }
+  .logo h1 .bot { color: var(--accent); }
   .logo span { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
   .nav { padding: 20px 12px; flex: 1; }
   .nav-item {
@@ -57,18 +59,13 @@
   .merchant-badge .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
   .merchant-badge .name { font-size: 13px; font-weight: 600; margin-top: 4px; color: var(--text); }
   .merchant-badge .status { font-size: 11px; color: var(--accent); margin-top: 2px; }
-
-  /* ── Main ── */
   .main { padding: 36px 40px; overflow-y: auto; }
   .page { display: none; }
   .page.active { display: block; animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
   .page-header { margin-bottom: 32px; }
   .page-header h2 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
   .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
-
-  /* ── Stats ── */
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
   .stat-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -86,8 +83,6 @@
   .stat-card.purple .value { color: var(--accent2); }
   .stat-card.red .value { color: var(--danger); }
   .stat-card.orange .value { color: var(--warning); }
-
-  /* ── Tables ── */
   .card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 16px; overflow: hidden; box-shadow: var(--card-glow);
@@ -102,8 +97,6 @@
   td { padding: 14px 24px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(255,255,255,0.02); }
-
-  /* ── Badges ── */
   .badge {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
@@ -115,8 +108,6 @@
   .badge.delivered { background: rgba(255,255,255,0.08); color: var(--muted); }
   .badge.cancelled { background: rgba(255,71,87,0.15); color: var(--danger); }
   .badge::before { content: '●'; font-size: 8px; }
-
-  /* ── Forms ── */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-group.full { grid-column: 1 / -1; }
@@ -128,8 +119,6 @@
   }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
   textarea { resize: vertical; min-height: 80px; }
-
-  /* ── Buttons ── */
   .btn {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
@@ -142,8 +131,6 @@
   .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-sm { padding: 6px 12px; font-size: 12px; }
-
-  /* ── Modal ── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
     display: none; align-items: center; justify-content: center; z-index: 100;
@@ -157,8 +144,6 @@
   @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   .modal h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 24px; }
   .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
-
-  /* ── Toast ── */
   .toast {
     position: fixed; bottom: 24px; right: 24px;
     background: var(--surface2); border: 1px solid var(--border);
@@ -169,94 +154,104 @@
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.success { border-color: var(--accent); }
   .toast.error { border-color: var(--danger); }
-
-  /* ── Empty state ── */
   .empty { text-align: center; padding: 60px 24px; color: var(--muted); }
   .empty .icon { font-size: 48px; margin-bottom: 12px; }
   .empty p { font-size: 15px; }
-
-  /* ── Select status ── */
   select.status-select { padding: 4px 10px; font-size: 12px; width: auto; }
-
-  /* ── Loader ── */
   .loader { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+  /* Ecran de connexion */
+  .login-screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; z-index: 300;
+  }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 40px; width: 100%; max-width: 400px;
+    text-align: center;
+  }
+  .login-card h2 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  .login-card h2 .wazi { color: var(--text); }
+  .login-card h2 .bot { color: var(--accent); }
+  .login-card p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .login-card input { margin-bottom: 12px; text-align: center; }
+  .login-card .btn { width: 100%; justify-content: center; }
+  .login-error { color: var(--danger); font-size: 13px; margin-top: 8px; display: none; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 20px 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
 </style>
-<!-- PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#00e5a0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="WaziBot">
-<link rel="apple-touch-icon" href="/wazibot-logo-1024.png">
 </head>
 <body>
 
+<!-- Ecran de connexion par Merchant ID -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <h2><span class="wazi">Wazi</span><span class="bot">Bot</span></h2>
+    <p>Entrez votre identifiant boutique pour accéder à votre dashboard</p>
+    <div class="form-group" style="margin-bottom:16px;">
+      <input id="login-id" type="text" placeholder="Votre ID boutique..." style="text-align:center;">
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Accéder au dashboard →</button>
+    <p class="login-error" id="login-error">ID invalide. Vérifiez votre identifiant.</p>
+    <p style="color:var(--muted);font-size:12px;margin-top:20px;">Votre ID vous a été communiqué par WaziBot lors de votre inscription.</p>
+  </div>
+</div>
+
 <div class="layout">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo">
-      <h1>⚡ WA Commerce</h1>
+      <h1><span class="wazi">Wazi</span><span class="bot">Bot</span></h1>
       <span>Dashboard Commerçant</span>
     </div>
     <nav class="nav">
-      <div class="nav-item active" onclick="showPage('stats')">
+      <div class="nav-item active" onclick="showPage('stats', this)">
         <span class="icon">📊</span> Statistiques
       </div>
-      <div class="nav-item" onclick="showPage('orders')">
+      <div class="nav-item" onclick="showPage('orders', this)">
         <span class="icon">📦</span> Commandes
       </div>
-      <div class="nav-item" onclick="showPage('catalog')">
+      <div class="nav-item" onclick="showPage('catalog', this)">
         <span class="icon">🛍️</span> Catalogue
       </div>
-      <div class="nav-item" onclick="showPage('customers')">
+      <div class="nav-item" onclick="showPage('customers', this)">
         <span class="icon">👥</span> Clients
       </div>
-      <div class="nav-item" onclick="showPage('settings')">
+      <div class="nav-item" onclick="showPage('settings', this)">
         <span class="icon">⚙️</span> Paramètres
+      </div>
+      <div class="nav-item" onclick="doLogout()" style="margin-top:auto;">
+        <span class="icon">🚪</span> Déconnexion
       </div>
     </nav>
     <div class="merchant-badge">
       <div class="label">Boutique active</div>
       <div class="name" id="sidebar-name">Chargement...</div>
-      <div class="status" id="sidebar-status">● Connecté</div>
+      <div class="status">● Connecté</div>
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="main">
-
-    <!-- ── Stats ── -->
+    <!-- Stats -->
     <div class="page active" id="page-stats">
       <div class="page-header">
         <h2>Vue d'ensemble</h2>
         <p>Résumé de votre activité en temps réel</p>
       </div>
       <div class="stats-grid">
-        <div class="stat-card green">
-          <div class="label">Revenus totaux</div>
-          <div class="value" id="stat-revenue">—</div>
-          <div class="sub">FCFA générés</div>
-        </div>
-        <div class="stat-card purple">
-          <div class="label">Commandes</div>
-          <div class="value" id="stat-orders">—</div>
-          <div class="sub">Au total</div>
-        </div>
-        <div class="stat-card orange">
-          <div class="label">En attente</div>
-          <div class="value" id="stat-pending">—</div>
-          <div class="sub">À traiter</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Clients</div>
-          <div class="value" id="stat-customers">—</div>
-          <div class="sub">Uniques</div>
-        </div>
+        <div class="stat-card green"><div class="label">Revenus totaux</div><div class="value" id="stat-revenue">—</div><div class="sub">FCFA générés</div></div>
+        <div class="stat-card purple"><div class="label">Commandes</div><div class="value" id="stat-orders">—</div><div class="sub">Au total</div></div>
+        <div class="stat-card orange"><div class="label">En attente</div><div class="value" id="stat-pending">—</div><div class="sub">À traiter</div></div>
+        <div class="stat-card"><div class="label">Clients</div><div class="value" id="stat-customers">—</div><div class="sub">Uniques</div></div>
       </div>
       <div class="card">
         <div class="card-header">
           <h3>Dernières commandes</h3>
-          <button class="btn btn-ghost btn-sm" onclick="showPage('orders')">Voir tout →</button>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('orders', null)">Voir tout →</button>
         </div>
         <table>
           <thead><tr><th>N° Commande</th><th>Client</th><th>Total</th><th>Statut</th><th>Date</th></tr></thead>
@@ -265,7 +260,7 @@
       </div>
     </div>
 
-    <!-- ── Commandes ── -->
+    <!-- Commandes -->
     <div class="page" id="page-orders">
       <div class="page-header">
         <h2>Commandes</h2>
@@ -291,13 +286,10 @@
       </div>
     </div>
 
-    <!-- ── Catalogue ── -->
+    <!-- Catalogue -->
     <div class="page" id="page-catalog">
       <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <h2>Catalogue</h2>
-          <p>Gérez vos produits</p>
-        </div>
+        <div><h2>Catalogue</h2><p>Gérez vos produits</p></div>
         <button class="btn btn-primary" onclick="openAddProduct()">+ Ajouter un produit</button>
       </div>
       <div class="card">
@@ -308,7 +300,7 @@
       </div>
     </div>
 
-    <!-- ── Clients ── -->
+    <!-- Clients -->
     <div class="page" id="page-customers">
       <div class="page-header">
         <h2>Clients</h2>
@@ -322,7 +314,7 @@
       </div>
     </div>
 
-    <!-- ── Paramètres ── -->
+    <!-- Paramètres -->
     <div class="page" id="page-settings">
       <div class="page-header">
         <h2>Paramètres</h2>
@@ -345,7 +337,7 @@
       </div>
       <div class="card" style="padding:28px;">
         <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;">Token WhatsApp</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Le token expire toutes les 24h. Mettez-le à jour régulièrement.</p>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Mettez à jour votre token Meta quand il expire.</p>
         <div class="form-group" style="margin-bottom:16px;">
           <label>Nouveau token d'accès</label>
           <input id="s-token" type="text" placeholder="EAAd...">
@@ -353,11 +345,10 @@
         <button class="btn btn-primary" onclick="updateToken()">Mettre à jour le token</button>
       </div>
     </div>
-
   </main>
 </div>
 
-<!-- ── Modal Produit ── -->
+<!-- Modal Produit -->
 <div class="modal-overlay" id="product-modal">
   <div class="modal">
     <h3 id="modal-title">Ajouter un produit</h3>
@@ -376,23 +367,56 @@
   </div>
 </div>
 
-<!-- ── Toast ── -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ── Config ──
-const API = 'http://localhost:3000/api';
-// Remplacez par votre vrai merchant ID
-const MERCHANT_ID = '1da9af22-d34b-42fd-8f3c-a9863da40a26';
-
+const API = 'https://whatsapp-commerce-1roe.onrender.com/api';
+let MERCHANT_ID = '';
 let editingProductId = null;
 
+// ── Login ──
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  if (!id) return;
+  try {
+    const res = await fetch(API + '/merchants/' + id);
+    const data = await res.json();
+    if (data.id) {
+      MERCHANT_ID = id;
+      localStorage.setItem('wazibot_merchant_id', id);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('sidebar-name').textContent = data.name;
+      loadStats();
+      loadRecentOrders();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  } catch (e) {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('wazibot_merchant_id');
+  location.reload();
+}
+
+// Vérifier si déjà connecté
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('wazibot_merchant_id');
+  if (saved) {
+    document.getElementById('login-id').value = saved;
+    doLogin();
+  }
+});
+
 // ── Navigation ──
-function showPage(name) {
+function showPage(name, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if (el) el.classList.add('active');
   loadPage(name);
 }
 
@@ -457,7 +481,7 @@ async function loadOrders(status) {
     return `<tr>
       <td><strong>${o.orderNumber}</strong></td>
       <td>${o.customerId || '—'}</td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${itemsText}">${itemsText}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${itemsText}</td>
       <td>${(o.totalAmount || 0).toLocaleString('fr-FR')} FCFA</td>
       <td><span class="badge ${o.status}">${statusLabel(o.status)}</span></td>
       <td>
@@ -492,7 +516,7 @@ function statusLabel(s) {
 async function loadCatalog() {
   const products = await api('/merchants/' + MERCHANT_ID + '/products');
   const tbody = document.getElementById('catalog-table');
-  if (!products.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="icon">🛍️</div><p>Aucun produit — ajoutez-en un !</p></div></td></tr>'; return; }
+  if (!products.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="icon">🛍️</div><p>Aucun produit</p></div></td></tr>'; return; }
   tbody.innerHTML = products.map(p => `
     <tr>
       <td><strong>${p.name}</strong><br><small style="color:var(--muted)">${p.description || ''}</small></td>
@@ -501,7 +525,7 @@ async function loadCatalog() {
       <td>${p.stock}</td>
       <td><span class="badge ${p.isAvailable ? 'confirmed' : 'cancelled'}">${p.isAvailable ? 'Disponible' : 'Indispo'}</span></td>
       <td style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-sm" onclick="editProduct(${JSON.stringify(p).replace(/"/g, '&quot;')})">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick='editProduct(${JSON.stringify(p)})'>✏️</button>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">🗑️</button>
       </td>
     </tr>`).join('');
@@ -561,7 +585,7 @@ async function deleteProduct(id) {
 async function loadCustomers() {
   const customers = await api('/merchants/' + MERCHANT_ID + '/customers');
   const tbody = document.getElementById('customers-table');
-  if (!customers.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="icon">👥</div><p>Aucun client pour le moment</p></div></td></tr>'; return; }
+  if (!customers.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="icon">👥</div><p>Aucun client</p></div></td></tr>'; return; }
   tbody.innerHTML = customers.map(c => `
     <tr>
       <td>${c.whatsappNumber}</td>
@@ -605,10 +629,6 @@ async function updateToken() {
   toast('Token mis à jour !', 'success');
   document.getElementById('s-token').value = '';
 }
-
-// ── Init ──
-loadStats();
-loadRecentOrders();
 </script>
 <script>
 if ('serviceWorker' in navigator) {
