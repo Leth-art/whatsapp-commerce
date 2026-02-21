@@ -181,6 +181,13 @@
   /* ── Loader ── */
   .loader { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
 </style>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00e5a0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WaziBot">
+<link rel="apple-touch-icon" href="/wazibot-logo-1024.png">
 </head>
 <body>
 
@@ -602,6 +609,13 @@ async function updateToken() {
 // ── Init ──
 loadStats();
 loadRecentOrders();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('PWA prête !'))
+    .catch(err => console.log('SW erreur:', err));
+}
 </script>
 </body>
 </html>
