@@ -20,6 +20,7 @@ const Merchant = sequelize.define("Merchant", {
   plan: { type: DataTypes.STRING, defaultValue: "starter" },
   subscriptionExpiresAt: { type: DataTypes.DATE },
   lastPaymentId: { type: DataTypes.STRING },
+  ownerPhone: { type: DataTypes.STRING, defaultValue: "" },
 });
 
 Merchant.prototype.isSubscriptionActive = function() {
