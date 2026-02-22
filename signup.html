@@ -155,7 +155,15 @@
       <h3>Votre boutique est prête !</h3>
       <p>Votre assistant WhatsApp est configuré et opérationnel. Vous avez <strong>7 jours gratuits</strong> pour tester.</p>
       <div class="success-info" id="success-info"></div>
-      <a href="https://wa.me/22871454079" class="whatsapp-btn" target="_blank">💬 Contacter WaziBot pour la suite</a>
+
+      <!-- ID boutique mis en évidence -->
+      <div style="background:rgba(37,211,102,0.1);border:2px dashed #25D366;border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">🔑 Votre ID boutique (à conserver !)</p>
+        <p id="merchant-id-display" style="font-size:20px;font-weight:800;color:#25D366;letter-spacing:2px;word-break:break-all;"></p>
+        <button onclick="copyId()" style="margin-top:8px;padding:6px 16px;border-radius:8px;background:#25D366;color:white;border:none;cursor:pointer;font-size:13px;font-weight:600;">📋 Copier l'ID</button>
+      </div>
+
+      <a href="https://wa.me/22871454079" class="whatsapp-btn" target="_blank" id="whatsapp-contact-btn">💬 Recevoir mon ID par WhatsApp</a>
     </div>
   </div>
 </div>
@@ -205,6 +213,13 @@ function addProduct() {
 
 function removeProduct(btn) { btn.parentElement.remove(); }
 
+function copyId() {
+  const id = document.getElementById("merchant-id-display").textContent;
+  navigator.clipboard.writeText(id).then(() => {
+    alert("ID copié ! Conservez-le précieusement.");
+  });
+}
+
 async function submitForm() {
   const products = [];
   document.querySelectorAll('.product-item').forEach(item => {
@@ -239,14 +254,26 @@ async function submitForm() {
       document.getElementById('form-content').style.display = 'none';
       document.getElementById('success').classList.add('show');
       const trialEnd = new Date(data.trialEndsAt).toLocaleDateString('fr-FR');
+      const merchantId = data.merchantId;
+
       document.getElementById('success-info').innerHTML = `
         <div class="row"><span>Boutique</span><span>${payload.name}</span></div>
         <div class="row"><span>Type</span><span>${selectedCommerce}</span></div>
         <div class="row"><span>Produits ajoutés</span><span>${data.productsCreated}</span></div>
         <div class="row"><span>Essai gratuit jusqu'au</span><span>${trialEnd}</span></div>
         <div class="row"><span>Statut</span><span style="color:#25D366">✅ Actif</span></div>`;
-      const msg = encodeURIComponent(`Bonjour ! Je viens de créer ma boutique *${payload.name}* sur WaziBot. Type : ${selectedCommerce}. ${products.length} produits ajoutés. Je suis prêt pour la suite ! 🚀`);
-      document.querySelector('.whatsapp-btn').href = `https://wa.me/22871454079?text=${msg}`;
+
+      // Afficher l'ID boutique
+      document.getElementById('merchant-id-display').textContent = merchantId;
+
+      // Préparer le message WhatsApp avec l'ID
+      const msg = encodeURIComponent(
+        `Bonjour WaziBot ! 👋\n\n` +
+        `Je viens de créer ma boutique *${payload.name}*.\n` +
+        `Mon ID boutique : *${merchantId}*\n\n` +
+        `Je voudrais accéder à mon dashboard. Merci !`
+      );
+      document.getElementById('whatsapp-contact-btn').href = `https://wa.me/22871454079?text=${msg}`;
     } else {
       document.getElementById('btn-submit').disabled = false;
       alert('Erreur : ' + (data.error || 'Réessayez dans un moment.'));
