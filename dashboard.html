@@ -415,6 +415,37 @@
           <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
         </div>
       </div>
+      <!-- Section Abonnement & Paiement -->
+      <div class="card" style="padding:28px;margin-bottom:20px;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;">Abonnement</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Gérez votre plan et renouvelez votre abonnement.</p>
+        <div id="sub-status" style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:20px;font-size:13px;">
+          Chargement...
+        </div>
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:16px;">Choisir un plan</h4>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;" id="plan-cards">
+          <div class="plan-card" onclick="selectPlan('starter')" data-plan="starter" style="border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;text-align:center;">
+            <div style="font-weight:700;font-size:15px;margin-bottom:6px;">Starter</div>
+            <div id="price-starter" style="color:var(--accent);font-size:13px;font-weight:600;">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">50 produits · 500 msg</div>
+          </div>
+          <div class="plan-card" onclick="selectPlan('pro')" data-plan="pro" style="border:2px solid var(--accent);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;text-align:center;background:rgba(0,229,160,0.05);">
+            <div style="font-weight:700;font-size:15px;margin-bottom:6px;">Pro ⭐</div>
+            <div id="price-pro" style="color:var(--accent);font-size:13px;font-weight:600;">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">200 produits · 2000 msg</div>
+          </div>
+          <div class="plan-card" onclick="selectPlan('business')" data-plan="business" style="border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;text-align:center;">
+            <div style="font-weight:700;font-size:15px;margin-bottom:6px;">Business</div>
+            <div id="price-business" style="color:var(--accent);font-size:13px;font-weight:600;">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Illimité · Support prioritaire</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,229,160,0.05);border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--muted);margin-bottom:16px;">
+          💳 Paiement accepté : <strong style="color:var(--text);">Mobile Money</strong> (MTN, Orange, Wave...) et <strong style="color:var(--text);">Carte bancaire</strong> (Visa, Mastercard)
+        </div>
+        <button class="btn btn-primary" onclick="initiatePayment()" style="width:100%;">💳 Payer maintenant</button>
+      </div>
+
       <div class="card" style="padding:28px;">
         <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;">Token WhatsApp</h3>
         <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Mettez à jour votre token Meta quand il expire.</p>
@@ -514,7 +545,7 @@ function loadPage(name) {
   else if (name === 'catalog') loadCatalog();
   else if (name === 'customers') loadCustomers();
   else if (name === 'analytics') loadAnalytics();
-  else if (name === 'settings') loadSettings();
+  else if (name === 'settings') { loadSettings(); loadSubscriptionInfo(); }
 }
 
 // ── API Helper ──
@@ -683,6 +714,76 @@ async function loadCustomers() {
       <td>${(c.totalSpent || 0).toLocaleString('fr-FR')} FCFA</td>
       <td>${new Date(c.lastInteraction).toLocaleDateString('fr-FR')}</td>
     </tr>`).join('');
+}
+
+// ── Abonnement & Paiement ──
+let selectedPlan = 'pro';
+
+async function loadSubscriptionInfo() {
+  try {
+    const merchant = await api('/merchants/' + MERCHANT_ID);
+    const currency = merchant.currency || 'XOF';
+
+    // Afficher statut abonnement
+    const exp = merchant.subscriptionExpiresAt ? new Date(merchant.subscriptionExpiresAt) : null;
+    const now = new Date();
+    const isExpired = !exp || exp < now;
+    const daysLeft = isExpired ? 0 : Math.ceil((exp - now) / (1000*60*60*24));
+    const statusColor = isExpired ? '#ff4757' : daysLeft < 5 ? '#f0a500' : '#00e5a0';
+
+    document.getElementById('sub-status').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <span style="font-weight:700;text-transform:uppercase;color:var(--accent);">${merchant.plan || 'starter'}</span>
+          <span style="color:var(--muted);font-size:12px;margin-left:8px;">${isExpired ? '⚠️ Expiré' : '● Actif'}</span>
+        </div>
+        <div style="color:${statusColor};font-weight:700;font-size:13px;">
+          ${isExpired ? 'Renouvelez maintenant' : daysLeft + ' jour(s) restant(s)'}
+        </div>
+      </div>
+      ${exp ? '<div style="color:var(--muted);font-size:12px;margin-top:6px;">Expire le ' + exp.toLocaleDateString('fr-FR') + '</div>' : ''}
+    `;
+
+    // Afficher les prix selon la devise
+    const plans = await fetch('/subscription/plans?currency=' + currency).then(r => r.json());
+    plans.forEach(p => {
+      const el = document.getElementById('price-' + p.plan);
+      if (el) el.textContent = p.price.toLocaleString('fr-FR') + ' ' + p.currency + '/mois';
+    });
+  } catch(e) {
+    console.error('Erreur chargement abonnement:', e);
+  }
+}
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(c => {
+    c.style.border = '2px solid var(--border)';
+    c.style.background = 'transparent';
+  });
+  const el = document.querySelector(`[data-plan="${plan}"]`);
+  if (el) {
+    el.style.border = '2px solid var(--accent)';
+    el.style.background = 'rgba(0,229,160,0.05)';
+  }
+}
+
+async function initiatePayment() {
+  try {
+    const res = await fetch('/subscription/initiate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ merchantId: MERCHANT_ID, plan: selectedPlan })
+    });
+    const data = await res.json();
+    if (data.checkoutUrl) {
+      window.open(data.checkoutUrl, '_blank');
+    } else {
+      toast('Erreur : ' + (data.error || 'Impossible de créer le lien'), 'error');
+    }
+  } catch(e) {
+    toast('Erreur paiement', 'error');
+  }
 }
 
 // ── Paramètres ──
