@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaziBot — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #050508;
+  --surface: #0d0d14;
+  --surface2: #14141f;
+  --border: #1e1e2e;
+  --accent: #e85c0e;
+  --gold: #f0a500;
+  --green: #00e5a0;
+  --text: #f0f0f8;
+  --muted: #4a4a6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* Login */
+.login-screen {
+  position:fixed; inset:0; background:var(--bg);
+  display:flex; align-items:center; justify-content:center; z-index:999;
+}
+.login-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:24px; padding:48px; width:100%; max-width:380px; text-align:center;
+}
+.login-logo { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; margin-bottom:8px; }
+.login-logo span { color:var(--accent); }
+.login-card p { color:var(--muted); font-size:14px; margin-bottom:32px; }
+.login-card input {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); padding:14px 18px; border-radius:12px;
+  font-size:15px; text-align:center; margin-bottom:12px;
+  font-family:'DM Mono',monospace; letter-spacing:2px;
+}
+.login-card input:focus { outline:none; border-color:var(--accent); }
+.login-btn {
+  width:100%; background:var(--accent); color:white; border:none;
+  padding:14px; border-radius:12px; font-size:15px; font-weight:700;
+  cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.login-btn:hover { background:#ff6a1a; transform:translateY(-1px); }
+.login-error { color:#ff4757; font-size:13px; margin-top:8px; display:none; }
+
+/* Layout */
+.app { display:none; }
+.app.visible { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+
+/* Sidebar */
+.sidebar {
+  background:var(--surface); border-right:1px solid var(--border);
+  padding:28px 0; display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+}
+.sidebar-logo { padding:0 24px 28px; border-bottom:1px solid var(--border); }
+.sidebar-logo h1 { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+.sidebar-logo h1 span { color:var(--accent); }
+.sidebar-logo p { font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:1px; }
+.nav { padding:20px 12px; flex:1; }
+.nav-item {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 14px; border-radius:10px; cursor:pointer;
+  font-size:13px; font-weight:500; color:var(--muted);
+  transition:all 0.2s; margin-bottom:3px;
+}
+.nav-item:hover { color:var(--text); background:var(--surface2); }
+.nav-item.active { color:var(--accent); background:rgba(232,92,14,0.1); }
+.sidebar-footer {
+  margin:12px; padding:14px; background:var(--surface2);
+  border-radius:12px; border:1px solid var(--border);
+}
+.sidebar-footer .label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+.sidebar-footer .val { font-size:13px; font-weight:700; color:var(--green); margin-top:4px; }
+
+/* Main */
+.main { padding:32px 36px; overflow-y:auto; }
+.page { display:none; animation:fadeIn 0.3s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.page-header { margin-bottom:28px; display:flex; align-items:center; justify-content:space-between; }
+.page-header h2 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; }
+.page-header p { color:var(--muted); font-size:13px; margin-top:3px; }
+
+/* KPI Grid */
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.kpi {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:20px; position:relative; overflow:hidden;
+}
+.kpi::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--c1,var(--accent)), var(--c2,var(--gold)));
+}
+.kpi .icon { font-size:22px; margin-bottom:12px; }
+.kpi .val { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--text); }
+.kpi .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-top:4px; }
+.kpi .trend { font-size:11px; margin-top:6px; }
+.kpi .trend.up { color:var(--green); }
+.kpi .trend.down { color:#ff4757; }
+
+/* Cards */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; overflow:hidden;
+}
+.card-header {
+  padding:18px 22px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-header h3 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+.mb { margin-bottom:14px; }
+
+/* Table */
+table { width:100%; border-collapse:collapse; }
+th { padding:11px 20px; text-align:left; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; border-bottom:1px solid var(--border); }
+td { padding:13px 20px; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.03); }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+
+/* Badge */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge.active { background:rgba(0,229,160,0.12); color:var(--green); }
+.badge.expired { background:rgba(255,71,87,0.12); color:#ff4757; }
+.badge.trial { background:rgba(240,165,0,0.12); color:var(--gold); }
+.badge::before { content:'●'; font-size:7px; }
+
+/* Merchant row actions */
+.action-btn {
+  background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  padding:5px 12px; border-radius:8px; font-size:11px; cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.action-btn:hover { border-color:var(--accent); color:var(--accent); }
+.action-btn.danger:hover { border-color:#ff4757; color:#ff4757; }
+
+/* Loader */
+.loader { text-align:center; padding:40px; color:var(--muted); font-size:13px; }
+
+/* Live dot */
+.live { display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--green); }
+.live::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Grain overlay */
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.4;
+}
+
+@media(max-width:768px) {
+  .app.visible { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+  .main { padding:20px 16px; }
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .grid-2,.grid-3 { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Wazi<span>Bot</span></div>
+    <p>Accès administrateur réservé</p>
+    <input id="admin-pwd" type="password" placeholder="Mot de passe admin">
+    <button class="login-btn" onclick="doAdminLogin()">Accéder →</button>
+    <p class="login-error" id="admin-error">Mot de passe incorrect</p>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Wazi<span>Bot</span></h1>
+      <p>⚡ Admin Panel</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('overview',this)">📊 Vue globale</div>
+      <div class="nav-item" onclick="showPage('merchants',this)">🏪 Commerçants</div>
+      <div class="nav-item" onclick="showPage('revenue',this)">💰 Revenus</div>
+      <div class="nav-item" onclick="showPage('messages',this)">💬 Messages IA</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="label">Statut serveur</div>
+      <div class="val"><span class="live"></span> En ligne</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- Vue globale -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div><h2>Vue globale</h2><p>Tout WaziBot en temps réel</p></div>
+        <span class="live">Live</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi" style="--c1:#e85c0e;--c2:#f0a500;">
+          <div class="icon">🏪</div>
+          <div class="val" id="k-merchants">—</div>
+          <div class="label">Commerçants actifs</div>
+          <div class="trend up" id="k-merchants-trend"></div>
+        </div>
+        <div class="kpi" style="--c1:#00e5a0;--c2:#00b37a;">
+          <div class="icon">💰</div>
+          <div class="val" id="k-revenue">—</div>
+          <div class="label">Revenus abonnements</div>
+          <div class="trend up" id="k-revenue-sub">/mois</div>
+        </div>
+        <div class="kpi" style="--c1:#7c5cfc;--c2:#e85c0e;">
+          <div class="icon">💬</div>
+          <div class="val" id="k-messages">—</div>
+          <div class="label">Messages IA ce mois</div>
+          <div class="trend" id="k-messages-cost"></div>
+        </div>
+        <div class="kpi" style="--c1:#f0a500;--c2:#ff6b6b;">
+          <div class="icon">⚠️</div>
+          <div class="val" id="k-expiring">—</div>
+          <div class="label">Expirent dans 3 jours</div>
+          <div class="trend down" id="k-expiring-sub">À relancer</div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb">
+        <div class="card">
+          <div class="card-header"><h3>📈 Croissance commerçants</h3></div>
+          <div style="padding:20px;"><canvas id="growthChart" height="160"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>🥧 Répartition des plans</h3></div>
+          <div style="padding:20px;display:flex;align-items:center;gap:20px;">
+            <canvas id="plansChart" height="160" width="160"></canvas>
+            <div id="plans-legend" style="flex:1;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>🏪 Derniers inscrits</h3>
+          <button class="action-btn" onclick="showPage('merchants', document.querySelector('.nav-item:nth-child(2))'))">Voir tous →</button>
+        </div>
+        <table>
+          <thead><tr><th>Boutique</th><th>Type</th><th>Plan</th><th>Statut</th><th>Inscrit le</th></tr></thead>
+          <tbody id="recent-merchants"><tr><td colspan="5" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Commerçants -->
+    <div class="page" id="page-merchants">
+      <div class="page-header">
+        <div><h2>Commerçants</h2><p>Gérez tous vos commerçants</p></div>
+        <select id="filter-status" onchange="loadMerchants()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13px;">
+          <option value="">Tous</option>
+          <option value="active">Actifs</option>
+          <option value="trial">En essai</option>
+          <option value="expired">Expirés</option>
+        </select>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Boutique</th><th>Contact</th><th>Plan</th><th>Expire le</th><th>Commandes</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody id="merchants-table"><tr><td colspan="7" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Revenus -->
+    <div class="page" id="page-revenue">
+      <div class="page-header">
+        <div><h2>Revenus</h2><p>Suivi des abonnements</p></div>
+      </div>
+      <div class="kpi-grid" style="margin-bottom:24px;">
+        <div class="kpi" style="--c1:#00e5a0;--c2:#00b37a;">
+          <div class="icon">📅</div>
+          <div class="val" id="r-monthly">—</div>
+          <div class="label">Revenus ce mois</div>
+        </div>
+        <div class="kpi" style="--c1:#e85c0e;--c2:#f0a500;">
+          <div class="icon">📆</div>
+          <div class="val" id="r-annual">—</div>
+          <div class="label">Projection annuelle</div>
+        </div>
+        <div class="kpi" style="--c1:#7c5cfc;--c2:#e85c0e;">
+          <div class="icon">👥</div>
+          <div class="val" id="r-paying">—</div>
+          <div class="label">Clients payants</div>
+        </div>
+        <div class="kpi" style="--c1:#f0a500;--c2:#ff6b6b;">
+          <div class="icon">📉</div>
+          <div class="val" id="r-churn">—</div>
+          <div class="label">Taux de churn</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>💰 Revenus par plan</h3></div>
+        <div style="padding:24px;"><canvas id="revenueChart" height="120"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Messages IA -->
+    <div class="page" id="page-messages">
+      <div class="page-header">
+        <div><h2>Messages IA</h2><p>Consommation Anthropic API</p></div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi" style="--c1:#7c5cfc;--c2:#e85c0e;">
+          <div class="icon">🤖</div>
+          <div class="val" id="m-total">—</div>
+          <div class="label">Messages ce mois</div>
+        </div>
+        <div class="kpi" style="--c1:#e85c0e;--c2:#f0a500;">
+          <div class="icon">💸</div>
+          <div class="val" id="m-cost">—</div>
+          <div class="label">Coût estimé ($)</div>
+        </div>
+        <div class="kpi" style="--c1:#00e5a0;--c2:#00b37a;">
+          <div class="icon">📊</div>
+          <div class="val" id="m-avg">—</div>
+          <div class="label">Moy. par boutique</div>
+        </div>
+        <div class="kpi" style="--c1:#f0a500;--c2:#ff6b6b;">
+          <div class="icon">⚡</div>
+          <div class="val" id="m-model">Haiku</div>
+          <div class="label">Modèle actif</div>
+        </div>
+      </div>
+      <div class="card mt" style="margin-top:14px;">
+        <div class="card-header"><h3>💬 Consommation par boutique</h3></div>
+        <table>
+          <thead><tr><th>Boutique</th><th>Plan</th><th>Messages</th><th>Quota</th><th>Utilisation</th></tr></thead>
+          <tbody id="messages-table"><tr><td colspan="5" class="loader">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = 'https://whatsapp-commerce-1roe.onrender.com/api';
+const ADMIN_PASSWORD = 'wazibot2026'; // Changez ce mot de passe !
+
+// ── Login ──
+function doAdminLogin() {
+  const pwd = document.getElementById('admin-pwd').value;
+  if (pwd === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    initDashboard();
+  } else {
+    document.getElementById('admin-error').style.display = 'block';
+    document.getElementById('admin-pwd').style.borderColor = '#ff4757';
+  }
+}
+
+document.getElementById('admin-pwd').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doAdminLogin();
+});
+
+// ── Navigation ──
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'merchants') loadMerchants();
+  if (name === 'revenue') loadRevenue();
+  if (name === 'messages') loadMessages();
+}
+
+// ── API ──
+async function api(path) {
+  const res = await fetch(API + path);
+  return res.json();
+}
+
+// ── Init ──
+async function initDashboard() {
+  const merchants = await api('/merchants');
+  renderOverview(merchants);
+  renderRecentMerchants(merchants);
+  renderGrowthChart(merchants);
+  renderPlansChart(merchants);
+}
+
+// ── Overview ──
+function renderOverview(merchants) {
+  const active = merchants.filter(m => m.isActive);
+  const expiring = merchants.filter(m => {
+    if (!m.subscriptionExpiresAt) return false;
+    const diff = new Date(m.subscriptionExpiresAt) - new Date();
+    return diff > 0 && diff < 3 * 24 * 60 * 60 * 1000;
+  });
+
+  // Revenus abonnements
+  const PLAN_PRICES = { starter: 15000, pro: 35000, business: 70000 };
+  const monthlyRevenue = active.filter(m => {
+    if (!m.subscriptionExpiresAt) return false;
+    const created = new Date(m.createdAt);
+    const trial = new Date(created.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return new Date() > trial;
+  }).reduce((sum, m) => sum + (PLAN_PRICES[m.plan] || 0), 0);
+
+  document.getElementById('k-merchants').textContent = active.length;
+  document.getElementById('k-merchants-trend').textContent = `${merchants.length} total inscrits`;
+  document.getElementById('k-revenue').textContent = monthlyRevenue.toLocaleString('fr-FR');
+  document.getElementById('k-expiring').textContent = expiring.length;
+
+  // Estimation messages (3 messages IA par commande en moyenne)
+  const totalMessages = merchants.length * 45;
+  const costUSD = (totalMessages * 0.0004).toFixed(2);
+  document.getElementById('k-messages').textContent = totalMessages;
+  document.getElementById('k-messages-cost').textContent = `~${costUSD}$ coût API`;
+}
+
+function renderRecentMerchants(merchants) {
+  const tbody = document.getElementById('recent-merchants');
+  const recent = [...merchants].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  if (!recent.length) { tbody.innerHTML = '<tr><td colspan="5" class="loader">Aucun commerçant</td></tr>'; return; }
+  tbody.innerHTML = recent.map(m => {
+    const status = getMerchantStatus(m);
+    return `<tr>
+      <td><strong>${m.name}</strong><br><small style="color:var(--muted)">${m.city || '—'}</small></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">${m.ownerPhone || '—'}</td>
+      <td><span style="color:var(--gold);text-transform:uppercase;font-size:11px;font-weight:700;">${m.plan || 'starter'}</span></td>
+      <td><span class="badge ${status.cls}">${status.label}</span></td>
+      <td>${new Date(m.createdAt).toLocaleDateString('fr-FR')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderGrowthChart(merchants) {
+  const last30 = {};
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    last30[d.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit'})] = 0;
+  }
+  merchants.forEach(m => {
+    const key = new Date(m.createdAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit'});
+    if (last30[key] !== undefined) last30[key]++;
+  });
+
+  // Cumulatif
+  let cum = 0;
+  const cumValues = Object.values(last30).map(v => { cum += v; return cum; });
+  const labels = Object.keys(last30).filter((_, i) => i % 5 === 0);
+
+  const ctx = document.getElementById('growthChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 200);
+  grad.addColorStop(0, 'rgba(232,92,14,0.3)');
+  grad.addColorStop(1, 'rgba(232,92,14,0)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Object.keys(last30),
+      datasets: [{
+        data: cumValues,
+        borderColor: '#e85c0e',
+        backgroundColor: grad,
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.4,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#14141f', borderColor: '#1e1e2e', borderWidth: 1,
+        titleColor: '#f0f0f8', bodyColor: '#e85c0e',
+      }},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4a4a6a', font: { size: 10 }, maxTicksLimit: 6 } },
+        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4a4a6a', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderPlansChart(merchants) {
+  const counts = { starter: 0, pro: 0, business: 0 };
+  merchants.forEach(m => { if (counts[m.plan] !== undefined) counts[m.plan]++; else counts.starter++; });
+
+  const ctx = document.getElementById('plansChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Starter', 'Pro', 'Business'],
+      datasets: [{
+        data: [counts.starter, counts.pro, counts.business],
+        backgroundColor: ['#e85c0e', '#00e5a0', '#f0a500'],
+        borderWidth: 0, hoverOffset: 4,
+      }]
+    },
+    options: {
+      responsive: false, cutout: '70%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  document.getElementById('plans-legend').innerHTML = [
+    { label: 'Starter', count: counts.starter, color: '#e85c0e' },
+    { label: 'Pro', count: counts.pro, color: '#00e5a0' },
+    { label: 'Business', count: counts.business, color: '#f0a500' },
+  ].map(p => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0;"></div>
+      <span style="font-size:13px;color:var(--muted);flex:1;">${p.label}</span>
+      <span style="font-size:13px;font-weight:700;">${p.count}</span>
+    </div>`).join('');
+}
+
+// ── Commerçants ──
+async function loadMerchants() {
+  const merchants = await api('/merchants');
+  const filter = document.getElementById('filter-status').value;
+  const tbody = document.getElementById('merchants-table');
+
+  let filtered = merchants;
+  if (filter === 'active') filtered = merchants.filter(m => m.isActive && !isInTrial(m));
+  if (filter === 'trial') filtered = merchants.filter(m => isInTrial(m));
+  if (filter === 'expired') filtered = merchants.filter(m => !m.isActive);
+
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun résultat</td></tr>'; return; }
+
+  tbody.innerHTML = filtered.map(m => {
+    const status = getMerchantStatus(m);
+    const expDate = m.subscriptionExpiresAt ? new Date(m.subscriptionExpiresAt).toLocaleDateString('fr-FR') : '—';
+    return `<tr>
+      <td><strong>${m.name}</strong><br><small style="color:var(--muted);font-size:11px;">${m.city || ''}</small></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;">${m.ownerPhone || m.email || '—'}</td>
+      <td><span style="color:var(--gold);text-transform:uppercase;font-size:11px;font-weight:700;">${m.plan || 'starter'}</span></td>
+      <td style="font-size:12px;">${expDate}</td>
+      <td>—</td>
+      <td><span class="badge ${status.cls}">${status.label}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="action-btn" onclick="sendReminder('${m.id}','${m.ownerPhone}','${m.name}')">📩 Relancer</button>
+        <button class="action-btn danger" onclick="toggleMerchant('${m.id}', ${m.isActive})">${m.isActive ? '⏸️' : '▶️'}</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Revenus ──
+async function loadRevenue() {
+  const merchants = await api('/merchants');
+  const PLAN_PRICES = { starter: 15000, pro: 35000, business: 70000 };
+  const paying = merchants.filter(m => m.isActive && !isInTrial(m));
+  const monthly = paying.reduce((s, m) => s + (PLAN_PRICES[m.plan] || 0), 0);
+  const churn = merchants.length ? Math.round(((merchants.length - paying.length) / merchants.length) * 100) : 0;
+
+  document.getElementById('r-monthly').textContent = monthly.toLocaleString('fr-FR') + ' F';
+  document.getElementById('r-annual').textContent = (monthly * 12).toLocaleString('fr-FR') + ' F';
+  document.getElementById('r-paying').textContent = paying.length;
+  document.getElementById('r-churn').textContent = churn + '%';
+
+  // Graphique revenus par plan
+  const counts = { starter: 0, pro: 0, business: 0 };
+  paying.forEach(m => { if (counts[m.plan] !== undefined) counts[m.plan]++; });
+
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Starter (15k)', 'Pro (35k)', 'Business (70k)'],
+      datasets: [{
+        label: 'Revenus',
+        data: [counts.starter * 15000, counts.pro * 35000, counts.business * 70000],
+        backgroundColor: ['rgba(232,92,14,0.7)', 'rgba(0,229,160,0.7)', 'rgba(240,165,0,0.7)'],
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#14141f', borderColor: '#1e1e2e', borderWidth: 1,
+        callbacks: { label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + '' }
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#4a4a6a' } },
+        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4a4a6a', callback: v => v.toLocaleString('fr-FR') } }
+      }
+    }
+  });
+}
+
+// ── Messages ──
+async function loadMessages() {
+  const merchants = await api('/merchants');
+  const PLAN_LIMITS = { starter: 500, pro: 2000, business: Infinity };
+
+  const totalMsg = merchants.length * 45;
+  const costUSD = (totalMsg * 0.0004).toFixed(2);
+  const avgMsg = merchants.length ? Math.round(totalMsg / merchants.length) : 0;
+
+  document.getElementById('m-total').textContent = totalMsg;
+  document.getElementById('m-cost').textContent = '$' + costUSD;
+  document.getElementById('m-avg').textContent = avgMsg;
+
+  const tbody = document.getElementById('messages-table');
+  tbody.innerHTML = merchants.map(m => {
+    const msgs = Math.floor(Math.random() * 80) + 10; // simulation
+    const quota = PLAN_LIMITS[m.plan] === Infinity ? '∞' : PLAN_LIMITS[m.plan];
+    const pct = PLAN_LIMITS[m.plan] === Infinity ? 5 : Math.round((msgs / PLAN_LIMITS[m.plan]) * 100);
+    const barColor = pct > 80 ? '#ff4757' : pct > 50 ? '#f0a500' : '#00e5a0';
+    return `<tr>
+      <td><strong>${m.name}</strong></td>
+      <td><span style="color:var(--gold);font-size:11px;font-weight:700;text-transform:uppercase;">${m.plan}</span></td>
+      <td>${msgs}</td>
+      <td>${quota}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;">
+            <div style="width:${Math.min(pct,100)}%;height:100%;background:${barColor};border-radius:3px;transition:width 1s;"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);width:32px;">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Actions ──
+async function sendReminder(merchantId, phone, name) {
+  if (!phone) { alert('Pas de numéro pour ce commerçant'); return; }
+  const msg = encodeURIComponent(`⚠️ Bonjour ${name} ! Votre abonnement WaziBot expire bientôt. Renouvelez ici : https://whatsapp-commerce-1roe.onrender.com/signup.html`);
+  window.open(`https://wa.me/${phone.replace(/\+/g,'')}?text=${msg}`, '_blank');
+}
+
+async function toggleMerchant(id, isActive) {
+  if (!confirm(isActive ? 'Désactiver cette boutique ?' : 'Réactiver cette boutique ?')) return;
+  await fetch(API + '/merchants/' + id, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isActive: !isActive })
+  });
+  loadMerchants();
+}
+
+// ── Helpers ──
+function isInTrial(m) {
+  if (!m.createdAt) return false;
+  const trialEnd = new Date(new Date(m.createdAt).getTime() + 7 * 24 * 60 * 60 * 1000);
+  return new Date() < trialEnd;
+}
+
+function getMerchantStatus(m) {
+  if (!m.isActive) return { cls: 'expired', label: 'Expiré' };
+  if (isInTrial(m)) return { cls: 'trial', label: 'Essai' };
+  return { cls: 'active', label: 'Actif' };
+}
+</script>
+</body>
+</html>

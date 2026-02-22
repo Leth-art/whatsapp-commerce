@@ -91,7 +91,7 @@
       <li><div class="icon">🤖</div><div class="text"><strong>Assistant IA configuré pour vous</strong><span>Personnalité adaptée à votre type de commerce</span></div></li>
       <li><div class="icon">📦</div><div class="text"><strong>Catalogue importé automatiquement</strong><span>Ajoutez vos produits directement dans le formulaire</span></div></li>
       <li><div class="icon">📊</div><div class="text"><strong>Dashboard disponible immédiatement</strong><span>Gérez vos commandes dès la première seconde</span></div></li>
-      <li><div class="icon">💰</div><div class="text"><strong>7 jours gratuits, puis 15 000 FCFA/mois</strong><span>Paiement MTN ou Moov — résiliez quand vous voulez</span></div></li>
+      <li><div class="icon">💰</div><div class="text"><strong>7 jours gratuits, puis abonnement mensuel</strong><span>Paiement via Mobile Money — résiliez quand vous voulez</span></div></li>
     </ul>
   </div>
   <div class="form-card">
@@ -107,9 +107,48 @@
         <div class="form-group"><label>Nom de votre boutique *</label><input type="text" id="f-name" placeholder="Ex: Boutique Ama, Chez Koffi Mode..." maxlength="60"></div>
         <div class="form-row">
           <div class="form-group"><label>Votre prénom *</label><input type="text" id="f-owner" placeholder="Votre prénom"></div>
-          <div class="form-group"><label>Ville *</label><input type="text" id="f-city" placeholder="Lomé, Kpalimé..."></div>
+          <div class="form-group"><label>Ville *</label><input type="text" id="f-city" placeholder="Votre ville..."></div>
         </div>
-        <div class="form-group"><label>WhatsApp (pour vous contacter) *</label><input type="tel" id="f-phone" placeholder="+228 XX XX XX XX"></div>
+        <div class="form-group">
+          <label>Pays *</label>
+          <select id="f-country" onchange="updateCountry()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;">
+            <option value="">— Sélectionnez votre pays —</option>
+            <option value="BJ|+229|XOF">🇧🇯 Bénin (+229)</option>
+            <option value="BF|+226|XOF">🇧🇫 Burkina Faso (+226)</option>
+            <option value="CM|+237|XAF">🇨🇲 Cameroun (+237)</option>
+            <option value="CF|+236|XAF">🇨🇫 Centrafrique (+236)</option>
+            <option value="CD|+243|CDF">🇨🇩 Congo (RDC) (+243)</option>
+            <option value="CG|+242|XAF">🇨🇬 Congo Brazzaville (+242)</option>
+            <option value="CI|+225|XOF">🇨🇮 Côte d'Ivoire (+225)</option>
+            <option value="GA|+241|XAF">🇬🇦 Gabon (+241)</option>
+            <option value="GN|+224|GNF">🇬🇳 Guinée (+224)</option>
+            <option value="GW|+245|XOF">🇬🇼 Guinée-Bissau (+245)</option>
+            <option value="GQ|+240|XAF">🇬🇶 Guinée Équatoriale (+240)</option>
+            <option value="KE|+254|KES">🇰🇪 Kenya (+254)</option>
+            <option value="MG|+261|MGA">🇲🇬 Madagascar (+261)</option>
+            <option value="ML|+223|XOF">🇲🇱 Mali (+223)</option>
+            <option value="MR|+222|MRO">🇲🇷 Mauritanie (+222)</option>
+            <option value="MU|+230|MUR">🇲🇺 Maurice (+230)</option>
+            <option value="NE|+227|XOF">🇳🇪 Niger (+227)</option>
+            <option value="NG|+234|NGN">🇳🇬 Nigeria (+234)</option>
+            <option value="RW|+250|RWF">🇷🇼 Rwanda (+250)</option>
+            <option value="SN|+221|XOF">🇸🇳 Sénégal (+221)</option>
+            <option value="SC|+248|SCR">🇸🇨 Seychelles (+248)</option>
+            <option value="TZ|+255|TZS">🇹🇿 Tanzanie (+255)</option>
+            <option value="TD|+235|XAF">🇹🇩 Tchad (+235)</option>
+            <option value="TG|+228|XOF">🇹🇬 Togo (+228)</option>
+            <option value="UG|+256|UGX">🇺🇬 Ouganda (+256)</option>
+            <option value="ZA|+27|ZAR">🇿🇦 Afrique du Sud (+27)</option>
+            <option value="GH|+233|GHS">🇬🇭 Ghana (+233)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp (pour vous contacter) *</label>
+          <div style="display:flex;gap:8px;">
+            <div id="indicatif-badge" style="background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--muted);white-space:nowrap;min-width:80px;text-align:center;">+XXX</div>
+            <input type="tel" id="f-phone" placeholder="XX XX XX XX" style="flex:1;">
+          </div>
+        </div>
         <div class="form-group"><label>Email</label><input type="email" id="f-email" placeholder="votre@email.com"></div>
         <p class="error-msg" id="err-1">Veuillez remplir tous les champs obligatoires (*).</p>
         <button class="btn-next" onclick="goStep(2)">Continuer →</button>
@@ -139,7 +178,7 @@
         <div class="products-list" id="products-list">
           <div class="product-item">
             <input type="text" placeholder="Nom du produit" class="product-name">
-            <input type="number" placeholder="Prix FCFA" class="price-input product-price">
+            <input type="number" placeholder="Prix" class="price-input product-price">
             <button class="remove-product" onclick="removeProduct(this)" style="display:none">×</button>
           </div>
         </div>
@@ -178,7 +217,8 @@ function goStep(step) {
     const owner = document.getElementById('f-owner').value.trim();
     const city = document.getElementById('f-city').value.trim();
     const phone = document.getElementById('f-phone').value.trim();
-    if (!name || !owner || !city || !phone) { document.getElementById('err-1').classList.add('show'); return; }
+    const country = document.getElementById('f-country').value;
+    if (!name || !owner || !city || !phone || !country) { document.getElementById('err-1').classList.add('show'); return; }
     document.getElementById('err-1').classList.remove('show');
   }
   if (step === 3 && currentStep === 2) {
@@ -207,11 +247,24 @@ function addProduct() {
   const list = document.getElementById('products-list');
   const div = document.createElement('div');
   div.className = 'product-item';
-  div.innerHTML = '<input type="text" placeholder="Nom du produit" class="product-name"><input type="number" placeholder="Prix FCFA" class="price-input product-price"><button class="remove-product" onclick="removeProduct(this)">×</button>';
+  div.innerHTML = '<input type="text" placeholder="Nom du produit" class="product-name"><input type="number" placeholder="Prix" class="price-input product-price"><button class="remove-product" onclick="removeProduct(this)">×</button>';
   list.appendChild(div);
 }
 
 function removeProduct(btn) { btn.parentElement.remove(); }
+
+function updateCountry() {
+  const select = document.getElementById('f-country');
+  const val = select.value; // format: "CODE|+indicatif|DEVISE"
+  if (!val) return;
+  const parts = val.split('|');
+  window.selectedCountry = parts[0];
+  window.selectedIndicatif = parts[1];
+  window.selectedCurrency = parts[2];
+  document.getElementById('indicatif-badge').textContent = parts[1];
+  document.getElementById('indicatif-badge').style.color = 'var(--accent)';
+  document.getElementById('indicatif-badge').style.borderColor = 'var(--accent)';
+}
 
 function goToDashboard(e) {
   e.preventDefault();
@@ -242,7 +295,9 @@ async function submitForm() {
     name: document.getElementById('f-name').value.trim(),
     email: document.getElementById('f-email').value.trim(),
     city: document.getElementById('f-city').value.trim(),
-    currency: 'FCFA',
+    currency: window.selectedCurrency || 'USD',
+    country: window.selectedCountry || '',
+    ownerPhone: (window.selectedIndicatif || '') + document.getElementById('f-phone').value.trim().replace(/\s/g, ''),
     type: selectedCommerce,
     businessDescription: document.getElementById('f-desc').value.trim(),
     products,

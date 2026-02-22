@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { Merchant, Product, Customer, Order } = require("../models/index");
 const { updateOrderStatus, getMerchantOrders } = require("../modules/orders");
+const { canAddProduct } = require("../modules/planLimits");
+const { v4: uuidv4 } = require("uuid");
 
 router.get("/merchants", async (req, res) => {
   try {
@@ -46,10 +48,22 @@ router.get("/merchants/:id/stats", async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Produits avec vérification limite plan ──
 router.post("/merchants/:id/products", async (req, res) => {
   try {
-    const { v4: uuidv4 } = require("uuid");
-    const product = await Product.create({ ...req.body, id: uuidv4(), merchantId: req.params.id });
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Commercant introuvable" });
+
+    // Vérifier la limite produits du plan
+    const currentCount = await Product.count({ where: { merchantId: req.params.id } });
+    const check = await canAddProduct(merchant, currentCount);
+    if (!check.allowed) {
+      return res.status(403).json({ error: check.reason });
+    }
+
+    const product = await Product.create({
+      ...req.body, id: uuidv4(), merchantId: req.params.id
+    });
     res.status(201).json({ success: true, productId: product.id, name: product.name });
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -96,7 +110,10 @@ router.patch("/orders/:id/status", async (req, res) => {
 
 router.get("/merchants/:id/customers", async (req, res) => {
   try {
-    const customers = await Customer.findAll({ where: { merchantId: req.params.id }, order: [["lastInteraction", "DESC"]] });
+    const customers = await Customer.findAll({
+      where: { merchantId: req.params.id },
+      order: [["lastInteraction", "DESC"]]
+    });
     res.json(customers);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WaziBot — L'assistant IA WhatsApp pour vos ventes au Togo</title>
+<title>WaziBot — L'assistant IA WhatsApp pour vos ventes</title>
 <meta name="description" content="Automatisez vos ventes sur WhatsApp avec l'IA. Répondez à vos clients 24h/24, gérez vos commandes et fidélisez vos acheteurs. Essai gratuit 7 jours.">
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -66,6 +66,9 @@
   .feature-icon{width:52px;height:52px;border-radius:14px;background:rgba(232,92,14,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px;}
   .feature-card h3{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:600;margin-bottom:10px;}
   .feature-card p{color:var(--muted);font-size:14px;line-height:1.6;}
+  .countries-banner{background:white;border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:60px;text-align:center;}
+  .countries-banner p{color:var(--muted);font-size:14px;margin-bottom:16px;}
+  .flags{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:28px;}
   .pricing{background:var(--dark);padding:100px 60px;}
   .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
   .price-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;transition:all 0.3s;position:relative;overflow:hidden;}
@@ -73,8 +76,8 @@
   .price-card.featured{background:var(--accent);border-color:var(--accent);}
   .price-card.featured::before{content:'POPULAIRE';position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);color:white;padding:4px 12px;border-radius:50px;font-size:10px;font-weight:700;}
   .price-name{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:600;color:white;margin-bottom:8px;}
-  .price-amount{font-family:'Clash Display',sans-serif;font-size:38px;font-weight:700;color:white;margin-bottom:4px;}
-  .price-amount span{font-size:16px;font-weight:400;opacity:0.7;}
+  .price-amount{font-family:'Clash Display',sans-serif;font-size:32px;font-weight:700;color:white;margin-bottom:4px;}
+  .price-amount span{font-size:14px;font-weight:400;opacity:0.7;}
   .price-desc{color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:28px;}
   .price-features{list-style:none;margin-bottom:32px;}
   .price-features li{color:rgba(255,255,255,0.8);font-size:14px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;}
@@ -82,6 +85,7 @@
   .price-card.featured .price-features li::before{color:white;}
   .price-features li.no::before{content:'✗';color:rgba(255,255,255,0.3);}
   .price-features li.no{opacity:0.3;}
+  .price-note{color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:16px;}
   .price-btn{display:block;text-align:center;background:rgba(255,255,255,0.15);color:white;padding:14px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none;transition:all 0.2s;}
   .price-card.featured .price-btn{background:white;color:var(--accent);}
   .price-btn:hover{background:rgba(255,255,255,0.25);}
@@ -94,7 +98,7 @@
   .author-name{font-weight:700;font-size:14px;}
   .author-role{color:var(--muted);font-size:12px;}
   .stars{color:var(--gold);font-size:14px;margin-bottom:12px;}
-  .cta-section{background:var(--accent);padding:100px 60px;text-align:center;position:relative;overflow:hidden;}
+  .cta-section{background:var(--accent);padding:100px 60px;text-align:center;}
   .cta-section h2{font-family:'Clash Display',sans-serif;font-size:48px;font-weight:700;color:white;max-width:600px;margin:0 auto 20px;line-height:1.2;}
   .cta-section p{color:rgba(255,255,255,0.8);font-size:18px;margin-bottom:40px;}
   .cta-btn{display:inline-flex;align-items:center;gap:10px;background:white;color:var(--accent);padding:18px 40px;border-radius:50px;font-size:17px;font-weight:700;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,0.2);transition:all 0.2s;}
@@ -133,7 +137,7 @@
 
 <section class="hero">
   <div class="hero-content">
-    <div class="hero-badge"><span>🟢</span> Assistant IA WhatsApp — Togo</div>
+    <div class="hero-badge"><span>🟢</span> Assistant IA WhatsApp — Disponible partout</div>
     <h1>Vendez pendant que vous <em>dormez</em></h1>
     <p>WaziBot répond à vos clients WhatsApp 24h/24, prend les commandes automatiquement et fidélise vos acheteurs. Sans effort de votre part.</p>
     <div class="hero-actions">
@@ -149,10 +153,10 @@
           <div><div class="chat-name">Boutique Ama</div><div class="chat-status">En ligne</div></div>
         </div>
         <div class="msg received"><div class="msg-bubble">Bonjour ! Vous avez des robes wax ? 👗</div><div class="msg-time">10:23</div></div>
-        <div class="msg sent"><div><div class="msg-bubble">Bonjour ! 😊 Oui, robes wax à partir de 15 000 FCFA. Tapez <b>catalogue</b> pour voir tout !</div><div class="msg-time">10:23 ✓✓</div></div></div>
+        <div class="msg sent"><div><div class="msg-bubble">Bonjour ! 😊 Oui, robes wax à partir de 15 000. Tapez <b>catalogue</b> pour voir tout !</div><div class="msg-time">10:23 ✓✓</div></div></div>
         <div class="msg received"><div class="msg-bubble">catalogue</div><div class="msg-time">10:24</div></div>
         <div class="typing"><span></span><span></span><span></span></div>
-        <div class="msg sent"><div><div class="msg-bubble">📦 <b>Nos robes :</b><br>• Robe Wax — 15 000 F<br>• Robe Soirée — 25 000 F<br><br>Laquelle vous intéresse ? 😊</div><div class="msg-time">10:24 ✓✓</div></div></div>
+        <div class="msg sent"><div><div class="msg-bubble">📦 <b>Nos robes :</b><br>• Robe Wax — 15 000<br>• Robe Soirée — 25 000<br><br>Laquelle vous intéresse ? 😊</div><div class="msg-time">10:24 ✓✓</div></div></div>
       </div>
     </div>
   </div>
@@ -169,24 +173,31 @@
   <div class="section-label">Fonctionnalités</div>
   <h2>Tout ce dont vous avez besoin pour <em>vendre plus</em></h2>
   <p>WaziBot s'occupe de tout pendant que vous gérez votre business.</p>
+
+  <div class="countries-banner">
+    <p>🌍 Disponible dans tous ces pays</p>
+    <div class="flags">🇧🇯 🇧🇫 🇨🇲 🇨🇫 🇨🇩 🇨🇬 🇨🇮 🇬🇦 🇬🇳 🇬🇼 🇬🇶 🇰🇪 🇲🇬 🇲🇱 🇲🇷 🇲🇺 🇳🇪 🇳🇬 🇷🇼 🇸🇳 🇸🇨 🇹🇿 🇹🇩 🇹🇬 🇺🇬 🇿🇦 🇬🇭</div>
+  </div>
+
   <div class="features-grid">
     <div class="feature-card"><div class="feature-icon">🤖</div><h3>Assistant IA intelligent</h3><p>L'IA répond aux questions, présente le catalogue, et prend les commandes automatiquement. Comme un vrai vendeur, mais sans salaire.</p></div>
     <div class="feature-card"><div class="feature-icon">📦</div><h3>Gestion des commandes</h3><p>Chaque commande est enregistrée automatiquement. Suivez vos livraisons depuis votre dashboard en temps réel.</p></div>
     <div class="feature-card"><div class="feature-icon">🔔</div><h3>Relances automatiques</h3><p>Vos clients inactifs reçoivent des messages personnalisés. Vous récupérez des ventes sans lever le petit doigt.</p></div>
     <div class="feature-card"><div class="feature-icon">📊</div><h3>Dashboard en temps réel</h3><p>Visualisez vos revenus, commandes et clients depuis n'importe quel appareil. Votre boutique dans votre poche.</p></div>
-    <div class="feature-card"><div class="feature-icon">💰</div><h3>Paiement Mobile Money</h3><p>Vos clients paient via MTN ou Moov Money directement dans WhatsApp. Zéro friction, plus de ventes.</p></div>
+    <div class="feature-card"><div class="feature-icon">💰</div><h3>Paiement Mobile Money</h3><p>Vos clients paient via Mobile Money directement dans WhatsApp. Zéro friction, plus de ventes.</p></div>
     <div class="feature-card"><div class="feature-icon">🛍️</div><h3>Catalogue illimité</h3><p>Ajoutez tous vos produits avec descriptions et prix. L'IA les connaît par coeur et les présente parfaitement.</p></div>
   </div>
 </section>
 
 <section class="pricing" id="tarifs">
   <div class="section-label">Tarifs</div>
-  <h2 style="color:white;">Des prix adaptés au <em>marché togolais</em></h2>
-  <p style="color:rgba(255,255,255,0.5);font-size:17px;max-width:520px;margin-bottom:60px;line-height:1.7;">7 jours d'essai gratuit sur tous les plans. Paiement via MTN ou Moov.</p>
+  <h2 style="color:white;">Des prix adaptés à <em>chaque marché</em></h2>
+  <p style="color:rgba(255,255,255,0.5);font-size:17px;max-width:520px;margin-bottom:60px;line-height:1.7;">7 jours d'essai gratuit sur tous les plans. Paiement via Mobile Money.</p>
   <div class="pricing-grid">
     <div class="price-card">
       <div class="price-name">Starter</div>
-      <div class="price-amount">15 000 <span>FCFA/mois</span></div>
+      <div class="price-amount">~25 <span>USD/mois</span></div>
+      <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Parfait pour démarrer</div>
       <ul class="price-features">
         <li>50 produits maximum</li>
@@ -200,7 +211,8 @@
     </div>
     <div class="price-card featured">
       <div class="price-name">Pro</div>
-      <div class="price-amount">35 000 <span>FCFA/mois</span></div>
+      <div class="price-amount">~55 <span>USD/mois</span></div>
+      <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Le plus choisi</div>
       <ul class="price-features">
         <li>200 produits maximum</li>
@@ -214,7 +226,8 @@
     </div>
     <div class="price-card">
       <div class="price-name">Business</div>
-      <div class="price-amount">70 000 <span>FCFA/mois</span></div>
+      <div class="price-amount">~110 <span>USD/mois</span></div>
+      <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Pour les grandes boutiques</div>
       <ul class="price-features">
         <li>Produits illimités</li>
@@ -232,24 +245,24 @@
 <section class="testimonials" id="temoignages">
   <div class="section-label">Témoignages</div>
   <h2>Ils vendent plus avec <em>WaziBot</em></h2>
-  <p style="color:var(--muted);font-size:17px;max-width:520px;margin-bottom:60px;line-height:1.7;">Des commerçants togolais qui ont transformé leur business.</p>
+  <p style="color:var(--muted);font-size:17px;max-width:520px;margin-bottom:60px;line-height:1.7;">Des commerçants qui ont transformé leur business.</p>
   <div class="testimonials-grid">
-    <div class="testimonial"><div class="stars">★★★★★</div><p class="testimonial-text">"Avant je ratais des commandes la nuit. Maintenant WaziBot répond à ma place et je me réveille avec des commandes confirmées. C'est incroyable !"</p><div class="testimonial-author"><div class="author-avatar">A</div><div><div class="author-name">Ama K.</div><div class="author-role">Boutique mode — Lomé</div></div></div></div>
-    <div class="testimonial"><div class="stars">★★★★★</div><p class="testimonial-text">"J'ai doublé mes ventes en 3 semaines. Mes clients sur Facebook Marketplace voient le numéro WhatsApp et l'IA s'occupe de tout. Je recommande !"</p><div class="testimonial-author"><div class="author-avatar">K</div><div><div class="author-name">Koffi M.</div><div class="author-role">Vêtements homme — Adidogomé</div></div></div></div>
-    <div class="testimonial"><div class="stars">★★★★★</div><p class="testimonial-text">"Le dashboard est super facile. Je vois toutes mes commandes en temps réel et je change les statuts depuis mon téléphone. Service au top !"</p><div class="testimonial-author"><div class="author-avatar">F</div><div><div class="author-name">Fatima D.</div><div class="author-role">Cosmétiques — Tokoin</div></div></div></div>
+    <div class="testimonial"><div class="stars">★★★★★</div><p class="testimonial-text">"Avant je ratais des commandes la nuit. Maintenant WaziBot répond à ma place et je me réveille avec des commandes confirmées. C'est incroyable !"</p><div class="testimonial-author"><div class="author-avatar">A</div><div><div class="author-name">Ama K.</div><div class="author-role">Boutique mode — Afrique de l'Ouest</div></div></div></div>
+    <div class="testimonial"><div class="stars">★★★★★</div><p class="testimonial-text">"J'ai doublé mes ventes en 3 semaines. Mes clients sur Facebook Marketplace voient le numéro WhatsApp et l'IA s'occupe de tout. Je recommande !"</p><div class="testimonial-author"><div class="author-avatar">K</div><div><div class="author-name">Koffi M.</div><div class="author-role">Vêtements homme</div></div></div></div>
+    <div class="testimonial"><div class="stars">★★★★★</div><p class="testimonial-text">"Le dashboard est super facile. Je vois toutes mes commandes en temps réel et je change les statuts depuis mon téléphone. Service au top !"</p><div class="testimonial-author"><div class="author-avatar">F</div><div><div class="author-name">Fatima D.</div><div class="author-role">Cosmétiques</div></div></div></div>
   </div>
 </section>
 
 <section class="cta-section">
   <h2>Prêt à automatiser vos ventes ?</h2>
-  <p>Rejoignez les commerçants togolais qui vendent 24h/24 avec WaziBot.</p>
+  <p>Rejoignez des commerçants qui vendent 24h/24 avec WaziBot.</p>
   <a href="/signup.html" class="cta-btn">💬 Démarrer l'essai gratuit</a>
 </section>
 
 <footer>
   <div>
     <div class="footer-logo">Wazi<span>Bot</span></div>
-    <p class="footer-desc">L'assistant IA WhatsApp pour les commerçants togolais. Vendez plus, travaillez moins.</p>
+    <p class="footer-desc">L'assistant IA WhatsApp pour les commerçants. Vendez plus, travaillez moins.</p>
   </div>
   <div class="footer-col">
     <h4>Produit</h4>
@@ -263,12 +276,12 @@
   </div>
   <div class="footer-col">
     <h4>Contact</h4>
-    <a href="https://wa.me/22871454079" target="_blank">+228 71 45 40 79</a>
+    <a href="https://wa.me/22871454079" target="_blank">WhatsApp Support</a>
   </div>
 </footer>
 <div class="footer-bottom">
   <span>2026 WaziBot. Tous droits réservés.</span>
-  <span>Fait avec ❤️ au Togo 🇹🇬</span>
+  <span>Fait avec ❤️ en Afrique 🌍</span>
 </div>
 </body>
 </html>
