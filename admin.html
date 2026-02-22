@@ -550,6 +550,7 @@ async function loadMerchants() {
       <td>—</td>
       <td><span class="badge ${status.cls}">${status.label}</span></td>
       <td style="display:flex;gap:6px;">
+        <button class="action-btn" onclick="openTokenModal('${m.id}','${m.name}','${m.whatsappToken || ''}','${m.phoneNumberId || ''}')">🔑 Token</button>
         <button class="action-btn" onclick="sendReminder('${m.id}','${m.ownerPhone}','${m.name}')">📩 Relancer</button>
         <button class="action-btn danger" onclick="toggleMerchant('${m.id}', ${m.isActive})">${m.isActive ? '⏸️' : '▶️'}</button>
       </td>
@@ -637,6 +638,63 @@ async function loadMessages() {
 }
 
 // ── Actions ──
+
+// ── Modale Token 360dialog ──
+let currentMerchantId = null;
+
+function openTokenModal(id, name, token, phoneId) {
+  currentMerchantId = id;
+  document.getElementById('modal-merchant-name').textContent = 'Boutique : ' + name;
+  document.getElementById('modal-token').value = token || '';
+  document.getElementById('modal-phone-id').value = phoneId || '';
+  document.getElementById('modal-success').style.display = 'none';
+  document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('token-modal').style.display = 'flex';
+}
+
+function closeTokenModal() {
+  document.getElementById('token-modal').style.display = 'none';
+  currentMerchantId = null;
+}
+
+async function saveToken() {
+  const token = document.getElementById('modal-token').value.trim();
+  const phoneNumberId = document.getElementById('modal-phone-id').value.trim();
+
+  if (!token || !phoneNumberId) {
+    document.getElementById('modal-error').textContent = 'Remplissez les deux champs.';
+    document.getElementById('modal-error').style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(API + '/merchants/' + currentMerchantId, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ whatsappToken: token, phoneNumberId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('modal-success').style.display = 'block';
+      document.getElementById('modal-error').style.display = 'none';
+      setTimeout(() => { closeTokenModal(); loadMerchants(); }, 2000);
+    } else {
+      throw new Error(data.error || 'Erreur');
+    }
+  } catch(e) {
+    document.getElementById('modal-error').textContent = 'Erreur : ' + e.message;
+    document.getElementById('modal-error').style.display = 'block';
+  }
+}
+
+// Fermer en cliquant en dehors
+window.addEventListener('load', function() {
+  const modal = document.getElementById('token-modal');
+  if (modal) modal.addEventListener('click', function(e) {
+    if (e.target === this) closeTokenModal();
+  });
+});
+
 async function sendReminder(merchantId, phone, name) {
   if (!phone) { alert('Pas de numéro pour ce commerçant'); return; }
   const msg = encodeURIComponent(`⚠️ Bonjour ${name} ! Votre abonnement WaziBot expire bientôt. Renouvelez ici : https://whatsapp-commerce-1roe.onrender.com/signup.html`);
@@ -666,5 +724,42 @@ function getMerchantStatus(m) {
   return { cls: 'active', label: 'Actif' };
 }
 </script>
+
+<!-- Modale Token 360dialog -->
+<div id="token-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:480px;margin:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">🔑 Token 360dialog</h3>
+      <button onclick="closeTokenModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <p id="modal-merchant-name" style="color:var(--muted);font-size:13px;margin-bottom:20px;"></p>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px;">Token WhatsApp 360dialog</label>
+      <input id="modal-token" type="text" placeholder="Collez le token 360dialog ici..."
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:13px;font-family:'DM Mono',monospace;">
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px;">Phone Number ID</label>
+      <input id="modal-phone-id" type="text" placeholder="Ex: 972509772616258"
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:13px;font-family:'DM Mono',monospace;">
+    </div>
+
+    <div style="background:rgba(0,229,160,0.05);border:1px solid rgba(0,229,160,0.15);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+      📋 <strong style="color:var(--text);">Comment obtenir ces infos :</strong><br>
+      1. Connectez-vous sur <strong>app.360dialog.com</strong><br>
+      2. Allez dans <strong>API Keys</strong> → copiez le token<br>
+      3. Allez dans <strong>Phone Numbers</strong> → copiez le Phone Number ID
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeTokenModal()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;">Annuler</button>
+      <button onclick="saveToken()" style="flex:2;background:var(--accent);border:none;color:white;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-family:'DM Sans',sans-serif;">✅ Enregistrer</button>
+    </div>
+    <p id="modal-success" style="display:none;color:var(--green);font-size:13px;text-align:center;margin-top:12px;">✅ Token enregistré ! Le bot utilise maintenant ce numéro.</p>
+    <p id="modal-error" style="display:none;color:#ff4757;font-size:13px;text-align:center;margin-top:12px;"></p>
+  </div>
+</div>
 </body>
 </html>
