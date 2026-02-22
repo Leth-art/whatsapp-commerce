@@ -29,7 +29,7 @@ if (process.env.DATABASE_URL) {
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ force: false });
+   await sequelize.sync({ alter: true });
     console.log("✅ Base de données connectée et tables créées");
   } catch (err) {
     console.error("❌ Erreur base de données :", err.message);
