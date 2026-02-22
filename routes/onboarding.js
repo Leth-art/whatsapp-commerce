@@ -10,9 +10,8 @@ router.get("/templates", (req, res) => {
 
 router.post("/create", async (req, res) => {
   try {
-    const { name, email, city, type, currency, products } = req.body;
+    const { name, email, city, type, currency, products, ownerPhone } = req.body;
 
-    // Token et phoneNumberId depuis les variables d'environnement (jamais dans le code)
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
     const whatsappToken = process.env.WHATSAPP_TOKEN || '';
 
@@ -22,25 +21,41 @@ router.post("/create", async (req, res) => {
 
     const templateConfig = applyTemplate(type || "general", name, city);
 
-    let merchant = await Merchant.findOne({ where: { phoneNumberId } });
+    // Chaque commerçant est unique par son numéro personnel OU son email
+    // Plus jamais par phoneNumberId qui est le même pour tout le monde
+    let merchant = null;
+
+    if (ownerPhone) {
+      merchant = await Merchant.findOne({ where: { ownerPhone } });
+    } else if (email) {
+      merchant = await Merchant.findOne({ where: { email } });
+    }
 
     if (merchant) {
+      // Mise à jour boutique existante
       await merchant.update({
-        name, email: email || "", city: city || "Lomé",
-        currency: currency || "FCFA", whatsappToken, isActive: true,
+        name, email: email || merchant.email,
+        city: city || "Lomé", currency: currency || "FCFA",
+        whatsappToken, phoneNumberId, isActive: true,
+        ownerPhone: ownerPhone || merchant.ownerPhone,
         subscriptionExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         ...templateConfig,
       });
     } else {
+      // Création nouvelle boutique avec ID unique
       merchant = await Merchant.create({
-        id: uuidv4(), name, email: email || "",
+        id: uuidv4(),
+        name, email: email || "",
         city: city || "Lomé", currency: currency || "FCFA",
-        phoneNumberId, whatsappToken, isActive: true, plan: "starter",
+        phoneNumberId, whatsappToken,
+        ownerPhone: ownerPhone || "",
+        isActive: true, plan: "starter",
         subscriptionExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         ...templateConfig,
       });
     }
 
+    // Créer les produits
     let productsCreated = 0;
     if (products && products.length > 0) {
       for (const p of products) {
