@@ -163,7 +163,7 @@
         <button onclick="copyId()" style="margin-top:8px;padding:6px 16px;border-radius:8px;background:#25D366;color:white;border:none;cursor:pointer;font-size:13px;font-weight:600;">📋 Copier l'ID</button>
       </div>
 
-      <a href="https://wa.me/22871454079" class="whatsapp-btn" target="_blank" id="whatsapp-contact-btn">💬 Recevoir mon ID par WhatsApp</a>
+      <a href="#" class="whatsapp-btn" id="dashboard-btn" style="background:var(--accent2);" onclick="goToDashboard(event)">📊 Accéder à mon dashboard →</a>
     </div>
   </div>
 </div>
@@ -212,6 +212,12 @@ function addProduct() {
 }
 
 function removeProduct(btn) { btn.parentElement.remove(); }
+
+function goToDashboard(e) {
+  e.preventDefault();
+  const id = document.getElementById('merchant-id-display').textContent;
+  window.location.href = 'https://whatsapp-commerce-1roe.onrender.com/dashboard?id=' + id;
+}
 
 function copyId() {
   const id = document.getElementById("merchant-id-display").textContent;
@@ -273,7 +279,7 @@ async function submitForm() {
         `Mon ID boutique : *${merchantId}*\n\n` +
         `Je voudrais accéder à mon dashboard. Merci !`
       );
-      document.getElementById('whatsapp-contact-btn').href = `https://wa.me/22871454079?text=${msg}`;
+      // Dashboard button prêt
     } else {
       document.getElementById('btn-submit').disabled = false;
       alert('Erreur : ' + (data.error || 'Réessayez dans un moment.'));

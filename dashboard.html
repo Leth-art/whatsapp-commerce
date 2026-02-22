@@ -404,6 +404,14 @@ function doLogout() {
 
 // Vérifier si déjà connecté
 window.addEventListener('DOMContentLoaded', () => {
+  // Vérifier si ID dans URL (venant de signup)
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlId = urlParams.get('id');
+  if (urlId) {
+    document.getElementById('login-id').value = urlId;
+    doLogin();
+    return;
+  }
   const saved = localStorage.getItem('wazibot_merchant_id');
   if (saved) {
     document.getElementById('login-id').value = saved;
