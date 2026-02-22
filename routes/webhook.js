@@ -19,7 +19,7 @@ router.get("/", (req, res) => {
 router.post("/", express.raw({ type: "application/json" }), (req, res) => {
   // Vérifier la signature Meta
   const signature = req.headers["x-hub-signature-256"] || "";
- if (false)  {
+  if (!verifySignature(req.body, signature)) {
     console.warn("⚠️ Signature webhook invalide");
     return res.sendStatus(403);
   }

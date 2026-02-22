@@ -1,51 +1,81 @@
-const { Order, Product } = require("../models/index");
+const Order = require("../models/Order");
+const Product = require("../models/Product");
 const { deductStock } = require("./catalog");
-const { v4: uuidv4 } = require("uuid");
 
-const generateOrderNumber = () => {
-  const date = new Date().toISOString().slice(2, 10).replace(/-/g, "");
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return "ORD-" + date + "-" + rand;
-};
+/**
+ * Crée une commande depuis le panier de la session.
+ * @param {Object} merchant
+ * @param {Object} customer
+ * @param {Map} cart  - Map { productId => quantity }
+ * @param {string} deliveryAddress
+ * @param {string} paymentMethod
+ */
+const createOrderFromCart = async (merchant, customer, cart, deliveryAddress = "", paymentMethod = "mobile_money") => {
+  if (!cart || cart.size === 0) return null;
 
-const createOrderFromCart = async (merchant, customer, cart, deliveryAddress, paymentMethod) => {
-  deliveryAddress = deliveryAddress || "";
-  paymentMethod = paymentMethod || "mobile_money";
-  if (!cart || Object.keys(cart).length === 0) return null;
   const items = [];
   let totalAmount = 0;
-  for (const [productId, qty] of Object.entries(cart)) {
-    const product = await Product.findByPk(productId);
+
+  for (const [productId, qty] of cart.entries()) {
+    const product = await Product.findById(productId);
     if (!product || !product.isAvailable) continue;
-    const quantity = Math.min(Number(qty), product.stock);
+
+    const quantity = Math.min(qty, product.stock);
     const total = product.price * quantity;
     totalAmount += total;
-    items.push({ productId: product.id, name: product.name, quantity, unitPrice: product.price, total });
+
+    items.push({
+      productId: product._id,
+      name: product.name,
+      quantity,
+      unitPrice: product.price,
+      total,
+    });
+
     await deductStock(productId, quantity);
   }
+
   if (!items.length) return null;
-  const order = await Order.create({ id: uuidv4(), orderNumber: generateOrderNumber(), merchantId: merchant.id, customerId: customer.id, items, totalAmount, deliveryAddress, paymentMethod, status: "pending" });
+
+  const order = await Order.create({
+    merchantId: merchant._id,
+    customerId: customer._id,
+    items,
+    totalAmount,
+    deliveryAddress,
+    paymentMethod,
+    status: "pending",
+  });
+
+  // Mettre à jour les stats client
   customer.totalOrders += 1;
   customer.totalSpent += totalAmount;
   customer.lastOrderAt = new Date();
   await customer.save();
+
   return order;
 };
 
+/**
+ * Met à jour le statut d'une commande.
+ */
 const updateOrderStatus = async (orderId, status) => {
-  const valid = ["pending", "confirmed", "preparing", "ready", "delivered", "cancelled"];
-  if (!valid.includes(status)) throw new Error("Statut invalide : " + status);
-  const order = await Order.findByPk(orderId);
-  if (!order) return null;
-  order.status = status;
-  await order.save();
-  return order;
+  const validStatuses = ["pending", "confirmed", "preparing", "ready", "delivered", "cancelled"];
+  if (!validStatuses.includes(status)) throw new Error(`Statut invalide : ${status}`);
+  return Order.findByIdAndUpdate(orderId, { status }, { new: true });
 };
 
-const getMerchantOrders = async (merchantId, status) => {
-  const where = { merchantId };
-  if (status) where.status = status;
-  return Order.findAll({ where, order: [["createdAt", "DESC"]] });
+/**
+ * Liste les commandes d'un commerçant avec filtre optionnel.
+ */
+const getMerchantOrders = async (merchantId, status = null) => {
+  const filter = { merchantId };
+  if (status) filter.status = status;
+  return Order.find(filter).sort({ createdAt: -1 }).populate("customerId", "name whatsappNumber");
 };
 
-module.exports = { createOrderFromCart, updateOrderStatus, getMerchantOrders };
+module.exports = {
+  createOrderFromCart,
+  updateOrderStatus,
+  getMerchantOrders,
+};

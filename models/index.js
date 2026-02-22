@@ -39,6 +39,7 @@ const Product = sequelize.define("Product", {
   category: { type: DataTypes.STRING, defaultValue: "Divers" },
   imageUrl: { type: DataTypes.STRING, defaultValue: "" },
   isAvailable: { type: DataTypes.BOOLEAN, defaultValue: true },
+  metaProductId: { type: DataTypes.STRING, defaultValue: null },
 });
 
 // ─── Customer ───
