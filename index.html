@@ -192,11 +192,33 @@
 <section class="pricing" id="tarifs">
   <div class="section-label">Tarifs</div>
   <h2 style="color:white;">Des prix adaptés à <em>chaque marché</em></h2>
-  <p style="color:rgba(255,255,255,0.5);font-size:17px;max-width:520px;margin-bottom:60px;line-height:1.7;">7 jours d'essai gratuit sur tous les plans. Paiement via Mobile Money.</p>
+  <p style="color:rgba(255,255,255,0.5);font-size:17px;max-width:520px;margin-bottom:24px;line-height:1.7;">7 jours d'essai gratuit sur tous les plans. Paiement via Mobile Money.</p>
+  
+  <!-- Sélecteur pays pour les prix -->
+  <div style="margin-bottom:40px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">Voir les prix pour :</span>
+    <select id="pricing-country" onchange="updatePricing()" style="background:#ffffff;border:none;color:#1a1208;padding:10px 16px;border-radius:50px;font-size:14px;cursor:pointer;font-weight:600;min-width:220px;">
+      <option value="XOF|XOF">Zone UEMOA — XOF</option>
+      <option value="XAF|XAF">Zone CEMAC — XAF</option>
+      <option value="NG|NGN">Nigeria — NGN</option>
+      <option value="KE|KES">Kenya — KES</option>
+      <option value="GH|GHS">Ghana — GHS</option>
+      <option value="ZA|ZAR">Afrique du Sud — ZAR</option>
+      <option value="CD|CDF">Congo RDC — CDF</option>
+      <option value="RW|RWF">Rwanda — RWF</option>
+      <option value="TZ|TZS">Tanzanie — TZS</option>
+      <option value="UG|UGX">Ouganda — UGX</option>
+      <option value="MG|MGA">Madagascar — MGA</option>
+      <option value="MU|MUR">Maurice — MUR</option>
+      <option value="SC|SCR">Seychelles — SCR</option>
+      <option value="MR|MRO">Mauritanie — MRO</option>
+    </select>
+  </div>
+
   <div class="pricing-grid">
     <div class="price-card">
       <div class="price-name">Starter</div>
-      <div class="price-amount">~25 <span>USD/mois</span></div>
+      <div class="price-amount"><span id="p-starter">15 000</span> <span id="p-currency-1" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
       <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Parfait pour démarrer</div>
       <ul class="price-features">
@@ -211,7 +233,7 @@
     </div>
     <div class="price-card featured">
       <div class="price-name">Pro</div>
-      <div class="price-amount">~55 <span>USD/mois</span></div>
+      <div class="price-amount"><span id="p-pro">35 000</span> <span id="p-currency-2" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
       <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Le plus choisi</div>
       <ul class="price-features">
@@ -226,7 +248,7 @@
     </div>
     <div class="price-card">
       <div class="price-name">Business</div>
-      <div class="price-amount">~110 <span>USD/mois</span></div>
+      <div class="price-amount"><span id="p-business">70 000</span> <span id="p-currency-3" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
       <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Pour les grandes boutiques</div>
       <ul class="price-features">
@@ -283,5 +305,36 @@
   <span>2026 WaziBot. Tous droits réservés.</span>
   <span>Fait avec ❤️ en Afrique 🌍</span>
 </div>
+
+<script>
+const PRICING = {
+  'XOF|XOF': { starter: '15 000', pro: '35 000', business: '70 000', currency: 'XOF' },
+  'XAF|XAF': { starter: '15 000', pro: '35 000', business: '70 000', currency: 'XAF' },
+  'NG|NGN':  { starter: '10 000', pro: '25 000', business: '50 000', currency: 'NGN' },
+  'KE|KES':  { starter: '3 000',  pro: '7 000',  business: '14 000', currency: 'KES' },
+  'GH|GHS':  { starter: '300',    pro: '700',    business: '1 400',  currency: 'GHS' },
+  'ZA|ZAR':  { starter: '500',    pro: '1 200',  business: '2 500',  currency: 'ZAR' },
+  'CD|CDF':  { starter: '65 000', pro: '150 000',business: '300 000',currency: 'CDF' },
+  'RW|RWF':  { starter: '30 000', pro: '70 000', business: '140 000',currency: 'RWF' },
+  'TZ|TZS':  { starter: '60 000', pro: '140 000',business: '280 000',currency: 'TZS' },
+  'UG|UGX':  { starter: '90 000', pro: '210 000',business: '420 000',currency: 'UGX' },
+  'MG|MGA':  { starter: '110 000',pro: '255 000',business: '510 000',currency: 'MGA' },
+  'MU|MUR':  { starter: '1 200',  pro: '2 800',  business: '5 500',  currency: 'MUR' },
+  'SC|SCR':  { starter: '350',    pro: '800',    business: '1 600',  currency: 'SCR' },
+  'MR|MRO':  { starter: '9 000',  pro: '21 000', business: '42 000', currency: 'MRO' },
+};
+
+function updatePricing() {
+  const val = document.getElementById('pricing-country').value;
+  const p = PRICING[val];
+  if (!p) return;
+  document.getElementById('p-starter').textContent = p.starter;
+  document.getElementById('p-pro').textContent = p.pro;
+  document.getElementById('p-business').textContent = p.business;
+  ['p-currency-1','p-currency-2','p-currency-3'].forEach(id => {
+    document.getElementById(id).textContent = p.currency + '/mois';
+  });
+}
+</script>
 </body>
 </html>

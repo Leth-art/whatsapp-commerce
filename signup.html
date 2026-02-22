@@ -142,6 +142,7 @@
             <option value="GH|+233|GHS">🇬🇭 Ghana (+233)</option>
           </select>
         </div>
+        <div id="local-prices" style="display:none;background:rgba(232,92,14,0.08);border:1px solid rgba(232,92,14,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text);margin-top:-8px;line-height:1.6;"></div>
         <div class="form-group">
           <label>WhatsApp (pour vous contacter) *</label>
           <div style="display:flex;gap:8px;">
@@ -253,6 +254,37 @@ function addProduct() {
 
 function removeProduct(btn) { btn.parentElement.remove(); }
 
+// Prix par pays (Starter / Pro / Business)
+const COUNTRY_PRICES = {
+  BJ: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  BF: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  CI: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  SN: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  ML: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  NE: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  GN: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  GW: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  TG: { currency: 'XOF', starter: '15 000', pro: '35 000', business: '70 000' },
+  CM: { currency: 'XAF', starter: '15 000', pro: '35 000', business: '70 000' },
+  CF: { currency: 'XAF', starter: '15 000', pro: '35 000', business: '70 000' },
+  CG: { currency: 'XAF', starter: '15 000', pro: '35 000', business: '70 000' },
+  GA: { currency: 'XAF', starter: '15 000', pro: '35 000', business: '70 000' },
+  GQ: { currency: 'XAF', starter: '15 000', pro: '35 000', business: '70 000' },
+  TD: { currency: 'XAF', starter: '15 000', pro: '35 000', business: '70 000' },
+  CD: { currency: 'CDF', starter: '65 000', pro: '150 000', business: '300 000' },
+  MG: { currency: 'MGA', starter: '110 000', pro: '255 000', business: '510 000' },
+  MR: { currency: 'MRO', starter: '9 000', pro: '21 000', business: '42 000' },
+  MU: { currency: 'MUR', starter: '1 200', pro: '2 800', business: '5 500' },
+  NG: { currency: 'NGN', starter: '10 000', pro: '25 000', business: '50 000' },
+  KE: { currency: 'KES', starter: '3 000', pro: '7 000', business: '14 000' },
+  RW: { currency: 'RWF', starter: '30 000', pro: '70 000', business: '140 000' },
+  TZ: { currency: 'TZS', starter: '60 000', pro: '140 000', business: '280 000' },
+  UG: { currency: 'UGX', starter: '90 000', pro: '210 000', business: '420 000' },
+  ZA: { currency: 'ZAR', starter: '500', pro: '1 200', business: '2 500' },
+  GH: { currency: 'GHS', starter: '300', pro: '700', business: '1 400' },
+  SC: { currency: 'SCR', starter: '350', pro: '800', business: '1 600' },
+};
+
 function updateCountry() {
   const select = document.getElementById('f-country');
   const val = select.value; // format: "CODE|+indicatif|DEVISE"
@@ -264,6 +296,21 @@ function updateCountry() {
   document.getElementById('indicatif-badge').textContent = parts[1];
   document.getElementById('indicatif-badge').style.color = 'var(--accent)';
   document.getElementById('indicatif-badge').style.borderColor = 'var(--accent)';
+
+  // Afficher les prix locaux
+  const prices = COUNTRY_PRICES[parts[0]];
+  if (prices) {
+    const priceEl = document.getElementById('local-prices');
+    if (priceEl) {
+      priceEl.innerHTML = 
+        '<strong>💰 Vos tarifs :</strong> ' +
+        'Starter <strong>' + prices.starter + ' ' + prices.currency + '</strong>/mois — ' +
+        'Pro <strong>' + prices.pro + ' ' + prices.currency + '</strong>/mois — ' +
+        'Business <strong>' + prices.business + ' ' + prices.currency + '</strong>/mois';
+      priceEl.style.display = 'block';
+    }
+    window.selectedCurrency = prices.currency;
+  }
 }
 
 function goToDashboard(e) {
