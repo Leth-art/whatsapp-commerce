@@ -8,19 +8,18 @@ const Merchant = sequelize.define("Merchant", {
   name: { type: DataTypes.STRING, allowNull: false },
   ownerPhone: { type: DataTypes.STRING, defaultValue: "" },
   email: { type: DataTypes.STRING, allowNull: true },
-  phoneNumberId: { type: DataTypes.STRING, unique: true, allowNull: false },
-  whatsappToken: { type: DataTypes.TEXT, allowNull: false },
+  phoneNumberId: { type: DataTypes.STRING, allowNull: true, defaultValue: "" },   // ← fix: plus unique ni required
+  whatsappToken: { type: DataTypes.TEXT, allowNull: true, defaultValue: "" },     // ← fix: plus required
   businessDescription: { type: DataTypes.TEXT, defaultValue: "" },
   aiPersona: { type: DataTypes.TEXT, defaultValue: "Tu es l'assistante de cette boutique." },
   welcomeMessage: { type: DataTypes.TEXT, defaultValue: "Bonjour ! Comment puis-je vous aider ?" },
-  city: { type: DataTypes.STRING, defaultValue: "Lomé" },
-  country: { type: DataTypes.STRING, defaultValue: "Togo" },
-  currency: { type: DataTypes.STRING, defaultValue: "FCFA" },
+  city: { type: DataTypes.STRING, defaultValue: "" },         // ← fix: plus "Lomé"
+  country: { type: DataTypes.STRING, defaultValue: "" },      // ← fix: plus "Togo"
+  currency: { type: DataTypes.STRING, defaultValue: "XOF" },  // ← fix: plus "FCFA"
   isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
   plan: { type: DataTypes.STRING, defaultValue: "starter" },
   subscriptionExpiresAt: { type: DataTypes.DATE },
   lastPaymentId: { type: DataTypes.STRING },
-  ownerPhone: { type: DataTypes.STRING, defaultValue: "" },
 });
 
 Merchant.prototype.isSubscriptionActive = function() {
@@ -72,7 +71,7 @@ const Order = sequelize.define("Order", {
 });
 
 Order.prototype.toWhatsApp = function(currency) {
-  currency = currency || "FCFA";
+  currency = currency || "XOF";
   const items = this.items;
   const lines = ["✅ *COMMANDE CONFIRMÉE*", "N° " + this.orderNumber, "", "*Vos articles :*"];
   items.forEach(i => lines.push("  - " + i.name + " x" + i.quantity + " - " + i.total.toLocaleString("fr-FR") + " " + currency));
