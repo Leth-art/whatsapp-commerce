@@ -8,8 +8,17 @@ const Merchant = sequelize.define("Merchant", {
   name: { type: DataTypes.STRING, allowNull: false },
   ownerPhone: { type: DataTypes.STRING, defaultValue: "" },
   email: { type: DataTypes.STRING, allowNull: true },
-  phoneNumberId: { type: DataTypes.STRING, allowNull: true, defaultValue: "" },   // ← fix: plus unique ni required
-  whatsappToken: { type: DataTypes.TEXT, allowNull: true, defaultValue: "" },     // ← fix: plus required
+  phoneNumberId: { 
+  type: DataTypes.STRING, 
+  allowNull: true,
+  defaultValue: null
+},
+
+whatsappToken: { 
+  type: DataTypes.TEXT, 
+  allowNull: true,
+  defaultValue: null
+},
   businessDescription: { type: DataTypes.TEXT, defaultValue: "" },
   aiPersona: { type: DataTypes.TEXT, defaultValue: "Tu es l'assistante de cette boutique." },
   welcomeMessage: { type: DataTypes.TEXT, defaultValue: "Bonjour ! Comment puis-je vous aider ?" },
