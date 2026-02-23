@@ -353,6 +353,7 @@ body::before {
 
 <script>
 const API = 'https://whatsapp-commerce-1roe.onrender.com/api';
+const API_KEY = 'WB-' + atob('d2F6aWJvdC1zZWNyZXQta2V5LTIwMjY=');
 const ADMIN_PASSWORD = 'Saletho@1'; // Changez ce mot de passe !
 
 // ── Login ──
@@ -385,7 +386,7 @@ function showPage(name, el) {
 
 // ── API ──
 async function api(path) {
-  const res = await fetch(API + path);
+  const res = await fetch(API + path, { headers: { 'x-api-key': API_KEY } });
   return res.json();
 }
 

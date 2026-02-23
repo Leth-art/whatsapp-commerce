@@ -20,25 +20,45 @@ app.use((req, res, next) => {
   express.json()(req, res, next);
 });
 
-app.use("/webhook", webhookRouter);
-app.use("/api", apiRouter);
-app.use("/subscription", subscriptionsRouter);
-app.use("/onboarding", onboardingRouter);
+// ── Middleware API Key — protège /api et /subscription ──
+const requireApiKey = (req, res, next) => {
+  const key = req.headers["x-api-key"] || req.query.apiKey;
+  const validKey = process.env.API_SECRET_KEY;
+  if (!validKey || key === validKey) return next();
+  return res.status(401).json({ error: "Accès non autorisé. Clé API invalide." });
+};
 
-app.get("/dashboard", (req, res) => { res.sendFile(path.join(__dirname, "dashboard.html")); });
-app.get("/admin", (req, res) => { res.sendFile(path.join(__dirname, "admin.html")); });
+// ── Middleware Admin — protège /admin côté serveur ──
+const requireAdminToken = (req, res, next) => {
+  const token = req.query.token;
+  const validToken = process.env.ADMIN_SECRET_TOKEN;
+  if (!validToken || token === validToken) return next();
+  return res.status(403).sendFile(path.join(__dirname, "403.html"));
+};
+
+// ── Routes publiques (sans protection) ──
+app.use("/webhook", webhookRouter);
+app.use("/onboarding", onboardingRouter); // nécessaire pour signup
+
+// ── Routes protégées par API Key ──
+app.use("/api", requireApiKey, apiRouter);
+app.use("/subscription", requireApiKey, subscriptionsRouter);
+
+// ── Pages HTML ──
+app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "index.html")); });
 app.get("/signup", (req, res) => { res.sendFile(path.join(__dirname, "signup.html")); });
 app.get("/privacy", (req, res) => { res.sendFile(path.join(__dirname, "privacy.html")); });
-app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "index.html")); });
+app.get("/dashboard", (req, res) => { res.sendFile(path.join(__dirname, "dashboard.html")); });
+app.get("/admin", requireAdminToken, (req, res) => { res.sendFile(path.join(__dirname, "admin.html")); });
 
 app.use((err, req, res, next) => { console.error("Erreur :", err.message); res.status(500).json({ error: "Erreur interne" }); });
 
 app.listen(PORT, () => {
   console.log("🚀 Serveur démarré sur http://localhost:" + PORT);
   console.log("📊 Dashboard : http://localhost:" + PORT + "/dashboard");
-  console.log("🔐 Admin : http://localhost:" + PORT + "/admin");
+  console.log("🔐 Admin : http://localhost:" + PORT + "/admin?token=VOTRE_TOKEN");
   console.log("📡 Webhook : http://localhost:" + PORT + "/webhook");
-  console.log("📋 API : http://localhost:" + PORT + "/api");
+  console.log("📋 API : http://localhost:" + PORT + "/api (x-api-key requis)");
 });
 
 module.exports = app;
