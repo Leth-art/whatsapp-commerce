@@ -35,7 +35,7 @@ router.post("/create", async (req, res) => {
       // Mise à jour boutique existante
       await merchant.update({
         name, email: email || merchant.email,
-        city: city || "Lomé", currency: currency || "FCFA",
+        city: city || '', currency: currency || 'XOF',
         whatsappToken, phoneNumberId, isActive: true,
         ownerPhone: ownerPhone || merchant.ownerPhone,
         subscriptionExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -46,7 +46,7 @@ router.post("/create", async (req, res) => {
       merchant = await Merchant.create({
         id: uuidv4(),
         name, email: email || "",
-        city: city || "Lomé", currency: currency || "FCFA",
+        city: city || '', currency: currency || 'XOF',
         phoneNumberId, whatsappToken,
         ownerPhone: ownerPhone || "",
         isActive: true, plan: "starter",
