@@ -1,4 +1,3 @@
-
 const axios = require("axios");
 const crypto = require("crypto");
 const { Merchant } = require("../models/index");
@@ -7,21 +6,15 @@ const MONEROO_API_URL = "https://api.moneroo.io/v1";
 
 // Prix par devise (Mobile Money + Carte)
 const PLAN_PRICES = {
-  XOF: { starter: 20000,  pro: 40000,  business: 100000 },
-  XAF: { starter: 20000,  pro: 40000,  business: 100000 },
-  NGN: { starter: 10000,  pro: 25000,  business: 50000  },
-  KES: { starter: 3000,   pro: 7000,   business: 14000  },
-  GHS: { starter: 300,    pro: 700,    business: 1400   },
-  ZAR: { starter: 500,    pro: 1200,   business: 2500   },
-  CDF: { starter: 65000,  pro: 150000, business: 300000 },
-  RWF: { starter: 30000,  pro: 70000,  business: 140000 },
-  TZS: { starter: 60000,  pro: 140000, business: 280000 },
-  UGX: { starter: 90000,  pro: 210000, business: 420000 },
-  MGA: { starter: 110000, pro: 255000, business: 510000 },
-  MUR: { starter: 1200,   pro: 2800,   business: 5500   },
-  SCR: { starter: 350,    pro: 800,    business: 1600   },
-  MRO: { starter: 9000,   pro: 21000,  business: 42000  },
-  USD: { starter: 25,     pro: 55,     business: 110    },
+  XOF: { starter: 20000, pro: 40000, business: 100000 },
+  XAF: { starter: 20000, pro: 40000, business: 100000 },
+  GNF: { starter: 250000, pro: 500000, business: 1250000 },
+  KES: { starter: 3500, pro: 7000, business: 18000 },
+  MRO: { starter: 11000, pro: 22000, business: 55000 },
+  NGN: { starter: 50000, pro: 100000, business: 250000 },
+  RWF: { starter: 34000, pro: 68000, business: 170000 },
+  TZS: { starter: 75000, pro: 150000, business: 380000 },
+  UGX: { starter: 110000, pro: 220000, business: 550000 },
 };
 
 // Méthodes Mobile Money par devise

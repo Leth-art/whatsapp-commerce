@@ -178,7 +178,7 @@
 
   <div class="countries-banner">
     <p>🌍 Disponible dans tous ces pays</p>
-    <div class="flags">🇧🇯 🇧🇫 🇨🇲 🇨🇫 🇨🇩 🇨🇬 🇨🇮 🇬🇦 🇬🇳 🇬🇼 🇬🇶 🇰🇪 🇲🇬 🇲🇱 🇲🇷 🇲🇺 🇳🇪 🇳🇬 🇷🇼 🇸🇳 🇸🇨 🇹🇿 🇹🇩 🇹🇬 🇺🇬 🇿🇦 🇬🇭</div>
+    <div class="flags">🇧🇯 🇧🇫 🇨🇲 🇨🇮 🇬🇦 🇬🇳 🇰🇪 🇲🇱 🇲🇷 🇳🇬 🇷🇼 🇸🇳 🇹🇩 🇹🇬 🇹🇿 🇺🇬</div>
   </div>
 
   <div class="features-grid">
@@ -199,21 +199,16 @@
   <!-- Sélecteur pays pour les prix -->
   <div style="margin-bottom:40px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
     <span style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">Voir les prix pour :</span>
-    <select id="pricing-country" onchange="updatePricing()" style="background:#ffffff;border:none;color:#1a1208;padding:10px 16px;border-radius:50px;font-size:14px;cursor:pointer;font-weight:600;min-width:220px;">
-      <option value="XOF|XOF">Zone UEMOA — XOF</option>
-      <option value="XAF|XAF">Zone CEMAC — XAF</option>
-      <option value="NG|NGN">Nigeria — NGN</option>
-      <option value="KE|KES">Kenya — KES</option>
-      <option value="GH|GHS">Ghana — GHS</option>
-      <option value="ZA|ZAR">Afrique du Sud — ZAR</option>
-      <option value="CD|CDF">Congo RDC — CDF</option>
-      <option value="RW|RWF">Rwanda — RWF</option>
-      <option value="TZ|TZS">Tanzanie — TZS</option>
-      <option value="UG|UGX">Ouganda — UGX</option>
-      <option value="MG|MGA">Madagascar — MGA</option>
-      <option value="MU|MUR">Maurice — MUR</option>
-      <option value="SC|SCR">Seychelles — SCR</option>
-      <option value="MR|MRO">Mauritanie — MRO</option>
+        <select id="pricing-country" onchange="updatePricing()" style="background:#ffffff;border:none;color:#1a1208;padding:10px 16px;border-radius:50px;font-size:14px;cursor:pointer;font-weight:600;min-width:220px;">
+      <option value="XOF|XOF">Zone UEMOA — XOF (BJ, BF, CI, ML, SN, TG)</option>
+      <option value="XAF|XAF">Zone CEMAC — XAF (CM, GA, TD)</option>
+      <option value="GN|GNF">🇬🇳 Guinée — GNF</option>
+      <option value="KE|KES">🇰🇪 Kenya — KES</option>
+      <option value="MR|MRO">🇲🇷 Mauritanie — MRO</option>
+      <option value="NG|NGN">🇳🇬 Nigeria — NGN</option>
+      <option value="RW|RWF">🇷🇼 Rwanda — RWF</option>
+      <option value="TZ|TZS">🇹🇿 Tanzanie — TZS</option>
+      <option value="UG|UGX">🇺🇬 Ouganda — UGX</option>
     </select>
   </div>
 
@@ -324,18 +319,13 @@
 const PRICING = {
   'XOF|XOF': { starter: '20 000', pro: '40 000', business: '100 000', currency: 'XOF' },
   'XAF|XAF': { starter: '20 000', pro: '40 000', business: '100 000', currency: 'XAF' },
-  'NG|NGN':  { starter: '10 000', pro: '25 000', business: '50 000', currency: 'NGN' },
-  'KE|KES':  { starter: '3 000',  pro: '7 000',  business: '14 000', currency: 'KES' },
-  'GH|GHS':  { starter: '300',    pro: '700',    business: '1 400',  currency: 'GHS' },
-  'ZA|ZAR':  { starter: '500',    pro: '1 200',  business: '2 500',  currency: 'ZAR' },
-  'CD|CDF':  { starter: '65 000', pro: '150 000',business: '300 000',currency: 'CDF' },
-  'RW|RWF':  { starter: '30 000', pro: '70 000', business: '140 000',currency: 'RWF' },
-  'TZ|TZS':  { starter: '60 000', pro: '140 000',business: '280 000',currency: 'TZS' },
-  'UG|UGX':  { starter: '90 000', pro: '210 000',business: '420 000',currency: 'UGX' },
-  'MG|MGA':  { starter: '110 000',pro: '255 000',business: '510 000',currency: 'MGA' },
-  'MU|MUR':  { starter: '1 200',  pro: '2 800',  business: '5 500',  currency: 'MUR' },
-  'SC|SCR':  { starter: '350',    pro: '800',    business: '1 600',  currency: 'SCR' },
-  'MR|MRO':  { starter: '9 000',  pro: '21 000', business: '42 000', currency: 'MRO' },
+  'GN|GNF': { starter: '250 000', pro: '500 000', business: '1 250 000', currency: 'GNF' },
+  'KE|KES': { starter: '3 500', pro: '7 000', business: '18 000', currency: 'KES' },
+  'MR|MRO': { starter: '11 000', pro: '22 000', business: '55 000', currency: 'MRO' },
+  'NG|NGN': { starter: '50 000', pro: '100 000', business: '250 000', currency: 'NGN' },
+  'RW|RWF': { starter: '34 000', pro: '68 000', business: '170 000', currency: 'RWF' },
+  'TZ|TZS': { starter: '75 000', pro: '150 000', business: '380 000', currency: 'TZS' },
+  'UG|UGX': { starter: '110 000', pro: '220 000', business: '550 000', currency: 'UGX' },
 };
 
 function updatePricing() {

@@ -113,35 +113,24 @@
         </div>
         <div class="form-group">
           <label>Pays *</label>
-          <select id="f-country" onchange="updateCountry()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;">
+                    <select id="f-country" onchange="updateCountry()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;">
             <option value="">— Sélectionnez votre pays —</option>
             <option value="BJ|+229|XOF">🇧🇯 Bénin (+229)</option>
             <option value="BF|+226|XOF">🇧🇫 Burkina Faso (+226)</option>
             <option value="CM|+237|XAF">🇨🇲 Cameroun (+237)</option>
-            <option value="CF|+236|XAF">🇨🇫 Centrafrique (+236)</option>
-            <option value="CD|+243|CDF">🇨🇩 Congo (RDC) (+243)</option>
-            <option value="CG|+242|XAF">🇨🇬 Congo Brazzaville (+242)</option>
             <option value="CI|+225|XOF">🇨🇮 Côte d'Ivoire (+225)</option>
             <option value="GA|+241|XAF">🇬🇦 Gabon (+241)</option>
             <option value="GN|+224|GNF">🇬🇳 Guinée (+224)</option>
-            <option value="GW|+245|XOF">🇬🇼 Guinée-Bissau (+245)</option>
-            <option value="GQ|+240|XAF">🇬🇶 Guinée Équatoriale (+240)</option>
             <option value="KE|+254|KES">🇰🇪 Kenya (+254)</option>
-            <option value="MG|+261|MGA">🇲🇬 Madagascar (+261)</option>
             <option value="ML|+223|XOF">🇲🇱 Mali (+223)</option>
             <option value="MR|+222|MRO">🇲🇷 Mauritanie (+222)</option>
-            <option value="MU|+230|MUR">🇲🇺 Maurice (+230)</option>
-            <option value="NE|+227|XOF">🇳🇪 Niger (+227)</option>
             <option value="NG|+234|NGN">🇳🇬 Nigeria (+234)</option>
             <option value="RW|+250|RWF">🇷🇼 Rwanda (+250)</option>
             <option value="SN|+221|XOF">🇸🇳 Sénégal (+221)</option>
-            <option value="SC|+248|SCR">🇸🇨 Seychelles (+248)</option>
-            <option value="TZ|+255|TZS">🇹🇿 Tanzanie (+255)</option>
             <option value="TD|+235|XAF">🇹🇩 Tchad (+235)</option>
             <option value="TG|+228|XOF">🇹🇬 Togo (+228)</option>
+            <option value="TZ|+255|TZS">🇹🇿 Tanzanie (+255)</option>
             <option value="UG|+256|UGX">🇺🇬 Ouganda (+256)</option>
-            <option value="ZA|+27|ZAR">🇿🇦 Afrique du Sud (+27)</option>
-            <option value="GH|+233|GHS">🇬🇭 Ghana (+233)</option>
           </select>
         </div>
         <div id="local-prices" style="display:none;background:rgba(232,92,14,0.08);border:1px solid rgba(232,92,14,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text);margin-top:-8px;line-height:1.6;"></div>
@@ -260,31 +249,20 @@ function removeProduct(btn) { btn.parentElement.remove(); }
 const COUNTRY_PRICES = {
   BJ: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
   BF: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  CI: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  SN: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  ML: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  NE: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  GN: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  GW: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
-  TG: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
   CM: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
-  CF: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
-  CG: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
+  CI: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
   GA: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
-  GQ: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
-  TD: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
-  CD: { currency: 'CDF', starter: '85 000', pro: '170 000', business: '420 000' },
-  MG: { currency: 'MGA', starter: '130 000', pro: '260 000', business: '650 000' },
-  MR: { currency: 'MRO', starter: '11 000', pro: '22 000', business: '55 000' },
-  MU: { currency: 'MUR', starter: '1 400', pro: '2 800', business: '7 000' },
-  NG: { currency: 'NGN', starter: '50 000', pro: '100 000', business: '250 000' },
+  GN: { currency: 'GNF', starter: '250 000', pro: '500 000', business: '1 250 000' },
   KE: { currency: 'KES', starter: '3 500', pro: '7 000', business: '18 000' },
+  ML: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
+  MR: { currency: 'MRO', starter: '11 000', pro: '22 000', business: '55 000' },
+  NG: { currency: 'NGN', starter: '50 000', pro: '100 000', business: '250 000' },
   RW: { currency: 'RWF', starter: '34 000', pro: '68 000', business: '170 000' },
+  SN: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
+  TD: { currency: 'XAF', starter: '20 000', pro: '40 000', business: '100 000' },
+  TG: { currency: 'XOF', starter: '20 000', pro: '40 000', business: '100 000' },
   TZ: { currency: 'TZS', starter: '75 000', pro: '150 000', business: '380 000' },
   UG: { currency: 'UGX', starter: '110 000', pro: '220 000', business: '550 000' },
-  ZA: { currency: 'ZAR', starter: '550', pro: '1 100', business: '2 800' },
-  GH: { currency: 'GHS', starter: '400', pro: '800', business: '2 000' },
-  SC: { currency: 'SCR', starter: '450', pro: '900', business: '2 200' },
 };
 
 function updateCountry() {
