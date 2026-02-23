@@ -5,7 +5,7 @@
 const PLANS_CONFIG = {
   starter: {
     label: "Starter",
-    price: 15000,
+    price: 20000,
     durationDays: 30,
     limits: {
       maxProducts: 10,
@@ -17,7 +17,7 @@ const PLANS_CONFIG = {
   },
   pro: {
     label: "Pro",
-    price: 35000,
+    price: 40000,
     durationDays: 30,
     limits: {
       maxProducts: 40,
@@ -29,7 +29,7 @@ const PLANS_CONFIG = {
   },
   business: {
     label: "Business",
-    price: 70000,
+    price: 100000,
     durationDays: 30,
     limits: {
       maxProducts: Infinity,

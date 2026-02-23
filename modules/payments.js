@@ -1,3 +1,4 @@
+
 const axios = require("axios");
 const crypto = require("crypto");
 const { Merchant } = require("../models/index");
@@ -6,8 +7,8 @@ const MONEROO_API_URL = "https://api.moneroo.io/v1";
 
 // Prix par devise (Mobile Money + Carte)
 const PLAN_PRICES = {
-  XOF: { starter: 15000,  pro: 35000,  business: 70000  },
-  XAF: { starter: 15000,  pro: 35000,  business: 70000  },
+  XOF: { starter: 20000,  pro: 40000,  business: 100000 },
+  XAF: { starter: 20000,  pro: 40000,  business: 100000 },
   NGN: { starter: 10000,  pro: 25000,  business: 50000  },
   KES: { starter: 3000,   pro: 7000,   business: 14000  },
   GHS: { starter: 300,    pro: 700,    business: 1400   },
