@@ -195,7 +195,16 @@ body::before {
       <div class="nav-item" onclick="showPage('revenue',this)">💰 Revenus</div>
       <div class="nav-item" onclick="showPage('messages',this)">💬 Messages IA</div>
     </nav>
-    <div class="sidebar-footer">
+    <div style="margin:12px;padding:14px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);margin-bottom:8px;">
+  <div class="label">Mode Maintenance</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+    <span id="maintenance-label" style="font-size:12px;color:var(--muted);">Désactivé</span>
+    <div id="maintenance-toggle" onclick="toggleMaintenance()" style="width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background 0.3s;">
+      <div id="toggle-dot" style="width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:3px;left:3px;transition:left 0.3s;"></div>
+    </div>
+  </div>
+</div>
+<div class="sidebar-footer">
       <div class="label">Statut serveur</div>
       <div class="val"><span class="live"></span> En ligne</div>
     </div>
@@ -641,6 +650,42 @@ async function loadMessages() {
 }
 
 // ── Actions ──
+
+// ── Mode Maintenance ──
+let maintenanceActive = false;
+
+async function toggleMaintenance() {
+  maintenanceActive = !maintenanceActive;
+  const toggle = document.getElementById('maintenance-toggle');
+  const dot = document.getElementById('toggle-dot');
+  const label = document.getElementById('maintenance-label');
+
+  if (maintenanceActive) {
+    toggle.style.background = '#ff4757';
+    dot.style.left = '23px';
+    label.textContent = 'Activé ⚠️';
+    label.style.color = '#ff4757';
+    if (!confirm('Activer la maintenance ? Le site affichera une page de maintenance aux visiteurs.')) {
+      maintenanceActive = false;
+      toggle.style.background = 'var(--border)';
+      dot.style.left = '3px';
+      label.textContent = 'Désactivé';
+      label.style.color = 'var(--muted)';
+      return;
+    }
+  } else {
+    toggle.style.background = 'var(--border)';
+    dot.style.left = '3px';
+    label.textContent = 'Désactivé';
+    label.style.color = 'var(--muted)';
+  }
+
+  // Appel API pour changer la variable d'env sur Render
+  alert(maintenanceActive 
+    ? '⚠️ Pour activer : allez sur Render → Environment → MAINTENANCE_MODE = true → Save → Redeploy'
+    : '✅ Pour désactiver : allez sur Render → Environment → MAINTENANCE_MODE = false → Save → Redeploy'
+  );
+}
 
 // ── Modale Token 360dialog ──
 let currentMerchantId = null;

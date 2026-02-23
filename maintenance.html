@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>WaziBot — Maintenance en cours</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@700&family=Cabinet+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Cabinet Grotesk',sans-serif;background:#050508;color:#f0f0f8;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;}
+  .container{max-width:500px;}
+  .logo{font-family:'Clash Display',sans-serif;font-size:28px;font-weight:700;margin-bottom:40px;}
+  .logo span{color:#e85c0e;}
+  .icon{font-size:72px;margin-bottom:24px;animation:spin 4s linear infinite;}
+  @keyframes spin{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+  h1{font-family:'Clash Display',sans-serif;font-size:36px;font-weight:700;margin-bottom:16px;background:linear-gradient(135deg,#e85c0e,#f0a500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  p{color:#4a4a6a;font-size:16px;line-height:1.7;margin-bottom:32px;}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(240,165,0,0.1);border:1px solid rgba(240,165,0,0.3);color:#f0a500;padding:10px 20px;border-radius:50px;font-size:14px;font-weight:600;margin-bottom:32px;}
+  .badge::before{content:'';width:8px;height:8px;border-radius:50%;background:#f0a500;animation:blink 1.5s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+  .wa-btn{display:inline-flex;align-items:center;gap:10px;background:#25D366;color:white;padding:14px 28px;border-radius:50px;font-size:15px;font-weight:700;text-decoration:none;transition:all 0.2s;}
+  .wa-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,211,102,0.3);}
+  .eta{color:#2a2a3a;font-size:13px;margin-top:24px;}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Wazi<span>Bot</span></div>
+    <div class="icon">🔧</div>
+    <div class="badge">Maintenance en cours</div>
+    <h1>On revient très vite !</h1>
+    <p>Nous effectuons des améliorations pour vous offrir une meilleure expérience. Le service sera rétabli dans quelques instants.</p>
+    <a href="https://wa.me/22871454079" class="wa-btn">💬 Nous contacter sur WhatsApp</a>
+    <p class="eta">Merci pour votre patience 🙏</p>
+  </div>
+</body>
+</html>

@@ -36,6 +36,25 @@ const requireAdminToken = (req, res, next) => {
   return res.status(403).sendFile(path.join(__dirname, "403.html"));
 };
 
+// ── Mode Maintenance ──
+const maintenanceMode = (req, res, next) => {
+  const isMaintenance = process.env.MAINTENANCE_MODE === 'true';
+  const isExcluded = 
+    req.path === '/maintenance' ||
+    req.path === '/favicon.svg' ||
+    req.path.startsWith('/webhook') ||
+    req.path.startsWith('/api') ||
+    req.path.startsWith('/admin') ||
+    req.path.startsWith('/subscription') ||
+    req.path.startsWith('/onboarding');
+  if (isMaintenance && !isExcluded) {
+    return res.sendFile(path.join(__dirname, 'maintenance.html'));
+  }
+  next();
+};
+app.use(maintenanceMode);
+app.get('/maintenance', (req, res) => { res.sendFile(path.join(__dirname, 'maintenance.html')); });
+
 // ── Routes publiques (sans protection) ──
 app.use("/webhook", webhookRouter);
 app.use("/onboarding", onboardingRouter); // nécessaire pour signup
