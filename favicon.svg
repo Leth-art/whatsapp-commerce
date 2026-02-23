@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Fond rond orange -->
+  <rect width="64" height="64" rx="16" fill="#e85c0e"/>
+  <!-- Bulle WhatsApp stylisée -->
+  <path d="M32 10 C19.8 10 10 19.8 10 32 C10 36.4 11.3 40.5 13.6 43.9 L10.5 53.5 L20.4 50.5 C23.7 52.6 27.7 53.8 32 53.8 C44.2 53.8 54 44 54 31.8 C54 19.6 44.2 10 32 10Z" fill="white" opacity="0.15"/>
+  <!-- Lettre W stylisée -->
+  <text x="32" y="42" font-family="Arial Black, sans-serif" font-size="26" font-weight="900" fill="white" text-anchor="middle">W</text>
+  <!-- Point vert en bas à droite -->
+  <circle cx="50" cy="50" r="8" fill="#00e5a0"/>
+  <text x="50" y="54" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="white" text-anchor="middle">B</text>
+</svg>
