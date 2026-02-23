@@ -6,6 +6,13 @@
 <link rel="shortcut icon" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WaziBot — Admin</title>
+<meta name="theme-color" content="#e85c0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WaziBot Admin">
+<link rel="manifest" href="/manifest-admin.json">
+<link rel="apple-touch-icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -809,5 +816,12 @@ function getMerchantStatus(m) {
     <p id="modal-error" style="display:none;color:#ff4757;font-size:13px;text-align:center;margin-top:12px;"></p>
   </div>
 </div>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw-admin.js').then(() => {
+    console.log('✅ Admin PWA prêt');
+  }).catch(err => console.log('SW erreur:', err));
+}
+</script>
 </body>
 </html>
