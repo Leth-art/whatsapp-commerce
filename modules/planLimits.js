@@ -8,8 +8,8 @@ const PLANS_CONFIG = {
     price: 15000,
     durationDays: 30,
     limits: {
-      maxProducts: 50,
-      maxMessagesPerMonth: 500,
+      maxProducts: 10,
+      maxMessagesPerMonth: 100,
       autoRelance: false,
       weeklyReport: false,
       prioritySupport: false,
@@ -20,8 +20,8 @@ const PLANS_CONFIG = {
     price: 35000,
     durationDays: 30,
     limits: {
-      maxProducts: 200,
-      maxMessagesPerMonth: 2000,
+      maxProducts: 40,
+      maxMessagesPerMonth: 800,
       autoRelance: true,
       weeklyReport: true,
       prioritySupport: false,
