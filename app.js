@@ -11,7 +11,55 @@ const { startCronJobs } = require("./modules/retention");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-connectDB().then(() => { startCronJobs(); });
+connectDB().then(async () => {
+  try {
+    const { sequelize } = require("./config/database");
+
+    // Migration SQLite — supprime la contrainte UNIQUE sur phoneNumberId
+    // SQLite ne supporte pas ALTER TABLE DROP CONSTRAINT, on recrée la table
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS "Merchants_new" (
+        "id" VARCHAR(255) PRIMARY KEY,
+        "name" VARCHAR(255) NOT NULL,
+        "ownerPhone" VARCHAR(255) DEFAULT '',
+        "email" VARCHAR(255),
+        "phoneNumberId" VARCHAR(255) DEFAULT '',
+        "whatsappToken" TEXT DEFAULT '',
+        "businessDescription" TEXT DEFAULT '',
+        "aiPersona" TEXT DEFAULT 'Tu es l assistante de cette boutique.',
+        "welcomeMessage" TEXT DEFAULT 'Bonjour ! Comment puis-je vous aider ?',
+        "city" VARCHAR(255) DEFAULT '',
+        "country" VARCHAR(255) DEFAULT '',
+        "currency" VARCHAR(255) DEFAULT 'XOF',
+        "isActive" BOOLEAN DEFAULT 1,
+        "plan" VARCHAR(255) DEFAULT 'starter',
+        "subscriptionExpiresAt" DATETIME,
+        "lastPaymentId" VARCHAR(255),
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    // Copier les données existantes
+    await sequelize.query(`
+      INSERT OR IGNORE INTO "Merchants_new"
+      SELECT "id","name","ownerPhone","email","phoneNumberId","whatsappToken",
+             "businessDescription","aiPersona","welcomeMessage","city","country",
+             "currency","isActive","plan","subscriptionExpiresAt","lastPaymentId",
+             "createdAt","updatedAt"
+      FROM "Merchants"
+    `).catch(() => {}); // ignore si Merchants n'existe pas encore
+    // Remplacer l'ancienne table
+    await sequelize.query(`DROP TABLE IF EXISTS "Merchants"`);
+    await sequelize.query(`ALTER TABLE "Merchants_new" RENAME TO "Merchants"`);
+
+    // Sync normal pour les autres tables
+    await sequelize.sync({ alter: true });
+    console.log("✅ Base de données migrée et synchronisée");
+  } catch (err) {
+    console.error("⚠️ Erreur migration DB :", err.message);
+  }
+  startCronJobs();
+});
 
 app.use(express.static(__dirname));
 
