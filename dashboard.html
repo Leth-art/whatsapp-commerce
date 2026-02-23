@@ -503,6 +503,7 @@ async function doLogin() {
       document.getElementById('sidebar-name').textContent = data.name;
       loadStats();
       loadRecentOrders();
+      checkTrialStatus(data);
     } else {
       document.getElementById('login-error').style.display = 'block';
     }
@@ -568,6 +569,48 @@ function toast(msg, type) {
 }
 
 // ── Stats ──
+// ── Vérification période d'essai / expiration ──
+function checkTrialStatus(merchant) {
+  const now = new Date();
+  const createdAt = merchant.createdAt ? new Date(merchant.createdAt) : null;
+  const expiresAt = merchant.subscriptionExpiresAt ? new Date(merchant.subscriptionExpiresAt) : null;
+  const trialDays = 7;
+  const isExpired = !expiresAt || expiresAt < now;
+  const daysLeft = expiresAt ? Math.ceil((expiresAt - now) / (1000*60*60*24)) : 0;
+  
+  // Calculer jours depuis création (période d'essai)
+  const daysSinceCreation = createdAt ? Math.floor((now - createdAt) / (1000*60*60*24)) : 0;
+  const trialDaysLeft = Math.max(0, trialDays - daysSinceCreation);
+  const isInTrial = !merchant.plan || merchant.plan === 'trial' || (daysSinceCreation < trialDays && !expiresAt);
+
+  const banner = document.getElementById('trial-banner');
+  const title = document.getElementById('trial-title');
+  const sub = document.getElementById('trial-sub');
+  const icon = document.getElementById('trial-icon');
+
+  if (isInTrial && trialDaysLeft <= 3 && trialDaysLeft > 0) {
+    icon.textContent = "⏳";
+    title.textContent = "Votre periode d essai se termine dans " + trialDaysLeft + " jour(s) !";
+    sub.textContent = "Souscrivez maintenant pour ne pas perdre acces a votre boutique.";
+    banner.style.display = "block";
+  } else if (isInTrial && trialDaysLeft === 0) {
+    icon.textContent = "🔒";
+    title.textContent = "Votre periode d essai est terminee !";
+    sub.textContent = "Votre boutique est suspendue. Abonnez-vous pour la reactiver.";
+    banner.style.display = "block";
+  } else if (!isInTrial && isExpired) {
+    icon.textContent = "🔒";
+    title.textContent = "Votre abonnement a expire !";
+    sub.textContent = "Renouvelez pour continuer a vendre 24h/24 avec WaziBot.";
+    banner.style.display = "block";
+  } else if (!isInTrial && daysLeft <= 3) {
+    icon.textContent = "⚠️";
+    title.textContent = "Votre abonnement expire dans " + daysLeft + " jour(s) !";
+    sub.textContent = "Renouvelez maintenant pour ne pas interrompre votre service.";
+    banner.style.display = "block";
+  }
+}
+
 async function loadStats() {
   const data = await api('/merchants/' + MERCHANT_ID + '/stats');
   document.getElementById('stat-revenue').textContent = (data.totalRevenue || 0).toLocaleString('fr-FR');
