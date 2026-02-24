@@ -494,7 +494,7 @@ async function doLogin() {
   const id = document.getElementById('login-id').value.trim();
   if (!id) return;
   try {
-    const res = await fetch(API + '/merchants/' + id);
+    const res = await fetch(API + '/merchants/' + id, { headers: { 'x-api-key': API_KEY } });
     const data = await res.json();
     if (data.id) {
       MERCHANT_ID = id;
@@ -554,7 +554,7 @@ function loadPage(name) {
 
 // ── API Helper ──
 async function api(path, method, body) {
-  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
+  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY } };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(API + path, opts);
   return res.json();

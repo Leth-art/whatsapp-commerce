@@ -21,27 +21,27 @@ router.post("/create", async (req, res) => {
 
     const templateConfig = applyTemplate(type || "general", name, city);
 
-    // Chaque commerçant est unique par son numéro personnel OU son email
-    // Plus jamais par phoneNumberId qui est le même pour tout le monde
+    // Vérifier si le commerçant existe déjà par téléphone OU email
     let merchant = null;
 
     if (ownerPhone) {
       merchant = await Merchant.findOne({ where: { ownerPhone } });
-    } else if (email) {
+    }
+    if (!merchant && email) {
       merchant = await Merchant.findOne({ where: { email } });
     }
 
+    // Bloquer la double inscription
     if (merchant) {
-      // Mise à jour boutique existante
-      await merchant.update({
-        name, email: email || merchant.email,
-        city: city || '', currency: currency || 'XOF',
-        whatsappToken, phoneNumberId, isActive: true,
-        ownerPhone: ownerPhone || merchant.ownerPhone,
-        subscriptionExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        ...templateConfig,
+      return res.status(409).json({
+        error: "already_exists",
+        message: "Un compte existe déjà avec ce numéro ou cet email.",
+        merchantId: merchant.id,
+        dashboardUrl: `${process.env.APP_BASE_URL || 'https://whatsapp-commerce-1roe.onrender.com'}/dashboard?id=${merchant.id}`
       });
-    } else {
+    }
+
+    if (false) { // jamais exécuté — structure conservée
       // Création nouvelle boutique avec ID unique
       merchant = await Merchant.create({
         id: uuidv4(),

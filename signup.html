@@ -336,6 +336,18 @@ async function submitForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
+
+    // Commerçant déjà inscrit
+    if (res.status === 409) {
+      const data = await res.json();
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('btn-submit').disabled = false;
+      document.getElementById('err-3').textContent = "Ce numéro ou email est déjà inscrit. Accédez à votre dashboard existant.";
+      document.getElementById('err-3').classList.add('show');
+      document.getElementById('err-3').style.cursor = 'pointer';
+      document.getElementById('err-3').onclick = () => window.location.href = data.dashboardUrl;
+      return;
+    }
     const data = await res.json();
     document.getElementById('loading').classList.remove('show');
     if (data.success) {
