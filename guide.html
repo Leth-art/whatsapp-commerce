@@ -8,25 +8,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #ffffff;
-    --surface: #f5f5f8;
-    --surface2: #ebebf0;
-    --border: #e0e0ea;
+    --bg: #050508;
+    --surface: #0e0e1a;
+    --surface2: #15151f;
+    --border: #1e1e2e;
     --accent: #e85c0e;
     --accent2: #00e5a0;
-    --text: #0a0a14;
-    --muted: #6a6a8a;
+    --text: #f0f0f8;
+    --muted: #4a4a6a;
     --warn: #f0a500;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
-  body { font-family:'Cabinet Grotesk',sans-serif; background:#ffffff; color:var(--text); line-height:1.7; }
+  body { font-family:'Cabinet Grotesk',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
 
   /* ── Nav ── */
   nav {
     position:fixed; top:0; left:0; right:0; z-index:100;
-    background:rgba(255,255,255,0.95); backdrop-filter:blur(20px);
-    border-bottom:1px solid #e0e0ea;
+    background:rgba(5,5,8,0.9); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 32px;
   }
@@ -35,14 +35,14 @@
   .nav-links { display:flex; gap:24px; list-style:none; }
   .nav-links a { color:var(--muted); text-decoration:none; font-size:14px; transition:color 0.2s; }
   .nav-links a:hover { color:var(--text); }
-  .btn-start { background:var(--accent); color:#0a0a14; padding:10px 22px; border-radius:50px; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.2s; }
+  .btn-start { background:var(--accent); color:white; padding:10px 22px; border-radius:50px; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.2s; }
   .btn-start:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(232,92,14,0.3); }
 
   /* ── Hero ── */
   .hero {
     min-height:100vh; display:flex; align-items:center; justify-content:center;
     text-align:center; padding:120px 24px 80px;
-    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,92,14,0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,92,14,0.12) 0%, transparent 70%);
   }
   .hero h1 {
     font-family:'Clash Display',sans-serif; font-size:clamp(40px,7vw,72px);
@@ -73,7 +73,7 @@
     width:56px; height:56px; border-radius:50%; border:2px solid var(--accent);
     display:flex; align-items:center; justify-content:center;
     font-family:'Clash Display',sans-serif; font-size:20px; font-weight:700;
-    color:var(--accent); flex-shrink:0; background:#ffffff;
+    color:var(--accent); flex-shrink:0; background:var(--bg);
   }
   .step-content { padding:0 0 48px; flex:1; }
   .step-content h3 { font-family:'Clash Display',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
@@ -105,7 +105,7 @@
     background:var(--surface); border:1px solid var(--border); border-radius:16px;
     padding:24px; transition:all 0.3s;
   }
-  .card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 32px rgba(232,92,14,0.12); }
+  .card:hover { border-color:var(--accent); transform:translateY(-2px); }
   .card-icon { font-size:32px; margin-bottom:12px; }
   .card h3 { font-family:'Clash Display',sans-serif; font-size:17px; font-weight:700; margin-bottom:8px; }
   .card p { color:var(--muted); font-size:14px; line-height:1.6; }
@@ -117,7 +117,7 @@
     justify-content:center; flex-wrap:wrap; gap:8px;
   }
   .flow-item {
-    background:#ffffff; border:1px solid var(--border); border-radius:10px;
+    background:var(--bg); border:1px solid var(--border); border-radius:10px;
     padding:10px 18px; font-size:14px; font-weight:600; text-align:center;
   }
   .flow-item.highlight { border-color:var(--accent); color:var(--accent); }
@@ -148,12 +148,12 @@
   /* ── CTA final ── */
   .cta-section {
     text-align:center; padding:80px 24px;
-    background:linear-gradient(135deg, rgba(232,92,14,0.06), rgba(0,229,160,0.04));
+    background:linear-gradient(135deg, rgba(232,92,14,0.1), rgba(0,229,160,0.05));
     border-top:1px solid var(--border);
   }
   .cta-section h2 { font-family:'Clash Display',sans-serif; font-size:36px; margin-bottom:16px; }
   .cta-section p { color:var(--muted); margin-bottom:32px; }
-  .btn-cta { background:var(--accent); color:#0a0a14; padding:16px 40px; border-radius:50px; font-size:16px; font-weight:700; text-decoration:none; display:inline-block; transition:all 0.2s; }
+  .btn-cta { background:var(--accent); color:white; padding:16px 40px; border-radius:50px; font-size:16px; font-weight:700; text-decoration:none; display:inline-block; transition:all 0.2s; }
   .btn-cta:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(232,92,14,0.4); }
 
   /* ── Divider ── */

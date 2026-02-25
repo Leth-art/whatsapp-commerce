@@ -10,8 +10,8 @@
 <style>
   :root { --bg:#f7f3ee;--dark:#1a1208;--accent:#e85c0e;--accent2:#25D366;--text:#2d2010;--muted:#8a7560;--border:#e8ddd0; }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Cabinet Grotesk',sans-serif;background:#ffffff;color:var(--text);min-height:100vh;}
-  nav{padding:20px 60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0ea;background:#ffffff;}
+  body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  nav{padding:20px 60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg);}
   .logo{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:var(--dark);text-decoration:none;}
   .logo span{color:var(--accent);}
   .container{max-width:1100px;margin:0 auto;padding:60px 24px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
@@ -20,7 +20,7 @@
   .left h1 em{color:var(--accent);font-style:normal;}
   .left p{color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:36px;}
   .benefits{list-style:none;}
-  .benefits li{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #e0e0ea;font-size:15px;}
+  .benefits li{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);font-size:15px;}
   .benefits li:last-child{border-bottom:none;}
   .benefits .icon{width:36px;height:36px;border-radius:10px;background:rgba(232,92,14,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
   .benefits .text strong{display:block;font-weight:700;margin-bottom:2px;}
@@ -37,12 +37,12 @@
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .form-group{margin-bottom:16px;}
   label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
-  input,select,textarea{width:100%;padding:12px 16px;background:#ffffff;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Cabinet Grotesk',sans-serif;color:var(--text);transition:border-color 0.2s;}
+  input,select,textarea{width:100%;padding:12px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Cabinet Grotesk',sans-serif;color:var(--text);transition:border-color 0.2s;}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:white;}
   textarea{resize:none;height:80px;}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .commerce-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-  .commerce-item{border:1.5px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.2s;background:#ffffff;}
+  .commerce-item{border:1.5px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg);}
   .commerce-item:hover{border-color:var(--accent);background:rgba(232,92,14,0.05);}
   .commerce-item.selected{border-color:var(--accent);background:rgba(232,92,14,0.08);}
   .commerce-item .emoji{font-size:24px;display:block;margin-bottom:4px;}
@@ -64,12 +64,12 @@
   .success-icon{font-size:64px;margin-bottom:16px;}
   .success-screen h3{font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;}
   .success-screen p{color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:24px;}
-  .success-info{background:#ffffff;border-radius:12px;padding:20px;text-align:left;margin-bottom:20px;}
-  .success-info .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e0e0ea;font-size:14px;}
+  .success-info{background:var(--bg);border-radius:12px;padding:20px;text-align:left;margin-bottom:20px;}
+  .success-info .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
   .success-info .row:last-child{border-bottom:none;}
   .success-info .row span:first-child{color:var(--muted);}
   .success-info .row span:last-child{font-weight:600;}
-  .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;background:var(--accent2);color:#0a0a14;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;text-decoration:none;}
+  .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;background:var(--accent2);color:white;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;text-decoration:none;}
   .error-msg{color:#ff4757;font-size:13px;margin-top:8px;display:none;}
   .error-msg.show{display:block;}
   .loading{display:none;align-items:center;justify-content:center;gap:12px;padding:20px;}
@@ -113,7 +113,7 @@
         </div>
         <div class="form-group">
           <label>Pays *</label>
-                    <select id="f-country" onchange="updateCountry()" style="width:100%;background:#ffffff;border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;">
+                    <select id="f-country" onchange="updateCountry()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;">
             <option value="">— Sélectionnez votre pays —</option>
             <option value="BJ|+229|XOF">🇧🇯 Bénin (+229)</option>
             <option value="BF|+226|XOF">🇧🇫 Burkina Faso (+226)</option>
@@ -137,7 +137,7 @@
         <div class="form-group">
           <label>WhatsApp (pour vous contacter) *</label>
           <div style="display:flex;gap:8px;">
-            <div id="indicatif-badge" style="background:#ffffff;border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--muted);white-space:nowrap;min-width:80px;text-align:center;">+XXX</div>
+            <div id="indicatif-badge" style="background:var(--bg);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-size:15px;color:var(--muted);white-space:nowrap;min-width:80px;text-align:center;">+XXX</div>
             <input type="tel" id="f-phone" placeholder="XX XX XX XX" style="flex:1;">
           </div>
         </div>
