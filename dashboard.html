@@ -570,44 +570,140 @@ function toast(msg, type) {
 
 // ── Stats ──
 // ── Vérification période d'essai / expiration ──
+let currentMerchantData = null;
+
+const PLAN_PRICES_DISPLAY = {
+  XOF: { starter: '20 000', pro: '40 000', business: '100 000', currency: 'XOF' },
+  XAF: { starter: '20 000', pro: '40 000', business: '100 000', currency: 'XAF' },
+  NGN: { starter: '50 000', pro: '100 000', business: '250 000', currency: 'NGN' },
+  KES: { starter: '3 500',  pro: '7 000',  business: '18 000',  currency: 'KES' },
+  GNF: { starter: '250 000',pro: '500 000',business: '1 250 000',currency: 'GNF' },
+  MRO: { starter: '11 000', pro: '22 000', business: '55 000',  currency: 'MRO' },
+  RWF: { starter: '34 000', pro: '68 000', business: '170 000', currency: 'RWF' },
+  TZS: { starter: '75 000', pro: '150 000',business: '380 000', currency: 'TZS' },
+  UGX: { starter: '110 000',pro: '220 000',business: '550 000', currency: 'UGX' },
+};
+
 function checkTrialStatus(merchant) {
+  currentMerchantData = merchant;
   const now = new Date();
-  const createdAt = merchant.createdAt ? new Date(merchant.createdAt) : null;
   const expiresAt = merchant.subscriptionExpiresAt ? new Date(merchant.subscriptionExpiresAt) : null;
-  const trialDays = 7;
+  const createdAt = merchant.createdAt ? new Date(merchant.createdAt) : null;
   const isExpired = !expiresAt || expiresAt < now;
   const daysLeft = expiresAt ? Math.ceil((expiresAt - now) / (1000*60*60*24)) : 0;
-  
-  // Calculer jours depuis création (période d'essai)
   const daysSinceCreation = createdAt ? Math.floor((now - createdAt) / (1000*60*60*24)) : 0;
-  const trialDaysLeft = Math.max(0, trialDays - daysSinceCreation);
-  const isInTrial = !merchant.plan || merchant.plan === 'trial' || (daysSinceCreation < trialDays && !expiresAt);
+  const isInTrial = !merchant.plan || merchant.plan === 'trial' || (daysSinceCreation < 7 && !expiresAt);
 
   const banner = document.getElementById('trial-banner');
   const title = document.getElementById('trial-title');
   const sub = document.getElementById('trial-sub');
   const icon = document.getElementById('trial-icon');
 
-  if (isInTrial && trialDaysLeft <= 3 && trialDaysLeft > 0) {
-    icon.textContent = "⏳";
-    title.textContent = "Votre periode d essai se termine dans " + trialDaysLeft + " jour(s) !";
-    sub.textContent = "Souscrivez maintenant pour ne pas perdre acces a votre boutique.";
-    banner.style.display = "block";
-  } else if (isInTrial && trialDaysLeft === 0) {
+  // Mettre à jour les prix selon la devise du commerçant
+  const cur = merchant.currency || 'XOF';
+  const prices = PLAN_PRICES_DISPLAY[cur] || PLAN_PRICES_DISPLAY['XOF'];
+  document.getElementById('pm-price-starter').textContent = prices.starter;
+  document.getElementById('pm-price-pro').textContent = prices.pro;
+  document.getElementById('pm-price-business').textContent = prices.business;
+  document.getElementById('pm-currency-starter').textContent = prices.currency + '/mois';
+  document.getElementById('pm-currency-pro').textContent = prices.currency + '/mois';
+  document.getElementById('pm-currency-business').textContent = prices.currency + '/mois';
+
+  if (isExpired || (isInTrial && daysLeft === 0)) {
+    // Expiré → afficher modale immédiatement
     icon.textContent = "🔒";
-    title.textContent = "Votre periode d essai est terminee !";
-    sub.textContent = "Votre boutique est suspendue. Abonnez-vous pour la reactiver.";
+    title.textContent = "Votre acces est expire !";
+    sub.textContent = "Choisissez un plan pour continuer.";
     banner.style.display = "block";
-  } else if (!isInTrial && isExpired) {
-    icon.textContent = "🔒";
-    title.textContent = "Votre abonnement a expire !";
-    sub.textContent = "Renouvelez pour continuer a vendre 24h/24 avec WaziBot.";
+    document.getElementById('payment-modal').style.display = 'flex';
+  } else if (daysLeft <= 3) {
+    // Bientôt → afficher bandeau avec bouton
+    icon.textContent = daysLeft <= 1 ? "🚨" : "⚠️";
+    title.textContent = daysLeft <= 1
+      ? "Votre acces expire demain !"
+      : "Votre acces expire dans " + daysLeft + " jour(s) !";
+    sub.textContent = "Abonnez-vous maintenant pour ne pas perdre votre boutique.";
     banner.style.display = "block";
-  } else if (!isInTrial && daysLeft <= 3) {
-    icon.textContent = "⚠️";
-    title.textContent = "Votre abonnement expire dans " + daysLeft + " jour(s) !";
-    sub.textContent = "Renouvelez maintenant pour ne pas interrompre votre service.";
-    banner.style.display = "block";
+  }
+}
+
+// ── Sélection plan ──
+let selectedPaymentPlan = 'pro';
+
+function selectPaymentPlan(plan) {
+  selectedPaymentPlan = plan;
+  const cur = (currentMerchantData && currentMerchantData.currency) || 'XOF';
+  const prices = PLAN_PRICES_DISPLAY[cur] || PLAN_PRICES_DISPLAY['XOF'];
+  const labels = { starter: 'Starter', pro: 'Pro ⭐', business: 'Business 🚀' };
+
+  // Highlight plan sélectionné
+  ['starter','pro','business'].forEach(p => {
+    const el = document.getElementById('plan-' + p);
+    el.style.border = p === plan ? '2px solid #e85c0e' : '2px solid #2a2a3a';
+    el.style.background = p === plan ? 'rgba(232,92,14,0.08)' : 'transparent';
+  });
+
+  // Afficher step 2
+  document.getElementById('selected-amount').textContent = prices[plan] + ' ' + prices.currency;
+  document.getElementById('selected-plan-label').textContent = 'Plan ' + labels[plan] + ' — par mois';
+  document.getElementById('payment-step2').style.display = 'block';
+  document.getElementById('transaction-sent').style.display = 'none';
+  document.getElementById('transaction-ref').value = '';
+}
+
+function backToPlanSelection() {
+  document.getElementById('payment-step2').style.display = 'none';
+  ['starter','pro','business'].forEach(p => {
+    document.getElementById('plan-' + p).style.border = '2px solid #2a2a3a';
+    document.getElementById('plan-' + p).style.background = 'transparent';
+  });
+}
+
+// ── Bouton My Touchpoint intelligent ──
+function openMyTouchpoint() {
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  
+  // Tenter d'ouvrir l'app via deep link
+  const deepLink = 'mytouchpoint://pay';
+  const androidStore = 'https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint&hl=fr';
+  const iosStore = 'https://apps.apple.com/bf/app/mytouchpoint/id6451056179';
+
+  if (isAndroid) {
+    window.location = deepLink;
+    setTimeout(() => { window.location = androidStore; }, 1500);
+  } else if (isIOS) {
+    window.location = deepLink;
+    setTimeout(() => { window.location = iosStore; }, 1500);
+  } else {
+    // Desktop — afficher les deux liens
+    alert('Sur votre telephone :\n\nAndroid : ' + androidStore + '\n\niOS : ' + iosStore);
+  }
+}
+
+// ── Soumettre la transaction ──
+async function submitTransaction() {
+  const ref = document.getElementById('transaction-ref').value.trim();
+  if (!ref) { alert('Entrez votre numero de transaction My Touchpoint'); return; }
+
+  const cur = (currentMerchantData && currentMerchantData.currency) || 'XOF';
+  const prices = PLAN_PRICES_DISPLAY[cur] || PLAN_PRICES_DISPLAY['XOF'];
+
+  try {
+    await fetch(API + '/merchants/' + MERCHANT_ID + '/payment-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      body: JSON.stringify({
+        plan: selectedPaymentPlan,
+        transactionRef: ref,
+        amount: prices[selectedPaymentPlan],
+        currency: cur,
+      })
+    });
+    document.getElementById('transaction-sent').style.display = 'block';
+    document.getElementById('transaction-ref').disabled = true;
+  } catch(e) {
+    alert('Erreur envoi. Reessayez ou contactez le support.');
   }
 }
 

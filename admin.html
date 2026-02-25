@@ -570,6 +570,7 @@ async function loadMerchants() {
       <td><span class="badge ${status.cls}">${status.label}</span></td>
       <td style="display:flex;gap:6px;">
         <button class="action-btn" onclick="openTokenModal('${m.id}','${m.name}','${m.whatsappToken || ''}','${m.phoneNumberId || ''}')">🔑 Token</button>
+        ${m.lastPaymentId ? '<button class="action-btn" style="background:rgba(0,229,160,0.15);color:#00e5a0;" onclick="validatePayment("'+m.id+'","'+m.name+'","'+(m.lastPaymentId||'')+'")">✅ Valider paiement</button>' : ''}
         <button class="action-btn" onclick="sendReminder('${m.id}','${m.ownerPhone}','${m.name}')">📩 Relancer</button>
         <button class="action-btn danger" onclick="toggleMerchant('${m.id}', ${m.isActive})">${m.isActive ? '⏸️' : '▶️'}</button>
       </td>
@@ -657,6 +658,26 @@ async function loadMessages() {
 }
 
 // ── Actions ──
+
+// ── Validation paiement ──
+async function validatePayment(id, name, paymentInfo) {
+  const parts = (paymentInfo || '').split('|');
+  const plan = parts[0] || 'starter';
+  const ref = parts[1] || '';
+  if (!confirm('Valider le paiement de ' + name + ' ? Plan: ' + plan.toUpperCase() + ' | Ref: ' + ref)) return;
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const res = await fetch(API + '/merchants/' + id, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+    body: JSON.stringify({ plan, isActive: true, subscriptionExpiresAt: expiresAt.toISOString(), lastPaymentId: null })
+  });
+  if (res.ok) {
+    alert('Compte ' + name + ' active sur plan ' + plan.toUpperCase() + ' !');
+    loadMerchants();
+  } else {
+    alert('Erreur validation');
+  }
+}
 
 // ── Mode Maintenance ──
 let maintenanceActive = false;
@@ -818,7 +839,7 @@ function getMerchantStatus(m) {
 </div>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw-admin.js').then(() => {
+  navigator.serviceWorker.register('/sw.js').then(() => {
     console.log('✅ Admin PWA prêt');
   }).catch(err => console.log('SW erreur:', err));
 }

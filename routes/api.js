@@ -119,3 +119,44 @@ router.get("/merchants/:id/customers", async (req, res) => {
 });
 
 module.exports = router;
+
+// ── Demande de paiement commerçant ──
+router.post("/merchants/:id/payment-request", async (req, res) => {
+  try {
+    const { Merchant } = require("../models/index");
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+
+    const { plan, transactionRef, amount, currency } = req.body;
+    const { sendText } = require("../core/whatsappClient");
+
+    const ADMIN_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const ADMIN_TOKEN = process.env.WHATSAPP_TOKEN;
+    const ADMIN_NUMBER = process.env.ADMIN_WHATSAPP_NUMBER || "22871454079";
+
+    // Notifier l'admin via WhatsApp
+    const message =
+      `💳 *Nouvelle demande de paiement*\n\n` +
+      `🏪 Boutique : *${merchant.name}*\n` +
+      `📱 Tél : ${merchant.ownerPhone}\n` +
+      `📧 Email : ${merchant.email || '-'}\n` +
+      `📦 Plan demandé : *${(plan || '').toUpperCase()}*\n` +
+      `💰 Montant : *${amount} ${currency}*\n` +
+      `🔖 Réf transaction : *${transactionRef}*\n\n` +
+      `👉 Validez sur : https://whatsapp-commerce-1roe.onrender.com/admin`;
+
+    if (ADMIN_PHONE_ID && ADMIN_TOKEN) {
+      await sendText(ADMIN_PHONE_ID, ADMIN_TOKEN, ADMIN_NUMBER, message).catch(() => {});
+    }
+
+    // Sauvegarder la demande dans le merchant
+    await merchant.update({
+      lastPaymentId: `${plan}|${transactionRef}|${new Date().toISOString()}`
+    });
+
+    res.json({ success: true, message: "Demande enregistrée. Votre compte sera réactivé sous 24h." });
+  } catch (err) {
+    console.error("Erreur payment-request:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
