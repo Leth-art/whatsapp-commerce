@@ -97,11 +97,14 @@ const startCronJobs = () => {
 
     for (const merchant of merchants) {
       const expDate = new Date(merchant.subscriptionExpiresAt).toLocaleDateString("fr-FR");
+      const plan = (merchant.plan || 'starter').toUpperCase();
       const message =
         `⚠️ *Rappel WaziBot* — Bonjour ${merchant.name} !\n\n` +
-        `Votre abonnement expire le *${expDate}*.\n\n` +
-        `Pour continuer à recevoir vos commandes automatiquement, renouvelez maintenant :\n` +
-        `👉 https://whatsapp-commerce-1roe.onrender.com/signup.html\n\n` +
+        `Votre abonnement *${plan}* expire le *${expDate}*.\n\n` +
+        `Pour continuer à recevoir vos commandes 24h/24, renouvelez maintenant via *My Touchpoint*.\n\n` +
+        `📱 *Téléchargez My Touchpoint pour payer :*\n` +
+        `• Android : https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint\n` +
+        `• iOS : https://apps.apple.com/bf/app/mytouchpoint/id6451056179\n\n` +
         `Des questions ? Contactez-nous au +228 71 45 40 79`;
 
       await notifyMerchant(merchant, message);
@@ -127,12 +130,50 @@ const startCronJobs = () => {
         `🚨 *URGENT — WaziBot* — Bonjour ${merchant.name} !\n\n` +
         `Votre abonnement expire *demain* !\n\n` +
         `Sans renouvellement, votre assistant WhatsApp sera suspendu et vos clients ne pourront plus commander.\n\n` +
-        `Renouvelez maintenant :\n` +
-        `👉 https://whatsapp-commerce-1roe.onrender.com/signup.html\n\n` +
-        `Paiement rapide via MTN ou Moov 📱`;
+        `Renouvelez maintenant via *My Touchpoint* :\n\n` +
+        `📱 *Téléchargez My Touchpoint :*\n` +
+        `• Android : https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint\n` +
+        `• iOS : https://apps.apple.com/bf/app/mytouchpoint/id6451056179\n\n` +
+        `⏰ Ne laissez pas vos clients sans réponse !`;
 
       await notifyMerchant(merchant, message);
       console.log(`🚨 Rappel J-1 envoyé à ${merchant.name}`);
+      await sleep(2000);
+    }
+  }, { timezone: "Africa/Lome" });
+
+  // ─── FIN PÉRIODE D'ESSAI — MESSAGE MY TOUCHPOINT (8h quotidien) ───
+  cron.schedule("0 8 * * *", async () => {
+    console.log("🎯 Vérification fins d'essai...");
+    const now = new Date();
+    const dans24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    // Commerçants dont l'essai se termine dans les prochaines 24h
+    const merchants = await Merchant.findAll({
+      where: {
+        isActive: true,
+        plan: "starter",
+        subscriptionExpiresAt: { [Op.between]: [now, dans24h] },
+      },
+    });
+
+    for (const merchant of merchants) {
+      const expDate = new Date(merchant.subscriptionExpiresAt).toLocaleDateString("fr-FR");
+      const message =
+        `⏳ *WaziBot* — Bonjour ${merchant.name} !\n\n` +
+        `Votre période d'essai gratuit se termine *aujourd'hui* (${expDate}).\n\n` +
+        `Pour continuer à vendre 24h/24 sans interruption, abonnez-vous maintenant.\n\n` +
+        `💳 *Comment payer avec My Touchpoint :*\n` +
+        `1️⃣ Téléchargez l'application\n` +
+        `2️⃣ Créez votre compte\n` +
+        `3️⃣ Effectuez le paiement\n\n` +
+        `📱 *Téléchargez My Touchpoint :*\n` +
+        `• Android : https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint\n` +
+        `• iOS : https://apps.apple.com/bf/app/mytouchpoint/id6451056179\n\n` +
+        `Des questions ? +228 71 45 40 79 📞`;
+
+      await notifyMerchant(merchant, message);
+      console.log(`⏳ Message fin d'essai envoyé à ${merchant.name}`);
       await sleep(2000);
     }
   }, { timezone: "Africa/Lome" });
@@ -152,12 +193,16 @@ const startCronJobs = () => {
       console.log(`❌ Abonnement expiré : ${merchant.name}`);
 
       // Notifier le commerçant
+      const plan = (merchant.plan || 'starter').toUpperCase();
       const message =
-        `😢 *WaziBot* — Bonjour ${merchant.name},\n\n` +
-        `Votre abonnement a expiré. Votre assistant WhatsApp est maintenant suspendu.\n\n` +
-        `Pour réactiver votre boutique, renouvelez ici :\n` +
-        `👉 https://whatsapp-commerce-1roe.onrender.com/signup.html\n\n` +
-        `Nous espérons vous revoir bientôt ! 🙏`;
+        `🔒 *WaziBot* — Bonjour ${merchant.name},\n\n` +
+        `Votre abonnement *${plan}* a expiré. Votre assistant WhatsApp est maintenant *suspendu*.\n\n` +
+        `Vos clients ne peuvent plus passer de commandes.\n\n` +
+        `✅ *Réactivez votre boutique maintenant via My Touchpoint :*\n\n` +
+        `📱 *Téléchargez My Touchpoint :*\n` +
+        `• Android : https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint\n` +
+        `• iOS : https://apps.apple.com/bf/app/mytouchpoint/id6451056179\n\n` +
+        `Une fois le paiement effectué, votre boutique sera réactivée automatiquement. 🙏`;
 
       await notifyMerchant(merchant, message);
     }
