@@ -9,7 +9,7 @@ const PLANS_CONFIG = {
     durationDays: 30,
     limits: {
       maxProducts: 15,
-      maxMessagesPerMonth: 300,   // conversations IA/mois
+      maxMessagesPerMonth: 250,   // aligné WAWP gratuit
       autoRelance: false,
       weeklyReport: false,
       prioritySupport: false,
