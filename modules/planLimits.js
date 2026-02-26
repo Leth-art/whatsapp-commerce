@@ -8,11 +8,12 @@ const PLANS_CONFIG = {
     price: 20000,
     durationDays: 30,
     limits: {
-      maxProducts: 10,
-      maxMessagesPerMonth: 100,
+      maxProducts: 15,
+      maxMessagesPerMonth: 300,   // conversations IA/mois
       autoRelance: false,
       weeklyReport: false,
       prioritySupport: false,
+      dedicatedSupport: false,
     },
   },
   pro: {
@@ -20,11 +21,12 @@ const PLANS_CONFIG = {
     price: 40000,
     durationDays: 30,
     limits: {
-      maxProducts: 40,
-      maxMessagesPerMonth: 800,
+      maxProducts: 50,
+      maxMessagesPerMonth: 1000,  // conversations IA/mois
       autoRelance: true,
       weeklyReport: true,
-      prioritySupport: false,
+      prioritySupport: true,
+      dedicatedSupport: false,
     },
   },
   business: {
@@ -37,6 +39,7 @@ const PLANS_CONFIG = {
       autoRelance: true,
       weeklyReport: true,
       prioritySupport: true,
+      dedicatedSupport: true,
     },
   },
 };
@@ -92,7 +95,7 @@ const canSendMessage = async (merchant) => {
   if (totalMessages >= max) {
     return {
       allowed: false,
-      reason: `Limite de ${max} messages/mois atteinte pour le plan ${config.label}. Votre quota se renouvelle le 1er du mois prochain.`,
+      reason: `Limite de ${max} conversations IA/mois atteinte pour le plan ${config.label}. Votre quota se renouvelle le 1er du mois prochain.`,
       current: totalMessages,
       max,
     };

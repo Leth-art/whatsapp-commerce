@@ -43,7 +43,7 @@ connectDB().then(async () => {
   startCronJobs();
 });
 
-app.use(express.static(__dirname));
+// express.static déplacé après maintenanceMode pour que la maintenance bloque tout
 
 app.use((req, res, next) => {
   if ((req.originalUrl === "/webhook" || req.originalUrl === "/subscription/webhook") && req.method === "POST") return next();
@@ -83,6 +83,7 @@ const maintenanceMode = (req, res, next) => {
   next();
 };
 app.use(maintenanceMode);
+app.use(express.static(__dirname)); // après maintenance — les fichiers statiques sont bloqués en maintenance
 app.get('/maintenance', (req, res) => { res.sendFile(path.join(__dirname, 'maintenance.html')); });
 
 // ── Routes publiques (sans protection) ──
