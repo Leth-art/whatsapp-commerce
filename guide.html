@@ -8,22 +8,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #050508;
-    --surface: #0e0e1a;
-    --surface2: #15151f;
-    --border: #1e1e2e;
+    --bg: #ffffff;
+    --surface: #f5f5f8;
+    --surface2: #ebebf0;
+    --border: #e0e0ea;
     --accent: #e85c0e;
     --accent2: #00e5a0;
-    --text: #f0f0f8;
-    --muted: #4a4a6a;
+    --text: #0a0a14;
+    --muted: #6a6a8a;
     --warn: #f0a500;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
-  body { font-family:'Cabinet Grotesk',sans-serif; background:#050508; color:var(--text); line-height:1.7; }
+  body { font-family:'Cabinet Grotesk',sans-serif; background:#ffffff; color:var(--text); line-height:1.7; }
   nav {
     position:fixed; top:0; left:0; right:0; z-index:100;
-    background:rgba(5,5,8,0.9); backdrop-filter:blur(20px);
+    background:rgba(255,255,255,0.95); backdrop-filter:blur(20px);
     border-bottom:1px solid #1e1e2e;
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 32px;
@@ -33,7 +33,7 @@
   .nav-links { display:flex; gap:24px; list-style:none; }
   .nav-links a { color:var(--muted); text-decoration:none; font-size:14px; transition:color 0.2s; }
   .nav-links a:hover { color:var(--text); }
-  .btn-start { background:var(--accent); color:#f0f0f8; padding:10px 22px; border-radius:50px; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.2s; }
+  .btn-start { background:var(--accent); color:white; padding:10px 22px; border-radius:50px; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.2s; }
   .btn-start:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(232,92,14,0.3); }
   .hero {
     min-height:100vh; display:flex; align-items:center; justify-content:center;
@@ -65,7 +65,7 @@
     width:56px; height:56px; border-radius:50%; border:2px solid var(--accent);
     display:flex; align-items:center; justify-content:center;
     font-family:'Clash Display',sans-serif; font-size:20px; font-weight:700;
-    color:var(--accent); flex-shrink:0; background:#050508;
+    color:var(--accent); flex-shrink:0; background:#ffffff;
   }
   .step-content { padding:0 0 48px; flex:1; }
   .step-content h3 { font-family:'Clash Display',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
@@ -101,7 +101,7 @@
     justify-content:center; flex-wrap:wrap; gap:8px;
   }
   .flow-item {
-    background:#050508; border:1px solid var(--border); border-radius:10px;
+    background:#ffffff; border:1px solid var(--border); border-radius:10px;
     padding:10px 18px; font-size:14px; font-weight:600; text-align:center;
   }
   .flow-item.highlight { border-color:var(--accent); color:var(--accent); }
@@ -131,7 +131,7 @@
   }
   .cta-section h2 { font-family:'Clash Display',sans-serif; font-size:36px; margin-bottom:16px; }
   .cta-section p { color:var(--muted); margin-bottom:32px; }
-  .btn-cta { background:var(--accent); color:#f0f0f8; padding:16px 40px; border-radius:50px; font-size:16px; font-weight:700; text-decoration:none; display:inline-block; transition:all 0.2s; }
+  .btn-cta { background:var(--accent); color:white; padding:16px 40px; border-radius:50px; font-size:16px; font-weight:700; text-decoration:none; display:inline-block; transition:all 0.2s; }
   .btn-cta:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(232,92,14,0.4); }
   .divider { border:none; border-top:1px solid var(--border); margin:0; }
   @media(max-width:600px) {
@@ -305,7 +305,7 @@
   <h2>Après votre essai gratuit</h2>
   <p class="subtitle">Choisissez le plan qui correspond à la taille de votre boutique.</p>
   <div class="cards">
-    <div class="card"><div class="card-icon">🌱</div><h3>Starter — 20 000 XOF/mois</h3><p>Jusqu'à <strong>15 produits</strong> et <strong>300 conversations IA/mois</strong>. Idéal pour démarrer et tester votre boutique.</p></div>
+    <div class="card"><div class="card-icon">🌱</div><h3>Starter — 20 000 XOF/mois</h3><p>Jusqu'à <strong>15 produits</strong> et <strong>250 conversations IA/mois</strong>. Idéal pour démarrer et tester votre boutique.</p></div>
     <div class="card" style="border-color:var(--accent);"><div class="card-icon">⭐</div><h3>Pro — 40 000 XOF/mois</h3><p>Jusqu'à <strong>50 produits</strong> et <strong>1 000 conversations IA/mois</strong>. Relances automatiques, rapport hebdomadaire et support prioritaire inclus.</p></div>
     <div class="card"><div class="card-icon">🚀</div><h3>Business — 100 000 XOF/mois</h3><p><strong>Produits et conversations illimités</strong>. Support dédié. Pour les boutiques à fort volume.</p></div>
   </div>
