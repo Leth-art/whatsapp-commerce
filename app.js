@@ -97,6 +97,8 @@ app.use("/subscription", requireApiKey, subscriptionsRouter);
 app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "index.html")); });
 app.get("/signup", (req, res) => { res.sendFile(path.join(__dirname, "signup.html")); });
 app.get("/privacy", (req, res) => { res.sendFile(path.join(__dirname, "privacy.html")); });
+app.get("/guide", (req, res) => { res.sendFile(path.join(__dirname, "guide.html")); });
+app.get("/403", (req, res) => { res.sendFile(path.join(__dirname, "403.html")); });
 app.get("/dashboard", (req, res) => { res.sendFile(path.join(__dirname, "dashboard.html")); });
 app.get("/admin", requireAdminToken, (req, res) => { res.sendFile(path.join(__dirname, "admin.html")); });
 
