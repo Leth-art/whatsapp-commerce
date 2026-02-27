@@ -366,11 +366,10 @@
       </div>
 
       <!-- Heures de pointe + Conversion côte à côte -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
         <!-- Heures de pointe -->
         <div class="card" style="padding:24px;">
-          <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:20px;">⏰ Heures de pointe</h3>
+          <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:20px;" data-i18n="peak_hours">⏰ Heures de pointe</h3>
           <div id="heatmap" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"></div>
           <div style="display:flex;justify-content:space-between;margin-top:12px;">
             <span style="font-size:11px;color:var(--muted)">0h</span>
@@ -381,16 +380,45 @@
             <span style="font-size:11px;color:var(--muted)">20h</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
-            <span style="font-size:11px;color:var(--muted)">Faible</span>
+            <span style="font-size:11px;color:var(--muted)" data-i18n="low">Faible</span>
             <div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(0,229,160,0.1),rgba(0,229,160,1));"></div>
-            <span style="font-size:11px;color:var(--muted)">Élevé</span>
+            <span style="font-size:11px;color:var(--muted)" data-i18n="high">Élevé</span>
           </div>
         </div>
-
-        <!-- Taux de conversion -->
+        <!-- Entonnoir -->
         <div class="card" style="padding:24px;">
-          <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:20px;">🎯 Entonnoir de conversion</h3>
+          <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:20px;" data-i18n="funnel_title">🎯 Entonnoir de conversion</h3>
           <div id="funnel"></div>
+        </div>
+      </div>
+
+      <!-- Top produits + Relances -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+        <!-- Top produits les plus commandés -->
+        <div class="card" style="padding:24px;">
+          <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:20px;" data-i18n="top_products">🏆 Produits les plus commandés</h3>
+          <div id="top-products-list"></div>
+        </div>
+
+        <!-- Résumé relances automatiques -->
+        <div class="card" style="padding:24px;">
+          <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px;" data-i18n="auto_relance">🔔 Relances automatiques</h3>
+          <p style="color:var(--muted);font-size:12px;margin-bottom:16px;" data-i18n="auto_relance_desc">Clients relancés automatiquement selon leur inactivité</p>
+          <div id="relance-stats" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted)" data-i18n="inactive_3">Inactifs 3 jours</span>
+              <span style="font-weight:700;color:var(--accent)" id="r-3j">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted)" data-i18n="inactive_7">Inactifs 7 jours</span>
+              <span style="font-weight:700;color:var(--warn)" id="r-7j">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted)" data-i18n="inactive_14">Inactifs 14+ jours</span>
+              <span style="font-weight:700;color:#e85c0e" id="r-14j">—</span>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -409,6 +437,13 @@
           <div class="form-group"><label>Ville</label><input id="s-city" type="text"></div>
           <div class="form-group"><label>Email</label><input id="s-email" type="email"></div>
           <div class="form-group"><label>Devise</label><input id="s-currency" type="text"></div>
+          <div class="form-group">
+            <label>Langue du bot</label>
+            <select id="s-language" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:13px;width:100%;">
+              <option value="fr">🇫🇷 Français</option>
+              <option value="en">🇬🇧 English</option>
+            </select>
+          </div>
           <div class="form-group full"><label>Description de la boutique</label><textarea id="s-desc"></textarea></div>
           <div class="form-group full"><label>Personnalité de l'IA</label><textarea id="s-persona"></textarea></div>
           <div class="form-group full"><label>Message d'accueil</label><textarea id="s-welcome"></textarea></div>
@@ -1015,6 +1050,7 @@ async function loadSettings() {
   document.getElementById('s-city').value = m.city || '';
   document.getElementById('s-email').value = m.email || '';
   document.getElementById('s-currency').value = m.currency || 'FCFA';
+  if (document.getElementById('s-language')) document.getElementById('s-language').value = m.language || 'fr';
   document.getElementById('s-desc').value = m.businessDescription || '';
   document.getElementById('s-persona').value = m.aiPersona || '';
   document.getElementById('s-welcome').value = m.welcomeMessage || '';
@@ -1026,6 +1062,7 @@ async function saveSettings() {
     city: document.getElementById('s-city').value,
     email: document.getElementById('s-email').value,
     currency: document.getElementById('s-currency').value,
+    language: document.getElementById('s-language')?.value || 'fr',
     businessDescription: document.getElementById('s-desc').value,
     aiPersona: document.getElementById('s-persona').value,
     welcomeMessage: document.getElementById('s-welcome').value,
@@ -1054,6 +1091,122 @@ async function updateToken() {
   }
   document.getElementById('s-token').value = '';
   if (document.getElementById('s-phone-id')) document.getElementById('s-phone-id').value = '';
+}
+
+// ── Système multi-langue ──
+const TRANSLATIONS = {
+  fr: {
+    dashboard: "Tableau de bord", orders: "Commandes", products: "Produits",
+    analytics: "Analytics", customers: "Clients", settings: "Paramètres",
+    peak_hours: "⏰ Heures de pointe", low: "Faible", high: "Élevé",
+    funnel_title: "🎯 Entonnoir de conversion", top_products: "🏆 Produits les plus commandés",
+    auto_relance: "🔔 Relances automatiques",
+    auto_relance_desc: "Clients relancés automatiquement selon leur inactivité",
+    inactive_3: "Inactifs 3 jours", inactive_7: "Inactifs 7 jours", inactive_14: "Inactifs 14+ jours",
+    confirm: "Confirmer", deliver: "Livrer", cancel: "Annuler",
+    save: "Enregistrer", add_product: "Ajouter un produit",
+    revenue: "Revenus", orders_count: "Commandes", pending: "En attente", clients: "Clients",
+  },
+  en: {
+    dashboard: "Dashboard", orders: "Orders", products: "Products",
+    analytics: "Analytics", customers: "Customers", settings: "Settings",
+    peak_hours: "⏰ Peak Hours", low: "Low", high: "High",
+    funnel_title: "🎯 Conversion Funnel", top_products: "🏆 Top Selling Products",
+    auto_relance: "🔔 Automatic Follow-ups",
+    auto_relance_desc: "Customers automatically re-engaged based on inactivity",
+    inactive_3: "Inactive 3 days", inactive_7: "Inactive 7 days", inactive_14: "Inactive 14+ days",
+    confirm: "Confirm", deliver: "Deliver", cancel: "Cancel",
+    save: "Save", add_product: "Add product",
+    revenue: "Revenue", orders_count: "Orders", pending: "Pending", clients: "Customers",
+  }
+};
+
+let currentLang = localStorage.getItem('wazibot_lang') || 'fr';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('wazibot_lang', lang);
+  // Mettre à jour les boutons (avec vérification null)
+  const btnFr = document.getElementById('lang-fr');
+  const btnEn = document.getElementById('lang-en');
+  if (btnFr) { btnFr.style.background = lang === 'fr' ? 'var(--accent)' : 'none'; btnFr.style.color = lang === 'fr' ? 'white' : 'var(--muted)'; }
+  if (btnEn) { btnEn.style.background = lang === 'en' ? 'var(--accent)' : 'none'; btnEn.style.color = lang === 'en' ? 'white' : 'var(--muted)'; }
+  // Traduire tous les éléments avec data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (TRANSLATIONS[lang]?.[key]) el.textContent = TRANSLATIONS[lang][key];
+  });
+}
+
+// Init langue après chargement DOM
+document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
+
+function t(key) {
+  return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS.fr[key] || key;
+}
+
+// ─── Top produits les plus commandés ───
+function renderTopProducts(orders) {
+  const counts = {};
+  orders.forEach(o => {
+    const items = o.items || [];
+    items.forEach(item => {
+      const name = item.productName || item.name || 'Produit';
+      counts[name] = (counts[name] || 0) + (item.quantity || 1);
+    });
+  });
+
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const max = sorted[0]?.[1] || 1;
+  const container = document.getElementById('top-products-list');
+  if (!container) return;
+
+  if (!sorted.length) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">Aucune donnée</p>';
+    return;
+  }
+
+  const colors = ['#e85c0e', '#00e5a0', '#6496ff', '#f0a500', '#7c5cfc'];
+  container.innerHTML = sorted.map(([name, count], i) => {
+    const pct = Math.round((count / max) * 100);
+    return `
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+          <span style="font-size:13px;font-weight:600;color:var(--text);">${i+1}. ${name}</span>
+          <span style="font-size:12px;font-weight:700;color:${colors[i]};">${count} cmd</span>
+        </div>
+        <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${colors[i]};border-radius:4px;transition:width 0.6s ease;"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─── Stats relances ───
+function renderRelanceStats(customers) {
+  const now = Date.now();
+  const j3 = customers.filter(c => {
+    const last = c.lastInteraction ? new Date(c.lastInteraction).getTime() : 0;
+    const diff = (now - last) / (1000 * 60 * 60 * 24);
+    return c.totalOrders > 0 && diff >= 3 && diff < 7;
+  }).length;
+  const j7 = customers.filter(c => {
+    const last = c.lastInteraction ? new Date(c.lastInteraction).getTime() : 0;
+    const diff = (now - last) / (1000 * 60 * 60 * 24);
+    return c.totalOrders > 0 && diff >= 7 && diff < 14;
+  }).length;
+  const j14 = customers.filter(c => {
+    const last = c.lastInteraction ? new Date(c.lastInteraction).getTime() : 0;
+    const diff = (now - last) / (1000 * 60 * 60 * 24);
+    return c.totalOrders > 0 && diff >= 14;
+  }).length;
+
+  const el3 = document.getElementById('r-3j');
+  const el7 = document.getElementById('r-7j');
+  const el14 = document.getElementById('r-14j');
+  if (el3) el3.textContent = j3 + ' client' + (j3 > 1 ? 's' : '');
+  if (el7) el7.textContent = j7 + ' client' + (j7 > 1 ? 's' : '');
+  if (el14) el14.textContent = j14 + ' client' + (j14 > 1 ? 's' : '');
 }
 
 // ── Vérifier le statut de paiement au retour ──
@@ -1160,6 +1313,10 @@ async function loadAnalytics() {
       }
     }
   });
+
+  // Top produits + relances
+  renderTopProducts(orders);
+  renderRelanceStats(customers);
 
   // Heures de pointe (simulation basée sur les commandes)
   const hourCounts = new Array(24).fill(0);
