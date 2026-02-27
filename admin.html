@@ -282,16 +282,19 @@ body::before {
     <div class="page" id="page-merchants">
       <div class="page-header">
         <div><h2>Commerçants</h2><p>Gérez tous vos commerçants</p></div>
-        <select id="filter-status" onchange="loadMerchants()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13px;">
-          <option value="">Tous</option>
-          <option value="active">Actifs</option>
-          <option value="trial">En essai</option>
-          <option value="expired">Expirés</option>
-        </select>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input id="search-merchant" oninput="loadMerchants()" placeholder="🔍 Rechercher..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13px;outline:none;width:200px;">
+          <select id="filter-status" onchange="loadMerchants()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13px;">
+            <option value="">Tous</option>
+            <option value="active">Actifs</option>
+            <option value="trial">En essai</option>
+            <option value="expired">Expirés</option>
+          </select>
+        </div>
       </div>
       <div class="card">
         <table>
-          <thead><tr><th>Boutique</th><th>Contact</th><th>Plan</th><th>Expire le</th><th>Commandes</th><th>Statut</th><th>Action</th></tr></thead>
+          <thead><tr><th>Boutique</th><th>Contact</th><th>Plan</th><th>Expire le</th><th>ID Boutique</th><th>Statut</th><th>Action</th></tr></thead>
           <tbody id="merchants-table"><tr><td colspan="7" class="loader">Chargement...</td></tr></tbody>
         </table>
       </div>
@@ -549,33 +552,71 @@ function renderPlansChart(merchants) {
 async function loadMerchants() {
   const merchants = await api('/merchants');
   const filter = document.getElementById('filter-status').value;
+  const search = (document.getElementById('search-merchant')?.value || '').toLowerCase();
   const tbody = document.getElementById('merchants-table');
 
   let filtered = merchants;
-  if (filter === 'active') filtered = merchants.filter(m => m.isActive && !isInTrial(m));
-  if (filter === 'trial') filtered = merchants.filter(m => isInTrial(m));
-  if (filter === 'expired') filtered = merchants.filter(m => !m.isActive);
+  if (filter === 'active') filtered = filtered.filter(m => m.isActive && !isInTrial(m));
+  if (filter === 'trial') filtered = filtered.filter(m => isInTrial(m));
+  if (filter === 'expired') filtered = filtered.filter(m => !m.isActive);
+  if (search) filtered = filtered.filter(m =>
+    (m.name||'').toLowerCase().includes(search) ||
+    (m.ownerPhone||'').includes(search) ||
+    (m.id||'').toLowerCase().includes(search) ||
+    (m.city||'').toLowerCase().includes(search)
+  );
 
   if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" class="loader">Aucun résultat</td></tr>'; return; }
 
   tbody.innerHTML = filtered.map(m => {
     const status = getMerchantStatus(m);
     const expDate = m.subscriptionExpiresAt ? new Date(m.subscriptionExpiresAt).toLocaleDateString('fr-FR') : '—';
+    const shortId = m.id ? m.id.substring(0,8) + '...' : '—';
     return `<tr>
-      <td><strong>${m.name}</strong><br><small style="color:var(--muted);font-size:11px;">${m.city || ''}</small></td>
+      <td><strong>${m.name}</strong><br><small style="color:var(--muted);font-size:11px;">${m.city || ''}, ${m.country || ''}</small></td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;">${m.ownerPhone || m.email || '—'}</td>
       <td><span style="color:var(--gold);text-transform:uppercase;font-size:11px;font-weight:700;">${m.plan || 'starter'}</span></td>
       <td style="font-size:12px;">${expDate}</td>
-      <td>—</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);" title="${m.id}">${shortId}</span>
+          <button onclick="copyId('${m.id}')" style="background:none;border:1px solid var(--border);color:var(--muted);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;">📋</button>
+        </div>
+      </td>
       <td><span class="badge ${status.cls}">${status.label}</span></td>
-      <td style="display:flex;gap:6px;">
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="action-btn" style="background:rgba(100,150,255,0.15);color:#6496ff;" onclick="accessDashboard('${m.id}','${m.name}')">👁️ Accéder</button>
         <button class="action-btn" onclick="openTokenModal('${m.id}','${m.name}','${m.whatsappToken || ''}','${m.phoneNumberId || ''}')">🔑 Token</button>
-        ${m.lastPaymentId ? '<button class="action-btn" style="background:rgba(0,229,160,0.15);color:#00e5a0;" onclick="validatePayment("'+m.id+'","'+m.name+'","'+(m.lastPaymentId||'')+'")">✅ Valider paiement</button>' : ''}
+        ${m.lastPaymentId ? '<button class="action-btn" style="background:rgba(0,229,160,0.15);color:#00e5a0;" onclick="validatePayment(\'' + m.id + '\',\'' + m.name + '\',\'' + (m.lastPaymentId||'') + '\')">✅ Valider</button>' : ''}
         <button class="action-btn" onclick="sendReminder('${m.id}','${m.ownerPhone}','${m.name}')">📩 Relancer</button>
         <button class="action-btn danger" onclick="toggleMerchant('${m.id}', ${m.isActive})">${m.isActive ? '⏸️' : '▶️'}</button>
       </td>
     </tr>`;
   }).join('');
+}
+
+// ── Copier l'ID ──
+function copyId(id) {
+  navigator.clipboard.writeText(id).then(() => showToast('✅ ID copié dans le presse-papier'));
+}
+
+// ── Accéder au dashboard d'un commerçant ──
+function accessDashboard(merchantId, shopName) {
+  window.open('/dashboard?id=' + merchantId, '_blank');
+}
+
+// ── Toast ──
+function showToast(msg) {
+  let t = document.getElementById('wazi-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'wazi-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0e0e1a;border:1px solid #e85c0e;color:#f0f0f8;padding:12px 20px;border-radius:12px;font-size:13px;z-index:9999;box-shadow:0 8px 32px rgba(232,92,14,0.2);transition:opacity 0.3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 2500);
 }
 
 // ── Revenus ──
