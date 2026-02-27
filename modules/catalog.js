@@ -1,28 +1,31 @@
-const Product = require("../models/Product");
+const { Product } = require("../models/index");
+const { Op } = require("sequelize");
 
 /**
  * Retourne tous les produits disponibles d'un commerçant.
  */
 const getAllProducts = async (merchantId, availableOnly = true) => {
-  const filter = { merchantId };
+  const where = { merchantId };
   if (availableOnly) {
-    filter.isAvailable = true;
-    filter.stock = { $gt: 0 };
+    where.isAvailable = true;
+    where.stock = { [Op.gt]: 0 };
   }
-  return Product.find(filter);
+  return Product.findAll({ where });
 };
 
 /**
  * Recherche un produit par nom ou description.
  */
 const searchProducts = async (merchantId, query) => {
-  return Product.find({
-    merchantId,
-    isAvailable: true,
-    $or: [
-      { name: { $regex: query, $options: "i" } },
-      { description: { $regex: query, $options: "i" } },
-    ],
+  return Product.findAll({
+    where: {
+      merchantId,
+      isAvailable: true,
+      [Op.or]: [
+        { name: { [Op.iLike]: `%${query}%` } },
+        { description: { [Op.iLike]: `%${query}%` } },
+      ],
+    },
   });
 };
 
@@ -30,23 +33,23 @@ const searchProducts = async (merchantId, query) => {
  * Déduit le stock après une vente.
  */
 const deductStock = async (productId, quantity) => {
-  const product = await Product.findById(productId);
+  const product = await Product.findByPk(productId);
   if (!product || product.stock < quantity) return false;
-  product.stock -= quantity;
-  if (product.stock === 0) product.isAvailable = false;
-  await product.save();
+  const newStock = product.stock - quantity;
+  await product.update({
+    stock: newStock,
+    isAvailable: newStock > 0,
+  });
   return true;
 };
 
 /**
  * Formate le catalogue en texte WhatsApp pour le contexte de l'IA.
- * L'IA utilise ce texte pour répondre aux questions sur les produits.
  */
 const formatCatalogForAI = async (merchantId, currency = "FCFA") => {
   const products = await getAllProducts(merchantId);
   if (!products.length) return "Aucun produit disponible pour le moment.";
 
-  // Grouper par catégorie
   const categories = {};
   for (const p of products) {
     const cat = p.category || "Divers";
@@ -59,8 +62,9 @@ const formatCatalogForAI = async (merchantId, currency = "FCFA") => {
     lines.push(`*${cat.toUpperCase()}*`);
     for (const p of items) {
       const stockAlert = p.stock <= 5 ? ` ⚠️ Plus que ${p.stock} en stock !` : "";
+      const photo = p.imageUrl ? " 📸" : "";
       lines.push(
-        `  • *${p.name}* — ${p.price.toLocaleString("fr-FR")} ${currency}${stockAlert}`,
+        `  • *${p.name}*${photo} — ${p.price.toLocaleString("fr-FR")} ${currency}${stockAlert}`,
         `    ${p.description || ""}`
       );
     }

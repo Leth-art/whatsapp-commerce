@@ -37,9 +37,9 @@ const MOBILE_MONEY_METHODS = {
 };
 
 const PLANS = {
-  starter: { label: "Starter", durationDays: 30, description: "Plan Starter — Assistant IA WhatsApp (50 produits, 500 messages/mois)" },
-  pro:     { label: "Pro",     durationDays: 30, description: "Plan Pro — Assistant IA WhatsApp + relances + rapport hebdomadaire" },
-  business:{ label: "Business",durationDays: 30, description: "Plan Business — Fonctionnalités complètes + support prioritaire" },
+  starter: { label: "Starter", durationDays: 30, description: "Plan Starter — 15 produits, 250 conversations IA/mois" },
+  pro:     { label: "Pro",     durationDays: 30, description: "Plan Pro — 50 produits, 1000 conversations IA/mois + relances + rapport" },
+  business:{ label: "Business",durationDays: 30, description: "Plan Business — Produits & conversations illimités + support dédié" },
 };
 
 /**
