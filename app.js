@@ -7,7 +7,8 @@ const apiRouter = require("./routes/api");
 const subscriptionsRouter = require("./routes/subscriptions");
 const onboardingRouter = require("./routes/onboarding");
 const { startCronJobs } = require("./modules/retention");
-
+const twofaRouter = require('./src/routes/twofa');
+app.use('/2fa', requireApiKey, twofaRouter);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
