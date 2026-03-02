@@ -6,9 +6,9 @@ const webhookRouter = require("./routes/webhook");
 const apiRouter = require("./routes/api");
 const subscriptionsRouter = require("./routes/subscriptions");
 const onboardingRouter = require("./routes/onboarding");
+const twofaRouter = require("./src/routes/twofa");
 const { startCronJobs } = require("./modules/retention");
-const twofaRouter = require('./src/routes/twofa');
-app.use('/2fa', requireApiKey, twofaRouter);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -94,6 +94,7 @@ app.use("/onboarding", onboardingRouter); // nécessaire pour signup
 // ── Routes protégées par API Key ──
 app.use("/api", requireApiKey, apiRouter);
 app.use("/subscription", requireApiKey, subscriptionsRouter);
+app.use("/2fa", requireApiKey, twofaRouter);
 
 // ── Pages HTML ──
 app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "index.html")); });
