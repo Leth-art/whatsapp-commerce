@@ -190,6 +190,84 @@
 </head>
 <body>
 
+<!-- Bandeau expiration/essai -->
+<div id="trial-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:250;background:linear-gradient(90deg,#e85c0e,#ff9a00);padding:12px 24px;display:none;align-items:center;justify-content:space-between;gap:12px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="trial-icon" style="font-size:18px;">⚠️</span>
+    <div>
+      <div id="trial-title" style="font-weight:700;font-size:13px;color:white;"></div>
+      <div id="trial-sub" style="font-size:11px;color:rgba(255,255,255,0.8);"></div>
+    </div>
+  </div>
+  <button onclick="document.getElementById('payment-modal').style.display='flex'" style="background:white;color:#e85c0e;border:none;padding:6px 16px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">S'abonner →</button>
+</div>
+
+<!-- Modal Paiement -->
+<div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:400;">
+  <div style="background:#13131a;border:1px solid #2a2a3a;border-radius:20px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;">💳 Choisir un plan</h3>
+      <button onclick="document.getElementById('payment-modal').style.display='none'" style="background:none;border:none;color:#6b6b8a;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Choix plan -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+      <div id="plan-starter" onclick="selectPaymentPlan('starter')" style="border:2px solid #2a2a3a;border-radius:12px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Starter</div>
+        <div style="color:#00e5a0;font-size:16px;font-weight:800;" id="pm-price-starter">—</div>
+        <div style="font-size:10px;color:#6b6b8a;" id="pm-currency-starter">XOF/mois</div>
+        <div style="font-size:10px;color:#6b6b8a;margin-top:4px;">15 produits</div>
+      </div>
+      <div id="plan-pro" onclick="selectPaymentPlan('pro')" style="border:2px solid #e85c0e;border-radius:12px;padding:14px;cursor:pointer;text-align:center;background:rgba(232,92,14,0.08);transition:all 0.2s;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Pro ⭐</div>
+        <div style="color:#00e5a0;font-size:16px;font-weight:800;" id="pm-price-pro">—</div>
+        <div style="font-size:10px;color:#6b6b8a;" id="pm-currency-pro">XOF/mois</div>
+        <div style="font-size:10px;color:#6b6b8a;margin-top:4px;">50 produits</div>
+      </div>
+      <div id="plan-business" onclick="selectPaymentPlan('business')" style="border:2px solid #2a2a3a;border-radius:12px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Business</div>
+        <div style="color:#00e5a0;font-size:16px;font-weight:800;" id="pm-price-business">—</div>
+        <div style="font-size:10px;color:#6b6b8a;" id="pm-currency-business">XOF/mois</div>
+        <div style="font-size:10px;color:#6b6b8a;margin-top:4px;">Illimité</div>
+      </div>
+    </div>
+
+    <!-- Étape 2 : payer -->
+    <div id="payment-step2" style="display:none;">
+      <div style="background:#0a0a0f;border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
+        <div id="selected-plan-label" style="font-size:12px;color:#6b6b8a;margin-bottom:4px;"></div>
+        <div id="selected-amount" style="font-size:28px;font-weight:800;color:#00e5a0;"></div>
+      </div>
+
+      <div style="background:rgba(232,92,14,0.08);border:1px solid rgba(232,92,14,0.2);border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:8px;">📱 Comment payer :</div>
+        <div style="font-size:12px;color:#6b6b8a;line-height:1.8;">
+          1. Ouvrez <strong style="color:#f0f0f8;">My Touchpoint</strong> (ou MTN/Orange/Wave)<br>
+          2. Envoyez le montant indiqué<br>
+          3. Copiez le <strong style="color:#f0f0f8;">numéro de transaction</strong> ci-dessous
+        </div>
+        <button onclick="openMyTouchpoint()" style="margin-top:12px;width:100%;background:#e85c0e;color:white;border:none;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">
+          💸 Ouvrir My Touchpoint
+        </button>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;color:#6b6b8a;text-transform:uppercase;letter-spacing:1px;">Numéro de transaction</label>
+        <input id="transaction-ref" type="text" placeholder="Ex: TXN123456789" style="width:100%;margin-top:6px;background:#1c1c27;border:1px solid #2a2a3a;color:#f0f0f8;padding:10px 14px;border-radius:10px;font-size:14px;">
+      </div>
+
+      <div id="transaction-sent" style="display:none;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:10px;padding:12px;text-align:center;color:#00e5a0;font-size:13px;font-weight:700;margin-bottom:12px;">
+        ✅ Demande envoyée ! Validation sous 24h.
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="backToPlanSelection()" style="flex:1;background:#1c1c27;border:1px solid #2a2a3a;color:#f0f0f8;padding:10px;border-radius:10px;font-size:13px;cursor:pointer;">← Retour</button>
+        <button onclick="submitTransaction()" style="flex:2;background:#00e5a0;color:#000;border:none;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">✅ Confirmer le paiement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Ecran de connexion par Merchant ID -->
 <div class="login-screen" id="login-screen">
   <div class="login-card">
@@ -1258,7 +1336,7 @@ async function load2FAStatus() {
       box.innerHTML = '<div style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:10px;padding:12px 16px;color:#00e5a0;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;"><span>✅</span><span>2FA activée — Compte sécurisé</span></div>';
       if (btnSetup) btnSetup.style.display = 'none';
     } else {
-      box.innerHTML = '<div style="background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);border-radius:10px;padding:12px 16px;color:#f0a500;font-size:13px;display:flex;align-items:center;gap:8px;"><span>⚠️</span><span>2FA non activée — Votre compte n'est pas protégé</span></div>';
+      box.innerHTML = '<div style="background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);border-radius:10px;padding:12px 16px;color:#f0a500;font-size:13px;display:flex;align-items:center;gap:8px;"><span>⚠️</span><span>2FA non activée — Votre compte n\'est pas protégé</span></div>';
       if (btnSetup) btnSetup.style.display = 'block';
     }
   } catch(e) {}
@@ -1277,7 +1355,7 @@ async function setup2FA() {
 
 async function enable2FA() {
   const code = document.getElementById('twofa-confirm-code').value.trim();
-  if (code.length !== 6) { toast('Entrez le code à 6 chiffres de l'app', 'error'); return; }
+  if (code.length !== 6) { toast('Entrez le code à 6 chiffres de l\'app', 'error'); return; }
   try {
     const data = await apiFull('/2fa/enable/' + MERCHANT_ID, 'POST', { code });
     if (data.success) {
