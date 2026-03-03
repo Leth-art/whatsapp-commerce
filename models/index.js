@@ -20,8 +20,6 @@ const Merchant = sequelize.define("Merchant", {
   plan: { type: DataTypes.STRING, defaultValue: "starter" },
   subscriptionExpiresAt: { type: DataTypes.DATE },
   lastPaymentId: { type: DataTypes.STRING },
-  totpSecret: { type: DataTypes.STRING, defaultValue: null },
-totpEnabled: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
 Merchant.prototype.isSubscriptionActive = function() {
@@ -41,6 +39,7 @@ const Product = sequelize.define("Product", {
   imageUrl: { type: DataTypes.STRING, defaultValue: "" },
   isAvailable: { type: DataTypes.BOOLEAN, defaultValue: true },
   metaProductId: { type: DataTypes.STRING, defaultValue: null },
+  language: { type: DataTypes.STRING, defaultValue: 'fr' },
 });
 
 // ─── Customer ───

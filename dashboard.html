@@ -561,34 +561,6 @@
         <button class="btn btn-primary" onclick="initiatePayment()" style="width:100%;">💳 Payer maintenant</button>
       </div>
 
-      <!-- Section 2FA -->
-      <div class="card" style="padding:28px;margin-bottom:20px;">
-        <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px;">🔐 Double authentification (2FA)</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Protégez votre compte avec Google Authenticator ou Authy.</p>
-
-        <div id="twofa-status-box" style="margin-bottom:16px;"></div>
-
-        <!-- QR code setup -->
-        <div id="twofa-qr-box" style="display:none;text-align:center;margin-bottom:16px;">
-          <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">Scannez ce QR avec <strong style="color:var(--text)">Google Authenticator</strong> ou <strong style="color:var(--text)">Authy</strong> :</p>
-          <img id="twofa-qr-img" src="" style="width:180px;height:180px;border-radius:12px;border:2px solid var(--border);">
-          <div style="margin-top:16px;">
-            <div class="form-group" style="max-width:240px;margin:0 auto;">
-              <label>Code de confirmation (6 chiffres)</label>
-              <input id="twofa-confirm-code" type="text" maxlength="6" placeholder="000000"
-                style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;">
-            </div>
-            <button class="btn btn-primary" onclick="enable2FA()" style="width:100%;max-width:240px;margin-top:12px;">
-              ✅ Activer la 2FA
-            </button>
-          </div>
-        </div>
-
-        <button class="btn btn-primary" id="btn-setup-2fa" onclick="setup2FA()" style="display:none;">
-          📱 Configurer la 2FA
-        </button>
-      </div>
-
       <!-- Onboarding WAWP guidé -->
       <div class="card" style="padding:28px;margin-bottom:20px;">
         <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px;">🔗 Connexion WhatsApp via WAWP</h3>
@@ -673,7 +645,6 @@
 <script>
 // ── Config ──
 const API = 'https://whatsapp-commerce-1roe.onrender.com/api';
-const BASE = 'https://whatsapp-commerce-1roe.onrender.com'; // pour routes hors /api
 const API_KEY = 'WB-' + atob('d2F6aWJvdC1zZWNyZXQta2V5LTIwMjY='); // clé encodée
 let MERCHANT_ID = '';
 let editingProductId = null;
@@ -738,18 +709,10 @@ function loadPage(name) {
   else if (name === 'catalog') loadCatalog();
   else if (name === 'customers') loadCustomers();
   else if (name === 'analytics') loadAnalytics();
-  else if (name === 'settings') { loadSettings(); loadSubscriptionInfo(); load2FAStatus(); }
+  else if (name === 'settings') { loadSettings(); loadSubscriptionInfo(); }
 }
 
 // ── API Helper ──
-// Appel vers routes hors /api (ex: /2fa)
-async function apiFull(path, method, body) {
-  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY } };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(BASE + path, opts);
-  return res.json();
-}
-
 async function api(path, method, body) {
   const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY } };
   if (body) opts.body = JSON.stringify(body);
@@ -1322,50 +1285,6 @@ function renderRelanceStats(customers) {
   if (el3) el3.textContent = j3 + ' client' + (j3 > 1 ? 's' : '');
   if (el7) el7.textContent = j7 + ' client' + (j7 > 1 ? 's' : '');
   if (el14) el14.textContent = j14 + ' client' + (j14 > 1 ? 's' : '');
-}
-
-// ── Fonctions 2FA ──
-async function load2FAStatus() {
-  if (!MERCHANT_ID) return;
-  try {
-    const data = await apiFull('/2fa/status/' + MERCHANT_ID);
-    const box = document.getElementById('twofa-status-box');
-    const btnSetup = document.getElementById('btn-setup-2fa');
-    if (!box) return;
-    if (data.enabled) {
-      box.innerHTML = '<div style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);border-radius:10px;padding:12px 16px;color:#00e5a0;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;"><span>✅</span><span>2FA activée — Compte sécurisé</span></div>';
-      if (btnSetup) btnSetup.style.display = 'none';
-    } else {
-      box.innerHTML = '<div style="background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);border-radius:10px;padding:12px 16px;color:#f0a500;font-size:13px;display:flex;align-items:center;gap:8px;"><span>⚠️</span><span>2FA non activée — Votre compte n\'est pas protégé</span></div>';
-      if (btnSetup) btnSetup.style.display = 'block';
-    }
-  } catch(e) {}
-}
-
-async function setup2FA() {
-  try {
-    const data = await apiFull('/2fa/setup/' + MERCHANT_ID, 'POST');
-    if (data.qrCode) {
-      document.getElementById('twofa-qr-img').src = data.qrCode;
-      document.getElementById('twofa-qr-box').style.display = 'block';
-      document.getElementById('btn-setup-2fa').style.display = 'none';
-    }
-  } catch(e) { toast('Erreur lors du setup 2FA', 'error'); }
-}
-
-async function enable2FA() {
-  const code = document.getElementById('twofa-confirm-code').value.trim();
-  if (code.length !== 6) { toast('Entrez le code à 6 chiffres de l\'app', 'error'); return; }
-  try {
-    const data = await apiFull('/2fa/enable/' + MERCHANT_ID, 'POST', { code });
-    if (data.success) {
-      toast('🎉 2FA activée avec succès !', 'success');
-      document.getElementById('twofa-qr-box').style.display = 'none';
-      load2FAStatus();
-    } else {
-      toast(data.error || 'Code incorrect', 'error');
-    }
-  } catch(e) { toast('Code incorrect, réessayez', 'error'); }
 }
 
 // ── Vérifier le statut de paiement au retour ──
