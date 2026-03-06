@@ -6,8 +6,8 @@ const MONEROO_API_URL = "https://api.moneroo.io/v1";
 
 // Prix par devise (Mobile Money + Carte)
 const PLAN_PRICES = {
-  XOF: { starter: 20000, pro: 40000, business: 100000 },
-  XAF: { starter: 20000, pro: 40000, business: 100000 },
+  XOF: { starter: 35000, pro: 55000, business: 115000 },
+  XAF: { starter: 35000, pro: 55000, business: 115000 },
   GNF: { starter: 250000, pro: 500000, business: 1250000 },
   KES: { starter: 3500, pro: 7000, business: 18000 },
   MRO: { starter: 11000, pro: 22000, business: 55000 },
