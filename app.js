@@ -7,6 +7,7 @@ const apiRouter = require("./routes/api");
 const subscriptionsRouter = require("./routes/subscriptions");
 const onboardingRouter = require("./routes/onboarding");
 const { startCronJobs } = require("./modules/retention");
+const analyticsRouter = require("./routes/analytics");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +42,7 @@ connectDB().then(async () => {
     console.error("⚠️ Erreur migration DB :", err.message);
   }
   startCronJobs();
+  // ℹ️ Pour les index DB : lancer manuellement → node migrations/add_indexes.js
 });
 
 // express.static déplacé après maintenanceMode pour que la maintenance bloque tout
@@ -93,6 +95,7 @@ app.use("/onboarding", onboardingRouter); // nécessaire pour signup
 // ── Routes protégées par API Key ──
 app.use("/api", requireApiKey, apiRouter);
 app.use("/subscription", requireApiKey, subscriptionsRouter);
+app.use("/analytics", requireApiKey, analyticsRouter);
 
 // ── Pages HTML ──
 app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "index.html")); });
