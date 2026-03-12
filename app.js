@@ -7,11 +7,21 @@ const apiRouter = require("./routes/api");
 const subscriptionsRouter = require("./routes/subscriptions");
 const onboardingRouter = require("./routes/onboarding");
 const analyticsRouter = require("./routes/analytics");
+const boutiqueRouter = require("./routes/boutique");
 const { startCronJobs } = require("./modules/retention");
-const { initRedis } = require("./core/cache");
-const { initQueue } = require("./core/messageQueue");
-const { runIndexMigration } = require("./migrations/addIndexes");
-const { initRateLimiter } = require("./core/rateLimiter");
+
+// Optimisations (avec fallback si fichier absent)
+let initRedis = async () => {};
+let initQueue = async () => {};
+let runIndexMigration = async () => {};
+let initRateLimiter = async () => {};
+
+try { ({ initRedis } = require("./core/cache")); } catch {}
+try { ({ initQueue } = require("./core/queue")); } catch (e) {
+  try { ({ initQueue } = require("./core/messageQueue")); } catch {}
+}
+try { ({ runIndexMigration } = require("./migrations/addIndexes")); } catch {}
+try { ({ initRateLimiter } = require("./core/rateLimiter")); } catch {}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,16 +46,13 @@ connectDB().then(async () => {
     await sequelize.sync({ alter: true });
     console.log("✅ Base de données migrée et synchronisée");
 
-    // Prompt 3 : Index DB
     await runIndexMigration().catch(err => console.warn("⚠️ Index migration:", err.message));
   } catch (err) {
     console.error("⚠️ Erreur migration DB:", err.message);
   }
 
-  // Prompt 1 : Redis Cache
   await initRedis().catch(() => {});
 
-  // Prompt 4 : Rate Limiter
   let sharedRedis = null;
   try {
     if (process.env.REDIS_URL) {
@@ -55,8 +62,6 @@ connectDB().then(async () => {
     }
   } catch {}
   await initRateLimiter(sharedRedis).catch(() => {});
-
-  // Prompt 2 : Queue
   await initQueue().catch(() => {});
 
   startCronJobs();
@@ -83,8 +88,8 @@ const requireAdminToken = (req, res, next) => {
 
 const maintenanceMode = (req, res, next) => {
   const isMaintenance = process.env.MAINTENANCE_MODE === "true";
-  const isExcluded = ["/maintenance","/favicon.svg"].includes(req.path) ||
-    ["/webhook","/api","/admin","/subscription","/onboarding","/analytics"].some(p => req.path.startsWith(p));
+  const isExcluded = ["/maintenance", "/favicon.svg"].includes(req.path) ||
+    ["/webhook", "/api", "/admin", "/subscription", "/onboarding", "/analytics", "/boutique"].some(p => req.path.startsWith(p));
   if (isMaintenance && !isExcluded) return res.sendFile(path.join(__dirname, "maintenance.html"));
   next();
 };
@@ -98,7 +103,9 @@ app.use("/onboarding", onboardingRouter);
 app.use("/api", requireApiKey, apiRouter);
 app.use("/subscription", requireApiKey, subscriptionsRouter);
 app.use("/analytics", requireApiKey, analyticsRouter);
+app.use("/boutique", boutiqueRouter);
 
+app.get("/merchant", (req, res) => res.sendFile(path.join(__dirname, "merchant.html")));
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 app.get("/signup", (req, res) => res.sendFile(path.join(__dirname, "signup.html")));
 app.get("/privacy", (req, res) => res.sendFile(path.join(__dirname, "privacy.html")));
@@ -111,6 +118,7 @@ app.use((err, req, res, next) => { res.status(500).json({ error: "Erreur interne
 
 app.listen(PORT, () => {
   console.log(`🚀 Serveur sur http://localhost:${PORT}`);
+  console.log(`🛍️ Boutiques : /boutique/:slug`);
   console.log(`📈 Analytics : /analytics/merchant/:id`);
 });
 
