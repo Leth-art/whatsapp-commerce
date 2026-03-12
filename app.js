@@ -11,17 +11,17 @@ const boutiqueRouter = require("./routes/boutique");
 const { startCronJobs } = require("./modules/retention");
 
 // Optimisations (avec fallback si fichier absent)
-let initRedis = async () => {};
-let initQueue = async () => {};
-let runIndexMigration = async () => {};
-let initRateLimiter = async () => {};
+const safeRequire = (path) => { try { return require(path); } catch { return {}; } };
 
-try { ({ initRedis } = require("./core/cache")); } catch {}
-try { ({ initQueue } = require("./core/queue")); } catch (e) {
-  try { ({ initQueue } = require("./core/messageQueue")); } catch {}
-}
-try { ({ runIndexMigration } = require("./migrations/addIndexes")); } catch {}
-try { ({ initRateLimiter } = require("./core/rateLimiter")); } catch {}
+const _cache = safeRequire("./core/cache");
+const _queue = safeRequire("./core/queue") || safeRequire("./core/messageQueue");
+const _indexes = safeRequire("./migrations/addIndexes");
+const _limiter = safeRequire("./core/rateLimiter");
+
+const initRedis = typeof _cache.initRedis === 'function' ? _cache.initRedis : async () => {};
+const initQueue = typeof _queue.initQueue === 'function' ? _queue.initQueue : async () => {};
+const runIndexMigration = typeof _indexes.runIndexMigration === 'function' ? _indexes.runIndexMigration : async () => {};
+const initRateLimiter = typeof _limiter.initRateLimiter === 'function' ? _limiter.initRateLimiter : async () => {};
 
 const app = express();
 const PORT = process.env.PORT || 3000;
