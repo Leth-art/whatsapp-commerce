@@ -47,6 +47,14 @@ connectDB().then(async () => {
     console.log("✅ Base de données migrée et synchronisée");
 
     await runIndexMigration().catch(err => console.warn("⚠️ Index migration:", err.message));
+    
+    // Migration slugs pour anciens commerçants
+    try {
+      const { migrateSlugs } = require("./migrations/migrate_slugs");
+      await migrateSlugs();
+    } catch (err) {
+      console.warn("⚠️ Slug migration:", err.message);
+    }
   } catch (err) {
     console.error("⚠️ Erreur migration DB:", err.message);
   }
@@ -66,7 +74,14 @@ connectDB().then(async () => {
 
   startCronJobs();
 
-  
+  // Restaure les sessions Baileys au démarrage
+  try {
+    const { restoreAllSessions } = require('./core/baileys');
+    const { handleBaileysMessage } = require('./core/router');
+    await restoreAllSessions(handleBaileysMessage);
+  } catch (err) {
+    console.warn('⚠️ Baileys sessions non restaurées:', err.message);
+  }
 });
 
 app.use((req, res, next) => {
