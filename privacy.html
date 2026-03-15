@@ -52,7 +52,7 @@
 <div class="container">
   <div class="hero-tag">Légal</div>
   <h1>Politique de confidentialité</h1>
-  <p class="date">Dernière mise à jour : Mars 2026 — WaziBot, plateforme SaaS d'assistant commercial IA pour WhatsApp</p>
+  <p class="date">Dernière mise à jour : 15 Mars 2026 — WaziBot, plateforme SaaS d'assistant commercial IA pour WhatsApp</p>
 
   <p>WaziBot ("nous", "notre", "la plateforme") est un service SaaS qui fournit des assistants commerciaux intelligents via WhatsApp aux commerçants d'Afrique de l'Ouest. Cette politique explique de manière transparente comment nous collectons, utilisons, stockons et protégeons vos données personnelles ainsi que celles de vos clients.</p>
 
@@ -64,9 +64,9 @@
   <h2>1. Qui sommes-nous</h2>
   <p>WaziBot est une plateforme SaaS hébergée sur Render (serveurs cloud) avec une base de données PostgreSQL sécurisée. Notre service est accessible via :</p>
   <ul>
-    <li><strong>Site web</strong> : <a href="https://whatsapp-commerce-1roe.onrender.com">whatsapp-commerce-1roe.onrender.com</a></li>
+    <li><strong>Site web</strong> : <a href="https://whatsapp-commerce-1roe.onrender.com/">whatsapp-commerce-1roe.onrender.com</a></li>
     <li><strong>Application mobile</strong> : WaziBot Merchant (Android)</li>
-    <li><strong>WhatsApp</strong> : via l'API officielle Meta, connectée via WAWP</li>
+    <li><strong>WhatsApp</strong> : via l'API officielle Meta (WhatsApp Business API)</li>
   </ul>
 
   <h2>2. Données collectées</h2>
@@ -74,8 +74,8 @@
   <ul>
     <li>Informations boutique : nom, ville, pays, devise, description</li>
     <li>Coordonnées : adresse email, numéro WhatsApp personnel</li>
-    <li>Identifiants techniques : Token API WAWP, Phone Number ID (stockés chiffrés)</li>
-    <li>Données de paiement : traitées par <strong>CinetPay</strong> (Mobile Money + Carte) — nous ne stockons aucune donnée bancaire</li>
+    <li>Identifiants techniques : Token WhatsApp Business API, Phone Number ID (stockés chiffrés)</li>
+    <li>Données de paiement : traitées par <strong>My Touchpoint</strong> (Mobile Money) — nous ne stockons aucune donnée bancaire</li>
     <li>Plan d'abonnement et date d'expiration</li>
   </ul>
   <p><strong>Pour les clients de votre boutique :</strong></p>
@@ -102,7 +102,7 @@
   <ul>
     <li><strong>Anthropic (Claude AI)</strong> — pour générer les réponses de l'assistant. Les messages sont transmis sans données personnellement identifiables du commerçant</li>
     <li><strong>Meta / WhatsApp API</strong> — pour envoyer et recevoir les messages WhatsApp via l'infrastructure officielle</li>
-    <li><strong>WAWP (wawp.net)</strong> — intermédiaire technique pour la connexion à l'API WhatsApp officielle de Meta</li>
+    
     
     <li><strong>Render (hébergeur)</strong> — infrastructure serveur et base de données PostgreSQL sécurisée</li>
   </ul>
@@ -124,17 +124,17 @@
   <ul>
     <li>Hébergement sur <strong>Render</strong> avec chiffrement en transit (HTTPS/TLS)</li>
     <li>Base de données <strong>PostgreSQL</strong> avec accès restreint et sauvegardes automatiques</li>
-    <li>Tokens WhatsApp (WAWP) stockés de manière <strong>chiffrée</strong>, jamais exposés publiquement</li>
+    <li>Tokens WhatsApp stockés de manière <strong>chiffrée</strong>, jamais exposés publiquement</li>
     <li>Clés API protégées par header d'authentification sur toutes les routes</li>
     <li>Aucun stockage de mots de passe (authentification par ID unique)</li>
   </ul>
 
-  <h2>7. Application mobile</h2>
-  <p>L'application WaziBot Merchant (Android) :</p>
+  <h2>7. Dashboard et site boutique</h2>
+  <p>WaziBot vous fournit deux interfaces web :</p>
   <ul>
-    <li>Ne collecte <strong>aucune donnée supplémentaire</strong> par rapport au site web</li>
-    <li>Stocke uniquement votre ID boutique localement sur votre téléphone (SharedPreferences)</li>
-    <li>Ne nécessite pas de compte séparé — utilise le même ID que votre dashboard web</li>
+    <li><strong>Dashboard marchand</strong> : accessible sur <code>/merchant</code> depuis n'importe quel navigateur</li>
+    <li><strong>Mini-site boutique</strong> : généré automatiquement sur <code>/boutique/votre-slug</code> pour vos clients</li>
+    <li>Stocke uniquement votre ID boutique localement dans votre navigateur (localStorage)</li>
     <li>Toutes les communications avec notre API sont chiffrées (HTTPS)</li>
   </ul>
 
@@ -162,13 +162,13 @@
   <div class="contact-card">
     <h3>Des questions sur vos données ?</h3>
     <p>Notre équipe est disponible pour répondre à toutes vos questions concernant la confidentialité et la gestion de vos données.</p>
-    <a href="https://wa.me/22871454079" class="contact-btn">💬 Nous contacter sur WhatsApp</a>
+    <a href="mailto:salemkingrosetho@gmail.com" class="contact-btn">📧 salemkingrosetho@gmail.com</a>
   </div>
 </div>
 
 <footer>
   <p>© 2026 WaziBot — Politique de confidentialité</p>
-  <p style="margin-top:8px;"><a href="/">Accueil</a> · <a href="/guide.html">Guide</a> · <a href="/signup.html">Créer un compte</a></p>
+  <p style="margin-top:8px;"><a href="/">Accueil</a> · <a href="/guide">Guide</a> · <a href="/signup">Créer un compte</a></p>
 </footer>
 
 </body>
