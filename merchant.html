@@ -528,6 +528,22 @@ select.status-sel { background: var(--surface2); border: 1px solid var(--border)
       <div class="form-group"><label>Stock</label><input type="number" id="pm-stock" placeholder="10"></div>
       <div class="form-group"><label>Catégorie</label><input type="text" id="pm-category" placeholder="Vêtements"></div>
       <div class="form-group full"><label>Description</label><textarea id="pm-desc" placeholder="Description du produit…"></textarea></div>
+      <div class="form-group full">
+        <label>📸 Photo du produit</label>
+        <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('pm-image-input').click()">
+          <input type="file" id="pm-image-input" accept="image/*" onchange="handleImageSelect(event)" onclick="event.stopPropagation()">
+          <img id="pm-image-preview" class="preview" src="" alt="Preview">
+          <div class="img-uploading" id="img-uploading">
+            <div style="color:white;font-size:13px">⏳ Upload en cours...</div>
+          </div>
+          <button class="img-remove" onclick="removeImage(event)">✕ Supprimer</button>
+          <div class="placeholder">
+            <div class="icon">📸</div>
+            <div>Cliquez pour ajouter une photo</div>
+            <div style="font-size:11px;margin-top:4px;opacity:0.6">JPG, PNG • Max 5MB</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeProductModal()">Annuler</button>
@@ -714,15 +730,80 @@ function openProductModal(productId = null) {
       document.getElementById('pm-stock').value = p.stock ?? '';
       document.getElementById('pm-category').value = p.category || '';
       document.getElementById('pm-desc').value = p.description || '';
+      // Image
+      const area = document.getElementById('img-upload-area');
+      const preview = document.getElementById('pm-image-preview');
+      if (p.imageUrl) {
+        preview.src = p.imageUrl;
+        area.classList.add('has-image');
+      } else {
+        preview.src = '';
+        area.classList.remove('has-image');
+      }
+      window._currentImageUrl = p.imageUrl || '';
     }
   } else {
     ['pm-name','pm-price','pm-stock','pm-category','pm-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('pm-image-preview').src = '';
+    document.getElementById('img-upload-area').classList.remove('has-image');
+    window._currentImageUrl = '';
   }
   document.getElementById('product-modal').classList.add('open');
 }
 
 function editProduct(id) { openProductModal(id); }
 function closeProductModal() { document.getElementById('product-modal').classList.remove('open'); editingProductId = null; }
+
+
+// ── IMAGE UPLOAD ─────────────────────────────────────────────────────────────
+window._currentImageUrl = '';
+window._pendingImageFile = null;
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('❌ Image trop lourde (max 5MB)', 'error'); return; }
+  
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const preview = document.getElementById('pm-image-preview');
+    const area = document.getElementById('img-upload-area');
+    preview.src = ev.target.result;
+    area.classList.add('has-image');
+    window._pendingImageFile = ev.target.result; // base64
+    window._currentImageUrl = ''; // sera mis à jour après upload
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(e) {
+  e.stopPropagation();
+  document.getElementById('pm-image-preview').src = '';
+  document.getElementById('img-upload-area').classList.remove('has-image');
+  document.getElementById('pm-image-input').value = '';
+  window._currentImageUrl = '';
+  window._pendingImageFile = null;
+}
+
+async function uploadPendingImage(productId) {
+  if (!window._pendingImageFile) return;
+  const area = document.getElementById('img-upload-area');
+  const spinner = document.getElementById('img-uploading');
+  spinner.classList.add('show');
+  try {
+    const r = await fetch(`${BASE}/api/merchants/${merchantId}/products/${productId}/image`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ imageBase64: window._pendingImageFile })
+    });
+    if (r.ok) {
+      const data = await r.json();
+      window._currentImageUrl = data.imageUrl;
+      window._pendingImageFile = null;
+      toast('🖼️ Image uploadée !', 'success');
+    }
+  } catch { toast('⚠️ Image non uploadée', 'error'); }
+  finally { spinner.classList.remove('show'); }
+}
 
 async function saveProduct() {
   const name = document.getElementById('pm-name').value.trim();
@@ -733,13 +814,31 @@ async function saveProduct() {
     stock: parseInt(document.getElementById('pm-stock').value) || 0,
     category: document.getElementById('pm-category').value.trim() || 'Divers',
     description: document.getElementById('pm-desc').value.trim(),
+    imageUrl: window._currentImageUrl || '',
   };
   const url = editingProductId
     ? `${BASE}/api/merchants/${merchantId}/products/${editingProductId}`
     : `${BASE}/api/merchants/${merchantId}/products`;
   const method = editingProductId ? 'PATCH' : 'POST';
   const r = await fetch(url, { method, headers: H, body: JSON.stringify(data) });
-  if (r.ok) { toast(editingProductId ? '✅ Produit modifié' : '✅ Produit ajouté', 'success'); closeProductModal(); await loadProducts(); }
+  if (r.ok) {
+    const saved = await r.json();
+    const productId = editingProductId || saved.productId;
+    // Upload image si une nouvelle a été sélectionnée
+    if (window._pendingImageFile && productId) {
+      await uploadPendingImage(productId);
+      // Met à jour l'imageUrl dans la DB
+      if (window._currentImageUrl) {
+        await fetch(`${BASE}/api/merchants/${merchantId}/products/${productId}`, {
+          method: 'PATCH', headers: H,
+          body: JSON.stringify({ imageUrl: window._currentImageUrl })
+        });
+      }
+    }
+    toast(editingProductId ? '✅ Produit modifié' : '✅ Produit ajouté', 'success');
+    closeProductModal();
+    await loadProducts();
+  }
   else toast('❌ Erreur enregistrement', 'error');
 }
 
