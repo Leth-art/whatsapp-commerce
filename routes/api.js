@@ -225,4 +225,46 @@ router.post("/merchants/:id/payment-request", validateMerchantId, async (req, re
   }
 });
 
+
+// ─── Routes Admin (non filtrées) ─────────────────────────────────────────────
+
+// Activer/renouveler un abonnement
+router.post("/admin/activate/:id", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    const { plan } = req.body;
+    const validPlans = ["starter", "pro", "business"];
+    const finalPlan = validPlans.includes(plan) ? plan : merchant.plan || "starter";
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await merchant.update({
+      plan: finalPlan,
+      isActive: true,
+      subscriptionExpiresAt: expiresAt,
+      lastPaymentId: null,
+    });
+    res.json({ success: true, plan: finalPlan, expiresAt });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Activer/désactiver une boutique
+router.post("/admin/toggle/:id", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    await merchant.update({ isActive: req.body.isActive });
+    res.json({ success: true, isActive: req.body.isActive });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Marquer comme relancé
+router.post("/admin/merchants/:id/mark-reminded", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    await merchant.update({ lastRemindedAt: new Date() });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

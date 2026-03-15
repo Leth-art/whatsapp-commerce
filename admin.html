@@ -430,7 +430,7 @@ function renderOverview(merchants) {
   });
 
   // Revenus abonnements
-  const PLAN_PRICES = { starter: 15000, pro: 35000, business: 70000 };
+  const PLAN_PRICES = { starter: 35000, pro: 55000, business: 115000 };
   const monthlyRevenue = active.filter(m => {
     if (!m.subscriptionExpiresAt) return false;
     const created = new Date(m.createdAt);
@@ -602,7 +602,7 @@ function copyId(id) {
 
 // ── Accéder au dashboard d'un commerçant ──
 function accessDashboard(merchantId, shopName) {
-  window.open('/dashboard?id=' + merchantId, '_blank');
+  window.open('/merchant?id=' + merchantId, '_blank');
 }
 
 // ── Toast ──
@@ -622,7 +622,7 @@ function showToast(msg) {
 // ── Revenus ──
 async function loadRevenue() {
   const merchants = await api('/merchants');
-  const PLAN_PRICES = { starter: 15000, pro: 35000, business: 70000 };
+  const PLAN_PRICES = { starter: 35000, pro: 55000, business: 115000 };
   const paying = merchants.filter(m => m.isActive && !isInTrial(m));
   const monthly = paying.reduce((s, m) => s + (PLAN_PRICES[m.plan] || 0), 0);
   const churn = merchants.length ? Math.round(((merchants.length - paying.length) / merchants.length) * 100) : 0;
@@ -640,10 +640,10 @@ async function loadRevenue() {
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Starter (15k)', 'Pro (35k)', 'Business (70k)'],
+      labels: ['Starter (35k)', 'Pro (55k)', 'Business (115k)'],
       datasets: [{
         label: 'Revenus',
-        data: [counts.starter * 15000, counts.pro * 35000, counts.business * 70000],
+        data: [counts.starter * 35000, counts.pro * 55000, counts.business * 115000],
         backgroundColor: ['rgba(232,92,14,0.7)', 'rgba(0,229,160,0.7)', 'rgba(240,165,0,0.7)'],
         borderRadius: 8,
       }]
@@ -705,18 +705,17 @@ async function validatePayment(id, name, paymentInfo) {
   const parts = (paymentInfo || '').split('|');
   const plan = parts[0] || 'starter';
   const ref = parts[1] || '';
-  if (!confirm('Valider le paiement de ' + name + ' ? Plan: ' + plan.toUpperCase() + ' | Ref: ' + ref)) return;
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-  const res = await fetch(API + '/merchants/' + id, {
-    method: 'PATCH',
+  if (!confirm('Valider le paiement de ' + name + ' ?\nPlan: ' + plan.toUpperCase() + '\nRéf: ' + ref)) return;
+  const res = await fetch(API + '/admin/activate/' + id, {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-    body: JSON.stringify({ plan, isActive: true, subscriptionExpiresAt: expiresAt.toISOString(), lastPaymentId: null })
+    body: JSON.stringify({ plan })
   });
   if (res.ok) {
-    alert('Compte ' + name + ' active sur plan ' + plan.toUpperCase() + ' !');
+    showToast('✅ Compte ' + name + ' activé sur plan ' + plan.toUpperCase() + ' !');
     loadMerchants();
   } else {
-    alert('Erreur validation');
+    showToast('❌ Erreur validation');
   }
 }
 
@@ -787,7 +786,7 @@ async function saveToken() {
   try {
     const res = await fetch(API + '/merchants/' + currentMerchantId, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
       body: JSON.stringify({ whatsappToken: token, phoneNumberId })
     });
     const data = await res.json();
@@ -814,15 +813,22 @@ window.addEventListener('load', function() {
 
 async function sendReminder(merchantId, phone, name) {
   if (!phone) { alert('Pas de numéro pour ce commerçant'); return; }
-  const msg = encodeURIComponent(`⚠️ Bonjour ${name} ! Votre abonnement WaziBot expire bientôt. Renouvelez ici : https://whatsapp-commerce-1roe.onrender.com/signup.html`);
-  window.open(`https://wa.me/${phone.replace(/\+/g,'')}?text=${msg}`, '_blank');
+  const baseUrl = window.location.origin;
+  const msg = encodeURIComponent(`⚠️ Bonjour ${name} !\n\nVotre abonnement WaziBot expire bientôt.\n\nAccédez à votre dashboard pour renouveler : ${baseUrl}/merchant?id=${merchantId}`);
+  window.open(`https://wa.me/${phone.replace(/[^0-9]/g,'')}?text=${msg}`, '_blank');
+  // Marquer comme relancé et rafraîchir
+  await fetch(API + '/admin/merchants/' + merchantId + '/mark-reminded', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+  }).catch(() => {});
+  setTimeout(() => loadMerchants(), 1000);
 }
 
 async function toggleMerchant(id, isActive) {
   if (!confirm(isActive ? 'Désactiver cette boutique ?' : 'Réactiver cette boutique ?')) return;
-  await fetch(API + '/merchants/' + id, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+  await fetch(API + '/admin/toggle/' + id, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
     body: JSON.stringify({ isActive: !isActive })
   });
   loadMerchants();
@@ -846,14 +852,14 @@ function getMerchantStatus(m) {
 <div id="token-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:480px;margin:20px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">🔑 Token 360dialog</h3>
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">🔑 Connexion WhatsApp</h3>
       <button onclick="closeTokenModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
     </div>
     <p id="modal-merchant-name" style="color:var(--muted);font-size:13px;margin-bottom:20px;"></p>
 
     <div style="margin-bottom:16px;">
-      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px;">Token WhatsApp 360dialog</label>
-      <input id="modal-token" type="text" placeholder="Collez le token 360dialog ici..."
+      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px;">Token WhatsApp (whatsappToken)</label>
+      <input id="modal-token" type="text" placeholder="Collez le token WhatsApp API ici..."
         style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:13px;font-family:'DM Mono',monospace;">
     </div>
 
@@ -864,10 +870,10 @@ function getMerchantStatus(m) {
     </div>
 
     <div style="background:rgba(0,229,160,0.05);border:1px solid rgba(0,229,160,0.15);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
-      📋 <strong style="color:var(--text);">Comment obtenir ces infos :</strong><br>
-      1. Connectez-vous sur <strong>app.360dialog.com</strong><br>
-      2. Allez dans <strong>API Keys</strong> → copiez le token<br>
-      3. Allez dans <strong>Phone Numbers</strong> → copiez le Phone Number ID
+      📋 <strong style="color:var(--text);">Infos WhatsApp Business API :</strong><br>
+      1. <strong>Token</strong> : votre token WhatsApp Business API<br>
+      2. <strong>Phone Number ID</strong> : l'ID de votre numéro Meta<br>
+      3. Disponible dans votre compte Meta for Developers
     </div>
 
     <div style="display:flex;gap:10px;">
