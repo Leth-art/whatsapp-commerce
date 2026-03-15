@@ -318,7 +318,8 @@
         </div>
       </div>
     </div>
-    <div class="step-num">5</div>
+    <div class="step">
+      <div class="step-num">5</div>
       <div class="step-content">
         <h3>Testez et partagez votre numéro !</h3>
         <p>Envoyez "Bonjour" à votre numéro de boutique depuis un autre téléphone. Le bot doit répondre automatiquement avec votre message d'accueil.</p>
@@ -339,9 +340,9 @@
   <h2>Après votre essai gratuit</h2>
   <p class="subtitle">Choisissez le plan qui correspond à la taille de votre boutique.</p>
   <div class="cards">
-    <div class="card"><div class="card-icon">🌱</div><h3>Starter — 20 000 XOF/mois</h3><p>Jusqu'à <strong>15 produits</strong> et <strong>250 conversations IA/mois</strong>. Idéal pour démarrer et tester votre boutique.</p></div>
-    <div class="card" style="border-color:var(--accent);"><div class="card-icon">⭐</div><h3>Pro — 40 000 XOF/mois</h3><p>Jusqu'à <strong>50 produits</strong> et <strong>1 000 conversations IA/mois</strong>. Relances automatiques, rapport hebdomadaire et support prioritaire inclus.</p></div>
-    <div class="card"><div class="card-icon">🚀</div><h3>Business — 100 000 XOF/mois</h3><p><strong>Produits et conversations illimités</strong>. Support dédié. Pour les boutiques à fort volume.</p></div>
+    <div class="card"><div class="card-icon">🌱</div><h3>Starter — 35 000 XOF/mois</h3><p>Jusqu'à <strong>15 produits</strong> et <strong>250 conversations IA/mois</strong>. Idéal pour démarrer et tester votre boutique.</p></div>
+    <div class="card" style="border-color:var(--accent);"><div class="card-icon">⭐</div><h3>Pro — 55 000 XOF/mois</h3><p>Jusqu'à <strong>50 produits</strong> et <strong>1 000 conversations IA/mois</strong>. Relances automatiques, rapport hebdomadaire et support prioritaire inclus.</p></div>
+    <div class="card"><div class="card-icon">🚀</div><h3>Business — 115 000 XOF/mois</h3><p><strong>Produits et conversations illimités</strong>. Support dédié. Pour les boutiques à fort volume.</p></div>
   </div>
   <div class="info-box">
     <div class="icon">📱</div>
@@ -398,4 +399,9 @@
 
 <script>
 function toggleFaq(el) {
-  const item = el.p
+  const item = el.parentElement;
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>
