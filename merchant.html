@@ -661,6 +661,9 @@ async function initDashboard() {
 
 async function loadAll() {
   await Promise.all([loadMerchant(), loadOrders(), loadProducts()]);
+  // Précharge les stats en arrière-plan
+  const btn = document.querySelector('.period-btn');
+  if (btn) loadStats('weekly', btn).catch(() => {});
 }
 
 // ── MERCHANT ─────────────────────────────────────────────────────────────────
@@ -1050,7 +1053,7 @@ function showPage(name) {
     navItems[idx]?.classList.add('active');
     document.querySelectorAll('.mobile-nav-item')[idx]?.classList.add('active');
   }
-  if (name === 'stats') loadStats('weekly', document.querySelector('.period-btn'));
+  if (name === 'stats') { const btn = document.querySelector('.period-btn.active') || document.querySelector('.period-btn'); if (btn) loadStats('weekly', btn); }
   if (name === 'settings') { loadSiteInfo(); }
 }
 
