@@ -72,6 +72,104 @@ router.patch("/:slug/theme", async (req, res) => {
   }
 });
 
+
+// ─── POST /boutique/:slug/order ───────────────────────────────────────────────
+router.post("/:slug/order", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { customerName, customerPhone, address, items, paymentMethod } = req.body;
+
+    if (!customerName || !customerPhone || !address || !items || !items.length) {
+      return res.status(400).json({ error: "Informations manquantes" });
+    }
+
+    const merchant = await Merchant.findOne({ where: { shopSlug: slug } });
+    if (!merchant) return res.status(404).json({ error: "Boutique introuvable" });
+
+    const { Customer, Order, ConversationSession } = require("../models/index");
+    const { v4: uuidv4 } = require("uuid");
+
+    // Créer ou trouver le client
+    let customer = await Customer.findOne({
+      where: { merchantId: merchant.id, whatsappNumber: customerPhone }
+    });
+    if (!customer) {
+      customer = await Customer.create({
+        id: uuidv4(),
+        merchantId: merchant.id,
+        whatsappNumber: customerPhone,
+        name: customerName,
+      });
+    } else if (customerName && !customer.name) {
+      await customer.update({ name: customerName });
+    }
+
+    // Calcul du total
+    const products = await Product.findAll({ where: { merchantId: merchant.id } });
+    let totalAmount = 0;
+    const orderItems = [];
+
+    for (const item of items) {
+      const product = products.find(p => p.id === item.productId);
+      if (!product) continue;
+      const qty = parseInt(item.quantity) || 1;
+      const subtotal = product.price * qty;
+      totalAmount += subtotal;
+      orderItems.push({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: qty,
+        total: subtotal,
+      });
+    }
+
+    if (!orderItems.length) return res.status(400).json({ error: "Aucun produit valide" });
+
+    // Créer la commande
+    const orderNumber = "WB-" + Date.now().toString().slice(-6);
+    const order = await Order.create({
+      id: uuidv4(),
+      orderNumber,
+      merchantId: merchant.id,
+      customerId: customer.id,
+      items: orderItems,
+      totalAmount,
+      deliveryAddress: address,
+      paymentMethod: paymentMethod || "mobile_money",
+      status: "pending",
+    });
+
+    // Notifier le commerçant via WhatsApp si possible
+    try {
+      const { sendText } = require("../core/whatsappClient");
+      const ADMIN_PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+      const ADMIN_TOKEN = process.env.WHATSAPP_TOKEN;
+      if (ADMIN_PHONE_ID && ADMIN_TOKEN && merchant.ownerPhone) {
+        const itemsList = orderItems.map(i => `• ${i.name} x${i.quantity} — ${i.total.toLocaleString("fr-FR")} ${merchant.currency}`).join("\n");
+        await sendText(ADMIN_PHONE_ID, ADMIN_TOKEN, merchant.ownerPhone,
+          `🔔 *Nouvelle commande web — ${merchant.shopName || merchant.name}*\n\n` +
+          `📦 N° : *${orderNumber}*\n${itemsList}\n\n` +
+          `💰 Total : *${totalAmount.toLocaleString("fr-FR")} ${merchant.currency}*\n` +
+          `📍 Livraison : ${address}\n` +
+          `📱 Client : ${customerName} (${customerPhone})\n\n` +
+          `👉 Dashboard : ${process.env.APP_BASE_URL || "https://whatsapp-commerce-1roe.onrender.com"}/merchant`
+        ).catch(() => {});
+      }
+    } catch {}
+
+    res.json({
+      success: true,
+      orderNumber,
+      totalAmount,
+      message: `Commande ${orderNumber} reçue ! Le commerçant vous contactera sous peu.`
+    });
+  } catch (err) {
+    console.error("Erreur commande boutique:", err.message);
+    res.status(500).json({ error: "Erreur lors de la commande" });
+  }
+});
+
 // ─── Génération du HTML du site ───────────────────────────────────────────────
 const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   const shopName = merchant.shopName || merchant.name;
@@ -94,7 +192,7 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
               ${p.description ? `<p class="product-desc">${p.description.slice(0, 80)}${p.description.length > 80 ? "…" : ""}</p>` : ""}
               <div class="product-footer">
                 <div class="product-price">${Number(p.price).toLocaleString("fr-FR")} <span>${currency}</span></div>
-                <a href="${waLink}" target="_blank" class="btn-order">Commander →</a>
+                <button class="btn-order" onclick="addToCart('${p.id}', '${p.name.replace(/'/g,"\\'")}', ${p.price})">🛒 Ajouter</button>
               </div>
             </div>
           </div>`;
@@ -276,84 +374,77 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .wa-float:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(37,211,102,0.5); }
 
 
-/* MINI BOT CHAT */
-.chat-widget {
-  position: fixed; bottom: 90px; right: 24px; z-index: 300;
+/* ORDER MODAL */
+.order-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+  z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px;
 }
-.chat-toggle {
-  width: 56px; height: 56px; border-radius: 50%; border: none;
-  background: var(--primary); color: white; font-size: 24px;
-  cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  transition: all 0.2s; display: flex; align-items: center; justify-content: center;
-}
-.chat-toggle:hover { transform: scale(1.1); }
-.chat-toggle .badge {
-  position: absolute; top: -4px; right: -4px; width: 18px; height: 18px;
-  background: #ff4757; border-radius: 50%; font-size: 10px; font-weight: 700;
-  display: none; align-items: center; justify-content: center;
-}
-.chat-box {
-  position: absolute; bottom: 70px; right: 0;
-  width: 320px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; overflow: hidden; display: none;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+.order-overlay.open { display: flex; }
+.order-modal {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
   animation: slideUp 0.3s ease;
 }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.chat-box.open { display: flex; flex-direction: column; }
-.chat-header {
-  background: var(--primary); padding: 14px 16px;
+.order-modal-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0;
+  background: var(--surface); z-index: 1;
+}
+.order-modal-header h3 { font-size: 17px; font-weight: 800; }
+.order-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+.order-modal-body { padding: 20px 24px; }
+.cart-items { margin-bottom: 20px; }
+.cart-item {
   display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
 }
-.chat-header-info { display: flex; align-items: center; gap: 10px; }
-.chat-avatar {
-  width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2);
-  display: flex; align-items: center; justify-content: center; font-size: 18px;
+.cart-item:last-child { border-bottom: none; }
+.cart-item-name { font-size: 14px; font-weight: 600; flex: 1; }
+.cart-item-qty { display: flex; align-items: center; gap: 8px; }
+.qty-btn {
+  width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05); color: var(--text); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
 }
-.chat-title { font-weight: 700; font-size: 14px; color: white; }
-.chat-subtitle { font-size: 11px; color: rgba(255,255,255,0.8); }
-.chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; opacity: 0.8; }
-.chat-close:hover { opacity: 1; }
-.chat-messages {
-  padding: 16px; height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+.qty-btn:hover { border-color: var(--primary); color: var(--primary); }
+.cart-item-price { font-size: 14px; font-weight: 700; color: var(--primary); min-width: 80px; text-align: right; }
+.cart-total {
+  background: rgba(255,255,255,0.04); border-radius: 12px; padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
 }
-.chat-messages::-webkit-scrollbar { width: 4px; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-.chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.5; }
-.chat-msg.bot { background: rgba(255,255,255,0.06); color: var(--text); border-radius: 4px 16px 16px 16px; align-self: flex-start; }
-.chat-msg.user { background: var(--primary); color: white; border-radius: 16px 4px 16px 16px; align-self: flex-end; }
-.chat-msg.typing { display: flex; gap: 4px; align-items: center; padding: 12px 16px; }
-.chat-msg.typing span { width: 8px; height: 8px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-.chat-msg.typing span:nth-child(2) { animation-delay: 0.2s; }
-.chat-msg.typing span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1.2); opacity: 1; } }
-.chat-quick { padding: 8px 12px; display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--border); }
-.chat-quick-btn {
-  padding: 5px 10px; border-radius: 20px; border: 1px solid var(--border);
-  background: transparent; color: var(--muted); font-size: 11px; cursor: pointer;
-  transition: all 0.2s; white-space: nowrap;
-}
-.chat-quick-btn:hover { border-color: var(--primary); color: var(--primary); }
-.chat-input-area {
-  padding: 12px; border-top: 1px solid var(--border);
-  display: flex; gap: 8px; align-items: center;
-}
-.chat-input {
-  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-  color: var(--text); padding: 9px 14px; border-radius: 20px; font-size: 13px;
+.cart-total-label { font-size: 13px; color: var(--muted); }
+.cart-total-amount { font-size: 20px; font-weight: 800; color: var(--primary); }
+.order-form { display: flex; flex-direction: column; gap: 14px; }
+.order-form label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: block; margin-bottom: 5px; }
+.order-form input, .order-form select, .order-form textarea {
+  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  color: var(--text); padding: 11px 14px; border-radius: 12px; font-size: 14px;
   font-family: inherit; outline: none; transition: border-color 0.2s;
 }
-.chat-input:focus { border-color: var(--primary); }
-.chat-send {
-  width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
-  border: none; color: white; font-size: 16px; cursor: pointer; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+.order-form input:focus, .order-form select:focus, .order-form textarea:focus { border-color: var(--primary); }
+.order-form textarea { resize: none; min-height: 80px; }
+.btn-submit-order {
+  width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
+  border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all 0.2s; margin-top: 6px;
 }
-.chat-send:hover { filter: brightness(1.1); }
-@media (max-width: 600px) {
-  .chat-widget { bottom: 80px; right: 12px; }
-  .chat-box { width: 290px; right: -12px; }
+.btn-submit-order:hover { filter: brightness(1.1); }
+.btn-submit-order:disabled { opacity: 0.6; cursor: not-allowed; }
+.order-success {
+  text-align: center; padding: 30px 20px;
 }
+.order-success .success-icon { font-size: 56px; margin-bottom: 16px; }
+.order-success h4 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.order-success p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.cart-badge {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--primary); color: white; padding: 12px 24px; border-radius: 30px;
+  font-weight: 700; font-size: 14px; cursor: pointer; z-index: 200;
+  box-shadow: 0 4px 20px rgba(232,92,14,0.4); transition: all 0.3s;
+  display: none; align-items: center; gap: 10px;
+}
+.cart-badge.show { display: flex; }
+.cart-badge:hover { transform: translateX(-50%) translateY(-2px); }
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
@@ -393,7 +484,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 <section class="catalogue" id="catalogue">
   <div class="catalogue-header">
     <h2>Nos produits <span style="color:var(--primary)">(${products.length})</span></h2>
-    <p>Contactez-nous sur WhatsApp pour commander</p>
+    <p>Ajoutez vos produits au panier et passez commande directement</p>
   </div>
   ${categoriesHTML}
   <div class="products-grid" id="products-grid">
@@ -406,7 +497,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
   <p>
     ${shopName} ${city ? `· ${city}` : ""}<br>
     ${whatsappNumber ? `📱 <a href="https://wa.me/${whatsappNumber}">WhatsApp : +${whatsappNumber}</a><br>` : ""}
-    <span style="opacity:0.4;font-size:11px">Propulsé par <a href="/">WaziBot</a></span>
+    <span style="opacity:0.4;font-size:11px">Propulsé par <a href="/">WaziBot</a> · <a href="/merchant?id=${merchant.id}" style="color:var(--primary)">Espace commerçant</a></span>
   </p>
 </footer>
 
@@ -429,7 +520,8 @@ ${whatsappNumber ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" cl
 </div>
 
 <script>
-// SLUG and MID defined in chat widget below
+const SLUG = '${merchant.shopSlug}';
+const MID = '${merchant.id}';
 
 // Filtre catégorie
 function filterCat(cat, btn) {
@@ -456,122 +548,179 @@ async function changeTheme(theme) {
   } catch {}
 }
 </script>
-<!-- MINI BOT -->
-<div class="chat-widget">
-  <div class="chat-box" id="chat-box">
-    <div class="chat-header">
-      <div class="chat-header-info">
-        <div class="chat-avatar">🤖</div>
-        <div>
-          <div class="chat-title">Assistant ${shopName}</div>
-          <div class="chat-subtitle">● En ligne · Répond instantanément</div>
-        </div>
-      </div>
-      <button class="chat-close" onclick="toggleChat()">✕</button>
+
+<!-- PANIER FLOTTANT -->
+<div class="cart-badge" id="cart-badge" onclick="openOrderModal()">
+  🛒 <span id="cart-count">0</span> article(s) · <span id="cart-total-badge">0</span> ${currency}
+  <span style="font-weight:400;font-size:12px">→ Commander</span>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="order-overlay" id="order-overlay">
+  <div class="order-modal">
+    <div class="order-modal-header">
+      <h3>🛒 Votre commande</h3>
+      <button class="order-modal-close" onclick="closeOrderModal()">✕</button>
     </div>
-    <div class="chat-messages" id="chat-messages"></div>
-    <div class="chat-quick" id="chat-quick">
-      <button class="chat-quick-btn" onclick="sendQuick('catalogue')">🛍️ Catalogue</button>
-      <button class="chat-quick-btn" onclick="sendQuick('livraison')">🚚 Livraison</button>
-      <button class="chat-quick-btn" onclick="sendQuick('paiement')">💳 Paiement</button>
-      <button class="chat-quick-btn" onclick="sendQuick('contact')">📞 Contact</button>
-    </div>
-    <div class="chat-input-area">
-      <input class="chat-input" id="chat-input" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter')sendMessage()">
-      <button class="chat-send" onclick="sendMessage()">➤</button>
+    <div class="order-modal-body" id="order-modal-body">
+      <!-- Rempli dynamiquement -->
     </div>
   </div>
-  <button class="chat-toggle" onclick="toggleChat()" id="chat-toggle-btn">
-    <span id="chat-icon">💬</span>
-    <div class="badge" id="chat-badge">1</div>
-  </button>
 </div>
 
 <script>
-const SLUG = '${merchant.shopSlug}';
-const MID = '${merchant.id}';
-let chatOpen = false;
-let msgCount = 0;
+// ── PANIER ────────────────────────────────────────────────────────────────────
+const CURRENCY = '${currency}';
+let cart = {}; // { productId: { name, price, qty } }
 
-function toggleChat() {
-  chatOpen = !chatOpen;
-  document.getElementById('chat-box').classList.toggle('open', chatOpen);
-  document.getElementById('chat-icon').textContent = chatOpen ? '✕' : '💬';
-  document.getElementById('chat-badge').style.display = 'none';
-  if (chatOpen && msgCount === 0) {
-    setTimeout(() => addBotMsg('Bonjour ! 👋 Je suis l\'assistant de cette boutique. Comment puis-je vous aider ?'), 300);
-    msgCount++;
+function addToCart(productId, name, price) {
+  if (cart[productId]) {
+    cart[productId].qty++;
+  } else {
+    cart[productId] = { name, price, qty: 1 };
   }
+  updateCartBadge();
+  showCartNotif(name);
 }
 
-function addBotMsg(text) {
-  const el = document.createElement('div');
-  el.className = 'chat-msg bot';
-  el.innerHTML = text.replace(/\n/g, '<br>').replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-  document.getElementById('chat-messages').appendChild(el);
-  scrollChat();
+function updateCartBadge() {
+  const total = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+  const amount = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('cart-count').textContent = total;
+  document.getElementById('cart-total-badge').textContent = amount.toLocaleString('fr-FR');
+  const badge = document.getElementById('cart-badge');
+  badge.classList.toggle('show', total > 0);
 }
 
-function addUserMsg(text) {
-  const el = document.createElement('div');
-  el.className = 'chat-msg user';
-  el.textContent = text;
-  document.getElementById('chat-messages').appendChild(el);
-  scrollChat();
+function showCartNotif(name) {
+  const notif = document.createElement('div');
+  notif.style.cssText = 'position:fixed;top:80px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:500;animation:slideUp 0.3s ease;';
+  notif.textContent = '✅ ' + name + ' ajouté !';
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 2000);
 }
 
-function showTyping() {
-  const el = document.createElement('div');
-  el.className = 'chat-msg bot typing';
-  el.id = 'typing-indicator';
-  el.innerHTML = '<span></span><span></span><span></span>';
-  document.getElementById('chat-messages').appendChild(el);
-  scrollChat();
-  return el;
+function openOrderModal() {
+  renderOrderModal();
+  document.getElementById('order-overlay').classList.add('open');
 }
 
-function removeTyping() {
-  document.getElementById('typing-indicator')?.remove();
+function closeOrderModal() {
+  document.getElementById('order-overlay').classList.remove('open');
 }
 
-function scrollChat() {
-  const msgs = document.getElementById('chat-messages');
-  msgs.scrollTop = msgs.scrollHeight;
+function renderOrderModal() {
+  const items = Object.entries(cart);
+  if (!items.length) return;
+
+  let itemsHTML = items.map(([id, item]) => \`
+    <div class="cart-item" id="cart-item-\${id}">
+      <div class="cart-item-name">\${item.name}</div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" onclick="changeQty('\${id}', -1)">−</button>
+        <span style="min-width:20px;text-align:center;font-weight:700">\${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty('\${id}', 1)">+</button>
+      </div>
+      <div class="cart-item-price">\${(item.price * item.qty).toLocaleString('fr-FR')} \${CURRENCY}</div>
+    </div>
+  \`).join('');
+
+  const total = items.reduce((s, [, i]) => s + i.price * i.qty, 0);
+
+  document.getElementById('order-modal-body').innerHTML = \`
+    <div class="cart-items">\${itemsHTML}</div>
+    <div class="cart-total">
+      <span class="cart-total-label">Total à payer</span>
+      <span class="cart-total-amount">\${total.toLocaleString('fr-FR')} \${CURRENCY}</span>
+    </div>
+    <div class="order-form">
+      <div>
+        <label>Votre nom *</label>
+        <input type="text" id="order-name" placeholder="Ex: Akosua Mensah">
+      </div>
+      <div>
+        <label>Téléphone / WhatsApp *</label>
+        <input type="tel" id="order-phone" placeholder="Ex: 22890000000">
+      </div>
+      <div>
+        <label>Adresse de livraison *</label>
+        <textarea id="order-address" placeholder="Quartier, rue, point de repère..."></textarea>
+      </div>
+      <div>
+        <label>Mode de paiement</label>
+        <select id="order-payment">
+          <option value="mobile_money">📱 Mobile Money (MTN, Moov, Wave)</option>
+          <option value="cash">💵 Paiement à la livraison</option>
+          <option value="orange_money">🟠 Orange Money</option>
+        </select>
+      </div>
+      <button class="btn-submit-order" id="submit-order-btn" onclick="submitOrder()">
+        ✅ Confirmer la commande
+      </button>
+    </div>
+  \`;
 }
 
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  addUserMsg(text);
-  const typing = showTyping();
+function changeQty(productId, delta) {
+  if (!cart[productId]) return;
+  cart[productId].qty += delta;
+  if (cart[productId].qty <= 0) delete cart[productId];
+  updateCartBadge();
+  if (Object.keys(cart).length === 0) { closeOrderModal(); return; }
+  renderOrderModal();
+}
+
+async function submitOrder() {
+  const name = document.getElementById('order-name')?.value.trim();
+  const phone = document.getElementById('order-phone')?.value.trim();
+  const address = document.getElementById('order-address')?.value.trim();
+  const payment = document.getElementById('order-payment')?.value;
+
+  if (!name || !phone || !address) {
+    alert('Veuillez remplir tous les champs obligatoires (*)');
+    return;
+  }
+
+  const btn = document.getElementById('submit-order-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi en cours...';
+
+  const items = Object.entries(cart).map(([productId, item]) => ({ productId, quantity: item.qty }));
+
   try {
-    const r = await fetch('/boutique/' + SLUG + '/chat', {
+    const r = await fetch('/boutique/' + SLUG + '/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ customerName: name, customerPhone: phone, address, items, paymentMethod: payment })
     });
     const data = await r.json();
-    removeTyping();
-    setTimeout(() => addBotMsg(data.reply || 'Désolé, je ne comprends pas. Pouvez-vous reformuler ?'), 200);
+
+    if (data.success) {
+      cart = {};
+      updateCartBadge();
+      document.getElementById('order-modal-body').innerHTML = \`
+        <div class="order-success">
+          <div class="success-icon">🎉</div>
+          <h4>Commande confirmée !</h4>
+          <p>N° <strong>\${data.orderNumber}</strong><br><br>
+          Le commerçant vous contactera bientôt pour confirmer la livraison.<br><br>
+          Merci de votre confiance !</p>
+          <button onclick="closeOrderModal()" style="margin-top:20px;padding:12px 24px;background:var(--primary);color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit">
+            Fermer
+          </button>
+        </div>
+      \`;
+    } else {
+      btn.disabled = false;
+      btn.textContent = '✅ Confirmer la commande';
+      alert(data.error || 'Erreur lors de la commande');
+    }
   } catch {
-    removeTyping();
-    addBotMsg('Désolé, je rencontre un problème. Contactez-nous directement sur WhatsApp !');
+    btn.disabled = false;
+    btn.textContent = '✅ Confirmer la commande';
+    alert('Erreur de connexion. Réessayez !');
   }
 }
-
-function sendQuick(q) {
-  document.getElementById('chat-input').value = q;
-  sendMessage();
-}
-
-// Affiche le badge après 3 secondes
-setTimeout(() => {
-  if (!chatOpen) {
-    document.getElementById('chat-badge').style.display = 'flex';
-  }
-}, 3000);
 </script>
 
 </body>
