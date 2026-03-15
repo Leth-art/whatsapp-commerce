@@ -11,7 +11,7 @@ const MERCHANT_ALLOWED_FIELDS = [
   "name", "shopName", "email", "city", "country", "currency",
   "businessDescription", "aiPersona", "welcomeMessage", "ownerPhone",
   "phoneNumberId", "whatsappToken", "plan", "isActive",
-  "subscriptionExpiresAt", "siteTheme", "siteActive",
+  "subscriptionExpiresAt", "siteTheme", "siteActive", "customSiteUrl",
 ];
 
 // Champs autorisés pour un produit

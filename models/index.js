@@ -23,6 +23,7 @@ const Merchant = sequelize.define("Merchant", {
   shopSlug: { type: DataTypes.STRING, defaultValue: "" },
   siteTheme: { type: DataTypes.STRING, defaultValue: "orange" },
   siteActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+  customSiteUrl: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 });
 
 Merchant.prototype.isSubscriptionActive = function() {

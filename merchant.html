@@ -472,6 +472,54 @@ select.status-sel { background: var(--surface2); border: 1px solid var(--border)
         <h2>Paramètres</h2>
         <p>Configurez votre boutique</p>
       </div>
+
+      <!-- Site web card -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>🌐 Site web</h3>
+          <span id="site-type-badge" style="font-size:12px;padding:4px 10px;border-radius:20px;background:rgba(232,92,14,0.1);color:var(--accent)">WaziBot</span>
+        </div>
+        <div style="padding:20px">
+
+          <!-- Toggle -->
+          <div style="display:flex;gap:10px;margin-bottom:20px">
+            <button id="btn-wazibot-site" onclick="setSiteType('wazibot')"
+              class="btn btn-primary btn-sm" style="flex:1">
+              🤖 Utiliser mon site WaziBot
+            </button>
+            <button id="btn-custom-site" onclick="setSiteType('custom')"
+              class="btn btn-ghost btn-sm" style="flex:1">
+              🔗 J'ai mon propre site
+            </button>
+          </div>
+
+          <!-- WaziBot site section -->
+          <div id="wazibot-site-section">
+            <div style="background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.15);border-radius:12px;padding:14px;margin-bottom:14px">
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px">🔗 VOTRE SITE WAZIBOT</div>
+              <div id="site-wazibot-url" style="font-size:13px;color:var(--accent2);font-weight:600;word-break:break-all"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="copySiteUrl()">📋 Copier le lien</button>
+              <a id="site-open-btn" href="#" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">🔗 Ouvrir</a>
+            </div>
+          </div>
+
+          <!-- Custom site section -->
+          <div id="custom-site-section" style="display:none">
+            <div class="form-group">
+              <label>URL de votre site web</label>
+              <input type="url" id="set-custom-url" placeholder="https://monsite.com">
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">
+              ℹ️ Le lien de votre site sera affiché dans l'app et partagé à vos clients. Votre site WaziBot reste actif.
+            </p>
+            <button class="btn btn-primary" style="margin-top:14px" onclick="saveCustomUrl()">💾 Enregistrer</button>
+          </div>
+
+        </div>
+      </div>
+
       <div class="card" style="margin-bottom:20px">
         <div class="card-header"><h3>🏪 Informations boutique</h3></div>
         <div style="padding:24px">
@@ -920,6 +968,80 @@ function copyId() {
 
 
 
+
+
+// ── SITE WEB ──────────────────────────────────────────────────────────────────
+let currentSiteType = 'wazibot';
+
+function loadSiteInfo() {
+  if (!merchantData) return;
+  const slug = merchantData.shopSlug || '';
+  const customUrl = merchantData.customSiteUrl || '';
+  const waziBotUrl = slug ? `${window.location.origin}/boutique/${slug}` : '';
+
+  document.getElementById('site-wazibot-url').textContent = waziBotUrl || 'Non disponible';
+  document.getElementById('site-open-btn').href = waziBotUrl || '#';
+
+  if (customUrl) {
+    setSiteType('custom');
+    document.getElementById('set-custom-url').value = customUrl;
+  } else {
+    setSiteType('wazibot');
+  }
+}
+
+function setSiteType(type) {
+  currentSiteType = type;
+  const wazibotSection = document.getElementById('wazibot-site-section');
+  const customSection = document.getElementById('custom-site-section');
+  const badge = document.getElementById('site-type-badge');
+  const btnWazibot = document.getElementById('btn-wazibot-site');
+  const btnCustom = document.getElementById('btn-custom-site');
+
+  if (type === 'wazibot') {
+    wazibotSection.style.display = 'block';
+    customSection.style.display = 'none';
+    badge.textContent = 'WaziBot';
+    badge.style.background = 'rgba(232,92,14,0.1)';
+    badge.style.color = 'var(--accent)';
+    btnWazibot.classList.remove('btn-ghost'); btnWazibot.classList.add('btn-primary');
+    btnCustom.classList.remove('btn-primary'); btnCustom.classList.add('btn-ghost');
+  } else {
+    wazibotSection.style.display = 'none';
+    customSection.style.display = 'block';
+    badge.textContent = 'Personnalisé';
+    badge.style.background = 'rgba(100,150,255,0.1)';
+    badge.style.color = '#6496FF';
+    btnCustom.classList.remove('btn-ghost'); btnCustom.classList.add('btn-primary');
+    btnWazibot.classList.remove('btn-primary'); btnWazibot.classList.add('btn-ghost');
+  }
+}
+
+function copySiteUrl() {
+  const slug = merchantData?.shopSlug || '';
+  if (!slug) return;
+  const url = `${window.location.origin}/boutique/${slug}`;
+  navigator.clipboard.writeText(url);
+  toast('📋 Lien copié !', 'success');
+}
+
+async function saveCustomUrl() {
+  const url = document.getElementById('set-custom-url').value.trim();
+  if (url && !url.startsWith('http')) {
+    toast('❌ URL invalide (doit commencer par https://)', 'error');
+    return;
+  }
+  const r = await fetch(`${BASE}/api/merchants/${merchantId}`, {
+    method: 'PATCH', headers: H,
+    body: JSON.stringify({ customSiteUrl: url || null })
+  });
+  if (r.ok) {
+    toast('✅ Site enregistré !', 'success');
+    await loadMerchant();
+  } else {
+    toast('❌ Erreur enregistrement', 'error');
+  }
+}
 
 // ── NAVIGATION ───────────────────────────────────────────────────────────────
 function showPage(name) {
