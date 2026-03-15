@@ -2,6 +2,10 @@ const { Merchant } = require("../models/index");
 const { getOrCreateCustomer, getOrCreateSession, addMessageToSession, updateCustomerName, clearCart } = require("../modules/crm");
 const { createOrderFromCart } = require("../modules/orders");
 const { generateAIResponse } = require("./aiEngine");
+const { handleMenuMessage } = require("./menuBot");
+
+// BOT_MODE=menu → menus interactifs | BOT_MODE=ai → IA Anthropic (défaut)
+const BOT_MODE = process.env.BOT_MODE || "ai";
 const { sendText, markAsRead } = require("./whatsappClient");
 const { canSendMessage } = require("../modules/planLimits");
 
@@ -43,7 +47,12 @@ const handleMessage = async ({ phoneNumberId, from, content, messageId }) => {
   await addMessageToSession(session, "user", content);
 
   try {
-    // ─── 6. Générer la réponse IA ───
+    // ─── 6. Mode bot (menu ou IA) ───
+    if (BOT_MODE === "menu") {
+      await handleMenuMessage({ merchant, customer, session, content, phoneNumberId });
+      return;
+    }
+
     const { cleanText, actions } = await generateAIResponse({
       merchant, customer, session, userMessage: content,
     });
