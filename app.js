@@ -65,6 +65,8 @@ connectDB().then(async () => {
   await initQueue().catch(() => {});
 
   startCronJobs();
+
+  
 });
 
 app.use((req, res, next) => {

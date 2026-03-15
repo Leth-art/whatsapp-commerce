@@ -492,6 +492,30 @@ select.status-sel { background: var(--surface2); border: 1px solid var(--border)
           <button class="btn btn-primary" style="margin-top:20px" onclick="saveSettings()">💾 Enregistrer</button>
         </div>
       </div>
+
+      <!-- WhatsApp Connection Card -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>📱 Connexion WhatsApp</h3>
+          <span id="wa-badge" style="font-size:12px;padding:4px 10px;border-radius:20px;background:rgba(255,71,87,0.1);color:#ff4757">Non connecté</span>
+        </div>
+        <div style="padding:20px">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">
+            Connectez votre numéro WhatsApp personnel pour que vos clients puissent vous écrire directement et que le bot réponde automatiquement.
+          </p>
+          <div id="wa-phone-display" style="display:none;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;text-align:center">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">NUMÉRO CONNECTÉ</div>
+            <div id="wa-phone-number" style="font-size:18px;font-weight:800;color:var(--accent2)"></div>
+          </div>
+          <a id="wa-connect-btn" href="#" target="_blank" class="btn btn-primary" style="display:inline-flex;text-decoration:none">
+            📱 Connecter WhatsApp
+          </a>
+          <button id="wa-disconnect-btn" onclick="disconnectWA()" style="display:none" class="btn btn-danger" style="margin-top:8px">
+            🔌 Déconnecter
+          </button>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header"><h3>🔑 Mon ID boutique</h3></div>
         <div style="padding:24px">
@@ -893,6 +917,9 @@ function copyId() {
   navigator.clipboard.writeText(merchantId);
   toast('📋 ID copié !', 'success');
 }
+
+
+
 
 // ── NAVIGATION ───────────────────────────────────────────────────────────────
 function showPage(name) {
