@@ -7,7 +7,6 @@
 const express = require("express");
 const router = express.Router();
 const { Merchant, Product } = require("../models/index");
-const { Op } = require("sequelize");
 
 // ─── Thèmes disponibles ───────────────────────────────────────────────────────
 const THEMES = {

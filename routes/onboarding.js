@@ -26,6 +26,10 @@ router.post("/create", async (req, res) => {
     if (!name) {
       return res.status(400).json({ error: "Nom obligatoire." });
     }
+    // Sanitisation des entrées
+    const safeName = name.replace(/<[^>]*>/g, '').trim().slice(0, 100);
+    const safeEmail = email ? email.replace(/<[^>]*>/g, '').trim().slice(0, 200) : '';
+    const safeCity = city ? city.replace(/<[^>]*>/g, '').trim().slice(0, 100) : '';
 
     // Vérifier double inscription par téléphone OU email
     let existing = null;
@@ -42,7 +46,7 @@ router.post("/create", async (req, res) => {
         error: "already_exists",
         message: "Un compte existe déjà avec ce numéro ou cet email.",
         merchantId: existing.id,
-        dashboardUrl: `${process.env.APP_BASE_URL || 'https://whatsapp-commerce-1roe.onrender.com'}/dashboard?id=${existing.id}`
+        dashboardUrl: `${process.env.APP_BASE_URL || 'https://chatbot-saas-lcsl.onrender.com'}/merchant?id=${existing.id}`
       });
     }
 
@@ -51,9 +55,9 @@ router.post("/create", async (req, res) => {
     // Créer la nouvelle boutique
     const merchant = await Merchant.create({
       id: uuidv4(),
-      name,
-      email: email || "",
-      city: city || "",
+      name: safeName,
+      email: safeEmail,
+      city: safeCity,
       country: "",
       currency: currency || "XOF",
       phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || "",

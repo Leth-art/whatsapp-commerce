@@ -9,6 +9,7 @@ const onboardingRouter = require("./routes/onboarding");
 const analyticsRouter = require("./routes/analytics");
 const boutiqueRouter = require("./routes/boutique");
 const { startCronJobs } = require("./modules/retention");
+const { helmetMiddleware, globalLimiter, sanitizeInput, corsMiddleware, onboardingLimiter } = require("./middleware/security");
 
 // Optimisations (avec fallback si fichier absent)
 const safeRequire = (path) => { try { return require(path); } catch { return {}; } };
@@ -74,14 +75,6 @@ connectDB().then(async () => {
 
   startCronJobs();
 
-  // Restaure les sessions Baileys au démarrage
-  try {
-    const { restoreAllSessions } = require('./core/baileys');
-    const { handleBaileysMessage } = require('./core/router');
-    await restoreAllSessions(handleBaileysMessage);
-  } catch (err) {
-    console.warn('⚠️ Baileys sessions non restaurées:', err.message);
-  }
 });
 
 app.use((req, res, next) => {
@@ -92,14 +85,16 @@ app.use((req, res, next) => {
 const requireApiKey = (req, res, next) => {
   const key = req.headers["x-api-key"] || req.query.apiKey;
   const validKey = process.env.API_SECRET_KEY;
-  if (!validKey || key === validKey) return next();
+  if (validKey && key === validKey) return next();
+  if (!validKey) { console.warn("⚠️ API_SECRET_KEY non définie !"); return next(); }
   return res.status(401).json({ error: "Accès non autorisé. Clé API invalide." });
 };
 
 const requireAdminToken = (req, res, next) => {
   const token = req.query.token;
   const validToken = process.env.ADMIN_SECRET_TOKEN;
-  if (!validToken || token === validToken) return next();
+  if (validToken && token === validToken) return next();
+  if (!validToken) { console.warn("⚠️ ADMIN_SECRET_TOKEN non définie !"); return next(); }
   return res.status(403).sendFile(path.join(__dirname, "403.html"));
 };
 
@@ -112,11 +107,23 @@ const maintenanceMode = (req, res, next) => {
 };
 
 app.use(maintenanceMode);
-app.use(express.static(__dirname));
+
+// Appliquer les middlewares de sécurité
+app.use(helmetMiddleware);
+app.use(corsMiddleware);
+app.use(globalLimiter);
+app.use(sanitizeInput);
+
+// Servir uniquement les fichiers publics (pas .env, pas node_modules)
+const serveStatic = express.static(__dirname, {
+  index: false, // désactive l'index auto
+  dotfiles: 'deny', // bloque les fichiers .env, .git, etc.
+});
+app.use(serveStatic);
 app.get("/maintenance", (req, res) => res.sendFile(path.join(__dirname, "maintenance.html")));
 
 app.use("/webhook", webhookRouter);
-app.use("/onboarding", onboardingRouter);
+app.use("/onboarding", onboardingLimiter, onboardingRouter);
 app.use("/api", requireApiKey, apiRouter);
 app.use("/subscription", requireApiKey, subscriptionsRouter);
 app.use("/analytics", requireApiKey, analyticsRouter);

@@ -73,7 +73,7 @@ const validateMerchantId = (req, res, next) => {
 const corsMiddleware = (req, res, next) => {
   const allowedOrigins = [
     process.env.APP_BASE_URL,
-    "https://whatsapp-commerce-1roe.onrender.com",
+    // "https://whatsapp-commerce-1roe.onrender.com", // ancienne URL
     "https://chatbot-saas-lcsl.onrender.com",
   ].filter(Boolean);
 
