@@ -586,10 +586,11 @@ async function loadMerchants() {
       <td><span class="badge ${status.cls}">${status.label}</span></td>
       <td style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="action-btn" style="background:rgba(100,150,255,0.15);color:#6496ff;" onclick="accessDashboard('${m.id}','${m.name}')">👁️ Accéder</button>
-        <button class="action-btn" onclick="openTokenModal('${m.id}','${m.name}','${m.whatsappToken || ''}','${m.phoneNumberId || ''}')">🔑 Token</button>
+        <button class="action-btn" style="background:rgba(100,150,255,0.12);color:#6496ff;" onclick="viewMerchantDetails('${m.id}')">📋 Détails</button>
         ${m.lastPaymentId ? '<button class="action-btn" style="background:rgba(0,229,160,0.15);color:#00e5a0;" onclick="validatePayment(\'' + m.id + '\',\'' + m.name + '\',\'' + (m.lastPaymentId||'') + '\')">✅ Valider</button>' : ''}
         <button class="action-btn" onclick="sendReminder('${m.id}','${m.ownerPhone}','${m.name}')">📩 Relancer</button>
         <button class="action-btn danger" onclick="toggleMerchant('${m.id}', ${m.isActive})">${m.isActive ? '⏸️' : '▶️'}</button>
+        <button class="action-btn" style="background:rgba(255,71,87,0.15);color:#ff4757;" onclick="deleteMerchant('${m.id}','${m.name}')">🗑️</button>
       </td>
     </tr>`;
   }).join('');
@@ -602,7 +603,9 @@ function copyId(id) {
 
 // ── Accéder au dashboard d'un commerçant ──
 function accessDashboard(merchantId, shopName) {
-  window.open('/merchant?id=' + merchantId, '_blank');
+  // Ouvre dans un nouvel onglet sans localStorage interférant
+  const url = '/merchant?id=' + merchantId + '&force=1';
+  window.open(url, '_blank');
 }
 
 // ── Toast ──
@@ -665,35 +668,31 @@ async function loadRevenue() {
 // ── Messages ──
 async function loadMessages() {
   const merchants = await api('/merchants');
-  const PLAN_LIMITS = { starter: 500, pro: 2000, business: Infinity };
+  // Récupère les analytics globaux
+  let globalData = null;
+  try {
+    const r = await fetch(window.location.origin + '/analytics/global', { headers: { 'x-api-key': API_KEY } });
+    if (r.ok) globalData = await r.json();
+  } catch {}
 
-  const totalMsg = merchants.length * 45;
-  const costUSD = (totalMsg * 0.0004).toFixed(2);
-  const avgMsg = merchants.length ? Math.round(totalMsg / merchants.length) : 0;
+  const totalConversations = globalData?.conversations?.total || 0;
+  const totalOrders = globalData?.orders?.total || 0;
+  const convRate = totalConversations > 0 ? ((totalOrders / totalConversations) * 100).toFixed(1) : '0';
 
-  document.getElementById('m-total').textContent = totalMsg;
-  document.getElementById('m-cost').textContent = '$' + costUSD;
-  document.getElementById('m-avg').textContent = avgMsg;
+  document.getElementById('m-total').textContent = totalConversations;
+  document.getElementById('m-cost').textContent = convRate + '% conversion';
+  document.getElementById('m-avg').textContent = merchants.length ? Math.round(totalConversations / merchants.length) : 0;
 
   const tbody = document.getElementById('messages-table');
   tbody.innerHTML = merchants.map(m => {
-    const msgs = Math.floor(Math.random() * 80) + 10; // simulation
-    const quota = PLAN_LIMITS[m.plan] === Infinity ? '∞' : PLAN_LIMITS[m.plan];
-    const pct = PLAN_LIMITS[m.plan] === Infinity ? 5 : Math.round((msgs / PLAN_LIMITS[m.plan]) * 100);
-    const barColor = pct > 80 ? '#ff4757' : pct > 50 ? '#f0a500' : '#00e5a0';
+    const PLAN_LIMITS = { starter: 250, pro: 1000, business: '∞' };
+    const quota = PLAN_LIMITS[m.plan] || 250;
     return `<tr>
       <td><strong>${m.name}</strong></td>
       <td><span style="color:var(--gold);font-size:11px;font-weight:700;text-transform:uppercase;">${m.plan}</span></td>
-      <td>${msgs}</td>
+      <td>—</td>
       <td>${quota}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;">
-            <div style="width:${Math.min(pct,100)}%;height:100%;background:${barColor};border-radius:3px;transition:width 1s;"></div>
-          </div>
-          <span style="font-size:11px;color:var(--muted);width:32px;">${pct}%</span>
-        </div>
-      </td>
+      <td><span style="color:var(--muted);font-size:12px;">Données en temps réel via /analytics</span></td>
     </tr>`;
   }).join('');
 }
@@ -758,58 +757,44 @@ async function toggleMaintenance() {
 // ── Modale Token 360dialog ──
 let currentMerchantId = null;
 
-function openTokenModal(id, name, token, phoneId) {
-  currentMerchantId = id;
-  document.getElementById('modal-merchant-name').textContent = 'Boutique : ' + name;
-  document.getElementById('modal-token').value = token || '';
-  document.getElementById('modal-phone-id').value = phoneId || '';
-  document.getElementById('modal-success').style.display = 'none';
-  document.getElementById('modal-error').style.display = 'none';
-  document.getElementById('token-modal').style.display = 'flex';
+function openTokenModal(id, name, token, phoneId) { viewMerchantDetails(id); }
+
+async function viewMerchantDetails(id) {
+  const r = await fetch(API + '/merchants/' + id, { headers: { 'x-api-key': API_KEY } });
+  if (!r.ok) return;
+  const m = await r.json();
+  const expDate = m.subscriptionExpiresAt ? new Date(m.subscriptionExpiresAt).toLocaleDateString('fr-FR') : '—';
+  const siteUrl = m.shopSlug ? window.location.origin + '/boutique/' + m.shopSlug : '—';
+  document.getElementById('details-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;">
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;">
+        <span style="color:var(--muted)">Nom</span><strong>${m.name || m.shopName || '—'}</strong>
+        <span style="color:var(--muted)">Email</span><span>${m.email || '—'}</span>
+        <span style="color:var(--muted)">Téléphone</span><span>${m.ownerPhone || '—'}</span>
+        <span style="color:var(--muted)">Ville</span><span>${m.city || '—'}</span>
+        <span style="color:var(--muted)">Plan</span><strong style="color:var(--gold);text-transform:uppercase;">${m.plan || 'starter'}</strong>
+        <span style="color:var(--muted)">Expiration</span><span>${expDate}</span>
+        <span style="color:var(--muted)">Statut</span><span style="color:${m.isActive ? 'var(--accent2)' : '#ff4757'}">${m.isActive ? '✅ Actif' : '❌ Suspendu'}</span>
+        <span style="color:var(--muted)">Site boutique</span><a href="${siteUrl}" target="_blank" style="color:var(--accent);word-break:break-all;">${siteUrl}</a>
+        <span style="color:var(--muted)">ID</span><code style="font-size:11px;color:var(--accent2);word-break:break-all;">${m.id}</code>
+      </div>
+      ${m.lastPaymentId ? `<div style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">DEMANDE DE PAIEMENT EN ATTENTE</div>
+        <div style="font-weight:700;color:var(--accent2);">${m.lastPaymentId}</div>
+      </div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        <button onclick="accessDashboard('${m.id}','${m.name}')" style="padding:8px 14px;background:rgba(100,150,255,0.15);color:#6496ff;border:none;border-radius:8px;cursor:pointer;font-size:12px;">👁️ Voir dashboard</button>
+        <button onclick="navigator.clipboard.writeText('${m.id}');showToast('ID copié !')" style="padding:8px 14px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📋 Copier ID</button>
+        ${m.lastPaymentId ? `<button onclick="closeDetailsModal();validatePayment('${m.id}','${m.name}','${m.lastPaymentId}')" style="padding:8px 14px;background:rgba(0,229,160,0.15);color:var(--accent2);border:none;border-radius:8px;cursor:pointer;font-size:12px;">✅ Valider paiement</button>` : ''}
+      </div>
+    </div>
+  `;
+  document.getElementById('details-modal').style.display = 'flex';
 }
 
-function closeTokenModal() {
-  document.getElementById('token-modal').style.display = 'none';
-  currentMerchantId = null;
+function closeDetailsModal() {
+  document.getElementById('details-modal').style.display = 'none';
 }
-
-async function saveToken() {
-  const token = document.getElementById('modal-token').value.trim();
-  const phoneNumberId = document.getElementById('modal-phone-id').value.trim();
-
-  if (!token || !phoneNumberId) {
-    document.getElementById('modal-error').textContent = 'Remplissez les deux champs.';
-    document.getElementById('modal-error').style.display = 'block';
-    return;
-  }
-
-  try {
-    const res = await fetch(API + '/merchants/' + currentMerchantId, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-      body: JSON.stringify({ whatsappToken: token, phoneNumberId })
-    });
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById('modal-success').style.display = 'block';
-      document.getElementById('modal-error').style.display = 'none';
-      setTimeout(() => { closeTokenModal(); loadMerchants(); }, 2000);
-    } else {
-      throw new Error(data.error || 'Erreur');
-    }
-  } catch(e) {
-    document.getElementById('modal-error').textContent = 'Erreur : ' + e.message;
-    document.getElementById('modal-error').style.display = 'block';
-  }
-}
-
-// Fermer en cliquant en dehors
-window.addEventListener('load', function() {
-  const modal = document.getElementById('token-modal');
-  if (modal) modal.addEventListener('click', function(e) {
-    if (e.target === this) closeTokenModal();
-  });
-});
 
 async function sendReminder(merchantId, phone, name) {
   if (!phone) { alert('Pas de numéro pour ce commerçant'); return; }
@@ -822,6 +807,20 @@ async function sendReminder(merchantId, phone, name) {
     headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
   }).catch(() => {});
   setTimeout(() => loadMerchants(), 1000);
+}
+
+async function deleteMerchant(id, name) {
+  if (!confirm('⚠️ Supprimer définitivement la boutique "' + name + '" ?\n\nCette action est irréversible. Toutes les commandes et produits seront supprimés.')) return;
+  const res = await fetch(API + '/admin/merchants/' + id, {
+    method: 'DELETE',
+    headers: { 'x-api-key': API_KEY }
+  });
+  if (res.ok) {
+    showToast('🗑️ Boutique "' + name + '" supprimée');
+    loadMerchants();
+  } else {
+    showToast('❌ Erreur suppression');
+  }
 }
 
 async function toggleMerchant(id, isActive) {
@@ -848,40 +847,17 @@ function getMerchantStatus(m) {
 }
 </script>
 
-<!-- Modale Token 360dialog -->
-<div id="token-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:480px;margin:20px;">
+<!-- Modale Détails Commerçant -->
+<div id="details-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;width:100%;max-width:500px;margin:20px;max-height:80vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">🔑 Connexion WhatsApp</h3>
-      <button onclick="closeTokenModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">📋 Détails boutique</h3>
+      <button onclick="closeDetailsModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
     </div>
-    <p id="modal-merchant-name" style="color:var(--muted);font-size:13px;margin-bottom:20px;"></p>
-
-    <div style="margin-bottom:16px;">
-      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px;">Token WhatsApp (whatsappToken)</label>
-      <input id="modal-token" type="text" placeholder="Collez le token WhatsApp API ici..."
-        style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:13px;font-family:'DM Mono',monospace;">
+    <div id="details-content"></div>
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button onclick="closeDetailsModal()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;">Fermer</button>
     </div>
-
-    <div style="margin-bottom:24px;">
-      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px;">Phone Number ID</label>
-      <input id="modal-phone-id" type="text" placeholder="Ex: 972509772616258"
-        style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:13px;font-family:'DM Mono',monospace;">
-    </div>
-
-    <div style="background:rgba(0,229,160,0.05);border:1px solid rgba(0,229,160,0.15);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
-      📋 <strong style="color:var(--text);">Infos WhatsApp Business API :</strong><br>
-      1. <strong>Token</strong> : votre token WhatsApp Business API<br>
-      2. <strong>Phone Number ID</strong> : l'ID de votre numéro Meta<br>
-      3. Disponible dans votre compte Meta for Developers
-    </div>
-
-    <div style="display:flex;gap:10px;">
-      <button onclick="closeTokenModal()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;">Annuler</button>
-      <button onclick="saveToken()" style="flex:2;background:var(--accent);border:none;color:white;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-family:'DM Sans',sans-serif;">✅ Enregistrer</button>
-    </div>
-    <p id="modal-success" style="display:none;color:var(--green);font-size:13px;text-align:center;margin-top:12px;">✅ Token enregistré ! Le bot utilise maintenant ce numéro.</p>
-    <p id="modal-error" style="display:none;color:#ff4757;font-size:13px;text-align:center;margin-top:12px;"></p>
   </div>
 </div>
 <script>

@@ -618,12 +618,20 @@ let currentFilter = 'all';
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 window.onload = async () => {
-  // Auto-fill ID from URL param ?id=xxx
   const urlParams = new URLSearchParams(window.location.search);
   const urlId = urlParams.get('id');
-  if (urlId && !merchantId) {
+  const forceId = urlParams.get('force');
+  
+  // Si force=1 ou ID différent dans URL → on force le changement
+  if (urlId && (forceId || urlId !== merchantId)) {
+    merchantId = urlId;
+    localStorage.setItem('wz_merchant_id', urlId);
+  }
+  
+  if (urlId) {
     document.getElementById('login-input').value = urlId;
   }
+  
   if (merchantId) await initDashboard();
   document.getElementById('login-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 };

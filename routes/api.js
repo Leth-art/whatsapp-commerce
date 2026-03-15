@@ -257,6 +257,24 @@ router.post("/admin/toggle/:id", async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// Supprimer une boutique (admin)
+router.delete("/admin/merchants/:id", async (req, res) => {
+  try {
+    const { Merchant, Product, Customer, Order, ConversationSession } = require("../models/index");
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    // Supprimer toutes les données liées
+    await Product.destroy({ where: { merchantId: req.params.id } });
+    await Order.destroy({ where: { merchantId: req.params.id } });
+    await Customer.destroy({ where: { merchantId: req.params.id } });
+    await ConversationSession.destroy({ where: { merchantId: req.params.id } });
+    await merchant.destroy();
+    console.log(`🗑️ Boutique supprimée : ${merchant.name}`);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Marquer comme relancé
 router.post("/admin/merchants/:id/mark-reminded", async (req, res) => {
   try {
