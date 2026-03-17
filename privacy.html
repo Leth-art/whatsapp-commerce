@@ -7,39 +7,71 @@
 <title>Politique de confidentialité — WaziBot</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#050508;--surface:#0e0e1a;--border:#1e1e2e;--accent:#e85c0e;--accent2:#00e5a0;--text:#f0f0f8;--muted:#4a4a6a;}
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;}
-  nav{padding:20px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100;}
-  .logo{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:var(--text);text-decoration:none;}
-  .logo span{color:var(--accent);}
-  .nav-back{color:var(--muted);text-decoration:none;font-size:14px;display:flex;align-items:center;gap:6px;transition:color 0.2s;}
-  .nav-back:hover{color:var(--text);}
-  .container{max-width:780px;margin:0 auto;padding:60px 24px 80px;}
-  .hero-tag{display:inline-block;background:rgba(232,92,14,0.15);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:2px;padding:6px 14px;border-radius:50px;margin-bottom:16px;text-transform:uppercase;}
-  h1{font-family:'Outfit',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:8px;line-height:1.2;}
-  .date{color:var(--muted);font-size:13px;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid var(--border);}
-  h2{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;margin:40px 0 12px;color:var(--text);display:flex;align-items:center;gap:10px;}
-  h2::before{content:'';display:inline-block;width:4px;height:20px;background:var(--accent);border-radius:2px;}
-  p{color:rgba(240,240,248,0.75);font-size:15px;margin-bottom:14px;line-height:1.8;}
-  ul{margin:0 0 14px 20px;}
-  li{font-size:15px;margin-bottom:8px;color:rgba(240,240,248,0.75);}
-  li strong{color:var(--text);}
-  a{color:var(--accent);text-decoration:none;}
-  a:hover{text-decoration:underline;}
-  .highlight-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin:24px 0;}
-  .highlight-box.green{border-color:rgba(0,229,160,0.25);background:rgba(0,229,160,0.04);}
-  .highlight-box.orange{border-color:rgba(232,92,14,0.25);background:rgba(232,92,14,0.04);}
-  .highlight-box h4{font-family:'Outfit',sans-serif;font-weight:700;margin-bottom:8px;font-size:15px;}
-  .highlight-box.green h4{color:var(--accent2);}
-  .highlight-box.orange h4{color:var(--accent);}
-  .contact-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;margin-top:48px;}
-  .contact-card h3{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;}
-  .contact-card p{color:var(--muted);}
-  .contact-btn{display:inline-block;background:var(--accent);color:white;padding:12px 28px;border-radius:50px;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;transition:all 0.2s;}
-  .contact-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,92,14,0.3);text-decoration:none;}
-  footer{text-align:center;padding:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);}
-  @media(max-width:600px){nav{padding:16px 20px;}.container{padding:40px 20px;}}
+  :root {
+    --bg: #ffffff;
+    --surface: #f8f8fb;
+    --surface2: #f0f0f7;
+    --border: #e4e4ef;
+    --accent: #e85c0e;
+    --accent2: #00a372;
+    --text: #0a0a14;
+    --muted: #6a6a8a;
+    --warn: #c47a00;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; }
+  nav {
+    padding: 18px 48px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); z-index: 100;
+  }
+  .logo { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-back { color: var(--muted); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: color 0.2s; font-weight: 500; }
+  .nav-back:hover { color: var(--accent); }
+  .wrapper { display: grid; grid-template-columns: 210px 1fr; gap: 52px; max-width: 1040px; margin: 0 auto; padding: 56px 24px 80px; }
+  .toc { position: sticky; top: 80px; height: fit-content; }
+  .toc-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 14px; }
+  .toc-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .toc-list a { font-size: 13px; color: var(--muted); text-decoration: none; padding: 7px 12px; border-radius: 8px; display: block; transition: all 0.2s; border-left: 2px solid transparent; }
+  .toc-list a:hover { color: var(--accent); background: rgba(232,92,14,0.05); border-left-color: var(--accent); }
+  .hero-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(232,92,14,0.08); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 14px; border-radius: 50px; margin-bottom: 20px; text-transform: uppercase; border: 1px solid rgba(232,92,14,0.2); }
+  h1 { font-family: 'Outfit', sans-serif; font-size: clamp(28px, 4vw, 40px); font-weight: 800; margin-bottom: 10px; line-height: 1.2; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .intro { font-size: 15px; color: #3a3a5a; line-height: 1.8; margin-bottom: 28px; }
+  .box { border-radius: 14px; padding: 18px 22px; margin: 24px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .box-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .box-content h4 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 5px; }
+  .box-content p { font-size: 14px; line-height: 1.6; margin: 0; }
+  .box.green { background: #f0fdf8; border: 1px solid #a7f0d4; }
+  .box.green h4 { color: var(--accent2); }
+  .box.green p { color: #1a6b4a; }
+  .box.orange { background: #fff8f0; border: 1px solid #fcd5a8; }
+  .box.orange h4 { color: var(--warn); }
+  .box.orange p { color: #7a4510; }
+  h2 { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; margin: 40px 0 14px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; background: var(--accent); color: white; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  p { color: #3a3a5a; font-size: 15px; margin-bottom: 12px; line-height: 1.8; }
+  p strong { color: var(--text); }
+  ul { margin: 8px 0 16px; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  li { font-size: 14px; color: #3a3a5a; padding: 10px 14px; background: var(--surface); border-radius: 10px; border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 10px; line-height: 1.6; }
+  li::before { content: '→'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+  li strong { color: var(--text); }
+  code { background: var(--surface2); color: var(--accent); padding: 2px 7px; border-radius: 6px; font-size: 13px; font-family: monospace; border: 1px solid var(--border); }
+  a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+  .contact-card { background: linear-gradient(135deg, #fff5f0, #fff9f5); border: 1px solid rgba(232,92,14,0.2); border-radius: 20px; padding: 36px; text-align: center; margin-top: 52px; }
+  .contact-card h3 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .contact-card p { color: var(--muted); font-size: 14px; }
+  .contact-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: white; padding: 13px 28px; border-radius: 50px; font-weight: 700; font-size: 14px; text-decoration: none; margin-top: 18px; transition: all 0.2s; box-shadow: 0 4px 16px rgba(232,92,14,0.2); }
+  .contact-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,92,14,0.3); text-decoration: none; }
+  footer { background: var(--surface); border-top: 1px solid var(--border); text-align: center; padding: 28px 24px; color: var(--muted); font-size: 13px; }
+  .footer-links { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+  .footer-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  @media (max-width: 768px) { nav { padding: 14px 20px; } .wrapper { grid-template-columns: 1fr; gap: 0; padding: 32px 20px 60px; } .toc { display: none; } }
 </style>
 </head>
 <body>
@@ -49,126 +81,153 @@
   <a href="/" class="nav-back">← Retour à l'accueil</a>
 </nav>
 
-<div class="container">
-  <div class="hero-tag">Légal</div>
-  <h1>Politique de confidentialité</h1>
-  <p class="date">Dernière mise à jour : 15 Mars 2026 — WaziBot, plateforme SaaS d'assistant commercial IA pour WhatsApp</p>
+<div class="wrapper">
+  <aside class="toc">
+    <div class="toc-title">Sommaire</div>
+    <ul class="toc-list">
+      <li><a href="#s1">1. Qui sommes-nous</a></li>
+      <li><a href="#s2">2. Données collectées</a></li>
+      <li><a href="#s3">3. Utilisation</a></li>
+      <li><a href="#s4">4. Partage</a></li>
+      <li><a href="#s5">5. Conservation</a></li>
+      <li><a href="#s6">6. Sécurité</a></li>
+      <li><a href="#s7">7. Dashboard & site</a></li>
+      <li><a href="#s8">8. Vos droits</a></li>
+      <li><a href="#s9">9. Cookies</a></li>
+      <li><a href="#s10">10. Modifications</a></li>
+    </ul>
+  </aside>
 
-  <p>WaziBot ("nous", "notre", "la plateforme") est un service SaaS qui fournit des assistants commerciaux intelligents via WhatsApp aux commerçants d'Afrique de l'Ouest. Cette politique explique de manière transparente comment nous collectons, utilisons, stockons et protégeons vos données personnelles ainsi que celles de vos clients.</p>
+  <main>
+    <div class="hero-tag">🔒 Légal</div>
+    <h1>Politique de confidentialité</h1>
+    <div class="meta">
+      <span><span class="meta-dot"></span> Dernière mise à jour : 15 mars 2026</span>
+      <span><span class="meta-dot"></span> WaziBot SaaS — Afrique de l'Ouest</span>
+    </div>
 
-  <div class="highlight-box green">
-    <h4>🔒 Notre engagement</h4>
-    <p style="color:rgba(0,229,160,0.75);margin:0;">Nous ne vendons jamais vos données à des tiers. Vos données vous appartiennent. Nous les utilisons uniquement pour faire fonctionner et améliorer votre boutique WaziBot.</p>
-  </div>
+    <p class="intro">WaziBot ("nous", "notre", "la plateforme") est un service SaaS qui fournit des assistants commerciaux intelligents via WhatsApp aux commerçants d'Afrique de l'Ouest. Cette politique explique comment nous collectons, utilisons, stockons et protégeons vos données personnelles ainsi que celles de vos clients.</p>
 
-  <h2>1. Qui sommes-nous</h2>
-  <p>WaziBot est une plateforme SaaS hébergée sur Render (serveurs cloud) avec une base de données PostgreSQL sécurisée. Notre service est accessible via :</p>
-  <ul>
-    <li><strong>Site web</strong> : <a href="https://whatsapp-commerce-1roe.onrender.com/">whatsapp-commerce-1roe.onrender.com</a></li>
-    <li><strong>Application mobile</strong> : WaziBot Merchant (Android)</li>
-    <li><strong>WhatsApp</strong> : via l'API officielle Meta (WhatsApp Business API)</li>
-  </ul>
+    <div class="box green">
+      <div class="box-icon">🔒</div>
+      <div class="box-content">
+        <h4>Notre engagement envers vous</h4>
+        <p>Nous ne vendons jamais vos données à des tiers. Vos données vous appartiennent. Nous les utilisons uniquement pour faire fonctionner et améliorer votre boutique WaziBot.</p>
+      </div>
+    </div>
 
-  <h2>2. Données collectées</h2>
-  <p><strong>Pour les commerçants (vous) :</strong></p>
-  <ul>
-    <li>Informations boutique : nom, ville, pays, devise, description</li>
-    <li>Coordonnées : adresse email, numéro WhatsApp personnel</li>
-    <li>Identifiants techniques : Token WhatsApp Business API, Phone Number ID (stockés chiffrés)</li>
-    <li>Données de paiement : traitées par <strong>My Touchpoint</strong> (Mobile Money) — nous ne stockons aucune donnée bancaire</li>
-    <li>Plan d'abonnement et date d'expiration</li>
-  </ul>
-  <p><strong>Pour les clients de votre boutique :</strong></p>
-  <ul>
-    <li>Numéro WhatsApp (identifiant anonyme fourni par Meta)</li>
-    <li>Nom fourni volontairement dans la conversation</li>
-    <li>Historique des commandes et conversations avec le bot</li>
-    <li>Date de dernière interaction (pour les relances automatiques)</li>
-  </ul>
+    <h2 id="s1"><span class="num">1</span> Qui sommes-nous</h2>
+    <p>WaziBot est une plateforme SaaS hébergée sur Render (serveurs cloud) avec une base de données PostgreSQL sécurisée. Notre service est accessible via :</p>
+    <ul>
+      <li><strong>Site web</strong> : chatbot-saas-lcsl.onrender.com</li>
+      <li><strong>Dashboard marchand</strong> : interface web accessible depuis tout navigateur</li>
+      <li><strong>WhatsApp</strong> : via l'API officielle Meta (WhatsApp Business API)</li>
+    </ul>
 
-  <h2>3. Utilisation des données</h2>
-  <p>Vos données et celles de vos clients sont utilisées exclusivement pour :</p>
-  <ul>
-    <li>Faire fonctionner l'assistant IA WhatsApp de votre boutique</li>
-    <li>Traiter et suivre les commandes de vos clients</li>
-    <li>Envoyer des relances automatiques aux clients inactifs (si votre plan l'inclut)</li>
-    <li>Générer vos rapports hebdomadaires et statistiques dashboard</li>
-    <li>Vous notifier des rappels d'abonnement et renouvellements</li>
-    <li>Améliorer les performances de l'IA et du service</li>
-  </ul>
+    <h2 id="s2"><span class="num">2</span> Données collectées</h2>
+    <p><strong>Pour les commerçants :</strong></p>
+    <ul>
+      <li>Informations boutique : nom, ville, pays, devise, description</li>
+      <li>Coordonnées : adresse email, numéro WhatsApp</li>
+      <li>Identifiants techniques : Token WhatsApp Business API, Phone Number ID (stockés chiffrés)</li>
+      <li>Paiements traités par <strong>My Touchpoint</strong> (Mobile Money) — aucune donnée bancaire stockée</li>
+      <li>Plan d'abonnement et date d'expiration</li>
+    </ul>
+    <p><strong>Pour les clients de votre boutique :</strong></p>
+    <ul>
+      <li>Numéro WhatsApp (identifiant anonyme fourni par Meta)</li>
+      <li>Nom fourni volontairement dans la conversation</li>
+      <li>Historique des commandes et conversations avec le bot</li>
+      <li>Date de dernière interaction (pour les relances automatiques)</li>
+    </ul>
 
-  <h2>4. Partage des données</h2>
-  <p>Nous partageons uniquement les données strictement nécessaires avec ces partenaires :</p>
-  <ul>
-    <li><strong>Anthropic (Claude AI)</strong> — pour générer les réponses de l'assistant. Les messages sont transmis sans données personnellement identifiables du commerçant</li>
-    <li><strong>Meta / WhatsApp API</strong> — pour envoyer et recevoir les messages WhatsApp via l'infrastructure officielle</li>
-    
-    
-    <li><strong>Render (hébergeur)</strong> — infrastructure serveur et base de données PostgreSQL sécurisée</li>
-  </ul>
+    <h2 id="s3"><span class="num">3</span> Utilisation des données</h2>
+    <ul>
+      <li>Faire fonctionner l'assistant IA WhatsApp de votre boutique</li>
+      <li>Traiter et suivre les commandes de vos clients</li>
+      <li>Envoyer des relances automatiques aux clients inactifs (plans Pro et Business)</li>
+      <li>Générer vos rapports hebdomadaires et statistiques dashboard</li>
+      <li>Vous notifier des rappels d'abonnement et renouvellements</li>
+      <li>Améliorer les performances de l'IA et du service</li>
+    </ul>
 
-  <div class="highlight-box orange">
-    <h4>⚠️ Important sur les données clients</h4>
-    <p style="color:rgba(232,92,14,0.75);margin:0;">En utilisant WaziBot, vous (le commerçant) êtes responsable d'informer vos clients que leurs messages WhatsApp sont traités par un assistant IA. Nous vous recommandons d'ajouter une mention dans votre message d'accueil.</p>
-  </div>
+    <h2 id="s4"><span class="num">4</span> Partage des données</h2>
+    <p>Nous partageons uniquement les données strictement nécessaires avec ces partenaires :</p>
+    <ul>
+      <li><strong>Anthropic (Claude AI)</strong> — génération des réponses de l'assistant, sans données personnellement identifiables</li>
+      <li><strong>Meta / WhatsApp Business API</strong> — envoi et réception des messages via l'infrastructure officielle</li>
+      <li><strong>My Touchpoint</strong> — traitement sécurisé des paiements Mobile Money</li>
+      <li><strong>Render</strong> — infrastructure serveur et base de données PostgreSQL sécurisée</li>
+    </ul>
 
-  <h2>5. Conservation des données</h2>
-  <ul>
-    <li>Données boutique et clients : conservées tant que votre compte est actif</li>
-    <li>Historique des commandes : 24 mois après la dernière commande</li>
-    <li>Conversations IA : 90 jours glissants</li>
-    <li>Après suppression du compte : toutes les données sont effacées sous <strong>30 jours</strong></li>
-  </ul>
+    <div class="box orange">
+      <div class="box-icon">⚠️</div>
+      <div class="box-content">
+        <h4>Votre responsabilité envers vos clients</h4>
+        <p>En utilisant WaziBot, vous êtes responsable d'informer vos clients que leurs messages WhatsApp sont traités par un assistant IA. Nous vous recommandons d'ajouter une mention dans votre message d'accueil.</p>
+      </div>
+    </div>
 
-  <h2>6. Sécurité</h2>
-  <ul>
-    <li>Hébergement sur <strong>Render</strong> avec chiffrement en transit (HTTPS/TLS)</li>
-    <li>Base de données <strong>PostgreSQL</strong> avec accès restreint et sauvegardes automatiques</li>
-    <li>Tokens WhatsApp stockés de manière <strong>chiffrée</strong>, jamais exposés publiquement</li>
-    <li>Clés API protégées par header d'authentification sur toutes les routes</li>
-    <li>Aucun stockage de mots de passe (authentification par ID unique)</li>
-  </ul>
+    <h2 id="s5"><span class="num">5</span> Conservation des données</h2>
+    <ul>
+      <li>Données boutique et clients : conservées tant que votre compte est actif</li>
+      <li>Historique des commandes : 24 mois après la dernière commande</li>
+      <li>Conversations IA : 90 jours glissants</li>
+      <li>Après suppression de compte : toutes les données effacées sous <strong>30 jours</strong></li>
+    </ul>
 
-  <h2>7. Dashboard et site boutique</h2>
-  <p>WaziBot vous fournit deux interfaces web :</p>
-  <ul>
-    <li><strong>Dashboard marchand</strong> : accessible sur <code>/merchant</code> depuis n'importe quel navigateur</li>
-    <li><strong>Mini-site boutique</strong> : généré automatiquement sur <code>/boutique/votre-slug</code> pour vos clients</li>
-    <li>Stocke uniquement votre ID boutique localement dans votre navigateur (localStorage)</li>
-    <li>Toutes les communications avec notre API sont chiffrées (HTTPS)</li>
-  </ul>
+    <h2 id="s6"><span class="num">6</span> Sécurité</h2>
+    <ul>
+      <li>Chiffrement en transit sur toutes les communications (HTTPS/TLS)</li>
+      <li>Base de données PostgreSQL avec accès restreint et sauvegardes automatiques</li>
+      <li>Tokens WhatsApp stockés de manière chiffrée, jamais exposés publiquement</li>
+      <li>Routes API protégées par authentification par clé sur tous les endpoints</li>
+      <li>Aucun stockage de mots de passe — authentification par ID unique sécurisé</li>
+    </ul>
 
-  <h2>8. Vos droits</h2>
-  <p>Conformément aux réglementations en vigueur, vous pouvez à tout moment :</p>
-  <ul>
-    <li><strong>Accéder</strong> à vos données via votre dashboard WaziBot</li>
-    <li><strong>Modifier</strong> vos informations dans les paramètres</li>
-    <li><strong>Exporter</strong> vos commandes et données clients (contactez notre support)</li>
-    <li><strong>Supprimer</strong> votre compte et toutes vos données en contactant notre support</li>
-    <li><strong>Contester</strong> tout traitement de données vous concernant</li>
-  </ul>
+    <h2 id="s7"><span class="num">7</span> Dashboard et site boutique</h2>
+    <ul>
+      <li><strong>Dashboard marchand</strong> : gérez vos commandes, produits et paramètres via <code>/merchant</code></li>
+      <li><strong>Mini-site boutique</strong> : vitrine publique générée automatiquement sur <code>/boutique/votre-slug</code></li>
+      <li>Seul votre ID boutique est stocké localement dans votre navigateur (localStorage)</li>
+      <li>Toutes les communications sont chiffrées (HTTPS)</li>
+    </ul>
 
-  <h2>9. Cookies et tracking</h2>
-  <p>Notre site utilise uniquement :</p>
-  <ul>
-    <li><strong>localStorage</strong> : pour mémoriser votre ID boutique (connexion automatique)</li>
-    <li><strong>Aucun cookie tiers</strong>, aucun pixel tracking, aucune publicité</li>
-    <li>WaziBot est un espace sans publicité. Nous ne permettons pas aux annonceurs de cibler nos utilisateurs</li>
-  </ul>
+    <h2 id="s8"><span class="num">8</span> Vos droits</h2>
+    <ul>
+      <li><strong>Accéder</strong> à vos données via votre dashboard WaziBot</li>
+      <li><strong>Modifier</strong> vos informations dans les paramètres</li>
+      <li><strong>Exporter</strong> vos commandes et données clients en contactant notre support</li>
+      <li><strong>Supprimer</strong> votre compte et toutes vos données sur demande</li>
+      <li><strong>Contester</strong> tout traitement de données vous concernant</li>
+    </ul>
 
-  <h2>10. Modifications de cette politique</h2>
-  <p>Nous pouvons mettre à jour cette politique. En cas de changement important, vous serez notifié par WhatsApp ou email. La date de mise à jour est toujours indiquée en haut de cette page.</p>
+    <h2 id="s9"><span class="num">9</span> Cookies et tracking</h2>
+    <ul>
+      <li><strong>localStorage</strong> uniquement pour mémoriser votre ID boutique (connexion automatique)</li>
+      <li>Aucun cookie tiers, aucun pixel tracking, aucune publicité</li>
+      <li>WaziBot est un espace sans publicité — nous ne permettons pas aux annonceurs de cibler nos utilisateurs</li>
+    </ul>
 
-  <div class="contact-card">
-    <h3>Des questions sur vos données ?</h3>
-    <p>Notre équipe est disponible pour répondre à toutes vos questions concernant la confidentialité et la gestion de vos données.</p>
-    <a href="mailto:salemkingrosetho@gmail.com" class="contact-btn">📧 salemkingrosetho@gmail.com</a>
-  </div>
+    <h2 id="s10"><span class="num">10</span> Modifications</h2>
+    <p>Nous pouvons mettre à jour cette politique à tout moment. En cas de changement important, vous serez notifié par WhatsApp ou email. La date de dernière mise à jour est toujours indiquée en haut de cette page.</p>
+
+    <div class="contact-card">
+      <h3>Des questions sur vos données ?</h3>
+      <p>Notre équipe répond à toutes vos questions concernant la confidentialité et la gestion de vos données personnelles.</p>
+      <a href="mailto:salemkingrosetho@gmail.com" class="contact-btn">📧 salemkingrosetho@gmail.com</a>
+    </div>
+  </main>
 </div>
 
 <footer>
-  <p>© 2026 WaziBot — Politique de confidentialité</p>
-  <p style="margin-top:8px;"><a href="/">Accueil</a> · <a href="/guide">Guide</a> · <a href="/signup">Créer un compte</a></p>
+  <p>© 2026 WaziBot — Tous droits réservés</p>
+  <div class="footer-links">
+    <a href="/">Accueil</a>
+    <a href="/guide">Guide</a>
+    <a href="/signup">Créer un compte</a>
+    <a href="/privacy">Confidentialité</a>
+  </div>
 </footer>
 
 </body>
