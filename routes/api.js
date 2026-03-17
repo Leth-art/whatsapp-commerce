@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Merchant, Product, Customer, Order } = require("../models/index");
+const { Merchant, Product, Customer, Order, Announcement } = require("../models/index");
 const { updateOrderStatus, getMerchantOrders } = require("../modules/orders");
 const { canAddProduct } = require("../modules/planLimits");
 const { validateMerchantId } = require("../middleware/security");
@@ -226,61 +226,83 @@ router.post("/merchants/:id/payment-request", validateMerchantId, async (req, re
 });
 
 
-// ─── Routes Admin (non filtrées) ─────────────────────────────────────────────
+// ─── Annonces ─────────────────────────────────────────────────────────────────
 
-// Activer/renouveler un abonnement
-router.post("/admin/activate/:id", async (req, res) => {
+// GET public — bandeau actif
+router.get("/announcements/active", async (req, res) => {
   try {
-    const merchant = await Merchant.findByPk(req.params.id);
-    if (!merchant) return res.status(404).json({ error: "Introuvable" });
-    const { plan } = req.body;
-    const validPlans = ["starter", "pro", "business"];
-    const finalPlan = validPlans.includes(plan) ? plan : merchant.plan || "starter";
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await merchant.update({
-      plan: finalPlan,
-      isActive: true,
-      subscriptionExpiresAt: expiresAt,
-      lastPaymentId: null,
+    const announcement = await Announcement.findOne({
+      where: { isActive: true, showBanner: true },
+      order: [["createdAt", "DESC"]],
     });
-    res.json({ success: true, plan: finalPlan, expiresAt });
+    if (!announcement) return res.json(null);
+    res.json({
+      id: announcement.id,
+      title: announcement.title,
+      message: announcement.message,
+      type: announcement.type,
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Activer/désactiver une boutique
-router.post("/admin/toggle/:id", async (req, res) => {
+// GET admin — toutes les annonces
+router.get("/admin/announcements", async (req, res) => {
   try {
-    const merchant = await Merchant.findByPk(req.params.id);
-    if (!merchant) return res.status(404).json({ error: "Introuvable" });
-    await merchant.update({ isActive: req.body.isActive });
-    res.json({ success: true, isActive: req.body.isActive });
+    const announcements = await Announcement.findAll({
+      order: [["createdAt", "DESC"]],
+      limit: 50,
+    });
+    res.json(announcements);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-
-// Supprimer une boutique (admin)
-router.delete("/admin/merchants/:id", async (req, res) => {
+// POST admin — créer une annonce
+router.post("/admin/announcements", async (req, res) => {
   try {
-    const { Merchant, Product, Customer, Order, ConversationSession } = require("../models/index");
-    const merchant = await Merchant.findByPk(req.params.id);
-    if (!merchant) return res.status(404).json({ error: "Introuvable" });
-    // Supprimer toutes les données liées
-    await Product.destroy({ where: { merchantId: req.params.id } });
-    await Order.destroy({ where: { merchantId: req.params.id } });
-    await Customer.destroy({ where: { merchantId: req.params.id } });
-    await ConversationSession.destroy({ where: { merchantId: req.params.id } });
-    await merchant.destroy();
-    console.log(`🗑️ Boutique supprimée : ${merchant.name}`);
+    const { title, message, type, showBanner, sendEmail } = req.body;
+    if (!title || !message) return res.status(400).json({ error: "Titre et message requis" });
+
+    const { v4: uuidv4 } = require("uuid");
+    const announcement = await Announcement.create({
+      id: uuidv4(),
+      title: title.slice(0, 200),
+      message: message.slice(0, 2000),
+      type: ["info", "warning", "promo", "update"].includes(type) ? type : "info",
+      showBanner: showBanner !== false,
+      isActive: true,
+    });
+
+    let emailResult = { skipped: true };
+    if (sendEmail) {
+      try {
+        const { sendAnnouncementEmails } = require("../modules/announcements");
+        emailResult = await sendAnnouncementEmails(title, message.replace(/\n/g, "<br>"), message);
+        await announcement.update({ emailSent: true, emailCount: emailResult.sent || 0 });
+      } catch (err) {
+        console.error("Email error:", err.message);
+      }
+    }
+
+    res.json({ success: true, announcement, emailResult });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PATCH admin — activer/désactiver
+router.patch("/admin/announcements/:id", async (req, res) => {
+  try {
+    const ann = await Announcement.findByPk(req.params.id);
+    if (!ann) return res.status(404).json({ error: "Introuvable" });
+    await ann.update({ isActive: req.body.isActive, showBanner: req.body.showBanner });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Marquer comme relancé
-router.post("/admin/merchants/:id/mark-reminded", async (req, res) => {
+// DELETE admin
+router.delete("/admin/announcements/:id", async (req, res) => {
   try {
-    const merchant = await Merchant.findByPk(req.params.id);
-    if (!merchant) return res.status(404).json({ error: "Introuvable" });
-    await merchant.update({ lastRemindedAt: new Date() });
+    const ann = await Announcement.findByPk(req.params.id);
+    if (!ann) return res.status(404).json({ error: "Introuvable" });
+    await ann.destroy();
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

@@ -23,8 +23,6 @@ const Merchant = sequelize.define("Merchant", {
   shopSlug: { type: DataTypes.STRING, defaultValue: "" },
   siteTheme: { type: DataTypes.STRING, defaultValue: "orange" },
   siteActive: { type: DataTypes.BOOLEAN, defaultValue: true },
-  customSiteUrl: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
-  lastRemindedAt: { type: DataTypes.DATE, allowNull: true, defaultValue: null },
 });
 
 Merchant.prototype.isSubscriptionActive = function() {
@@ -118,4 +116,17 @@ ConversationSession.prototype.cartSummary = function(products) {
   return items.join(", ") || "vide";
 };
 
-module.exports = { Merchant, Product, Customer, Order, ConversationSession };
+
+// ─── Announcement ───
+const Announcement = sequelize.define("Announcement", {
+  id: { type: DataTypes.STRING, primaryKey: true, defaultValue: () => uuidv4() },
+  title: { type: DataTypes.STRING, allowNull: false },
+  message: { type: DataTypes.TEXT, allowNull: false },
+  type: { type: DataTypes.STRING, defaultValue: "info" }, // info | warning | promo | update
+  showBanner: { type: DataTypes.BOOLEAN, defaultValue: true },
+  isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+  emailSent: { type: DataTypes.BOOLEAN, defaultValue: false },
+  emailCount: { type: DataTypes.INTEGER, defaultValue: 0 },
+});
+
+module.exports = { Merchant, Product, Customer, Order, ConversationSession, Announcement };

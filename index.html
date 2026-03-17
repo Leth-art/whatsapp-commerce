@@ -125,9 +125,36 @@
     footer{grid-template-columns:1fr;padding:40px 24px;}
     .footer-bottom{padding:20px 24px;flex-direction:column;gap:8px;}
   }
+
+/* ── BANDEAU ANNONCE ── */
+.ann-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  padding: 10px 16px; display: none; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 600; font-family: sans-serif;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15); animation: bannerIn 0.4s ease;
+}
+.ann-banner.show { display: flex; }
+@keyframes bannerIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+.ann-banner-icon { font-size: 16px; flex-shrink: 0; }
+.ann-banner-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ann-banner-text.scroll { animation: scrollText 18s linear infinite; display: inline-block; white-space: nowrap; }
+@keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+.ann-banner-close { background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.7; flex-shrink: 0; padding: 0 4px; }
+.ann-banner-close:hover { opacity: 1; }
+
 </style>
 </head>
 <body>
+
+<!-- Bandeau annonce -->
+<div class="ann-banner" id="ann-banner" role="alert">
+  <span class="ann-banner-icon" id="ann-banner-icon">ℹ️</span>
+  <div style="flex:1;overflow:hidden;">
+    <span class="ann-banner-text" id="ann-banner-text"></span>
+  </div>
+  <button class="ann-banner-close" onclick="closeBanner()" aria-label="Fermer">✕</button>
+</div>
+
 <nav>
   <div class="logo">Wazi<span>Bot</span></div>
   <ul class="nav-links">
@@ -136,7 +163,7 @@
     <li><a href="#temoignages">Témoignages</a></li>
     <li><a href="/guide">Guide d'utilisation</a></li>
   </ul>
-  <a href="/signup" class="nav-cta">Essai gratuit 7 jours</a>
+  <a href="/signup.html" class="nav-cta">Essai gratuit 7 jours</a>
 </nav>
 
 <section class="hero">
@@ -145,7 +172,7 @@
     <h1>Vendez pendant que vous <em>dormez</em></h1>
     <p>WaziBot répond à vos clients WhatsApp 24h/24, prend les commandes automatiquement et fidélise vos acheteurs. Sans effort de votre part.</p>
     <div class="hero-actions">
-      <a href="/signup" class="btn-primary">Commencer gratuitement →</a>
+      <a href="/signup.html" class="btn-primary">Commencer gratuitement →</a>
       <a href="#fonctionnalites" class="btn-secondary">Voir comment ça marche →</a>
     </div>
   </div>
@@ -185,9 +212,9 @@
 
   <div class="features-grid">
     <div class="feature-card"><div class="feature-icon">🤖</div><h3>Assistant IA intelligent</h3><p>L'IA répond aux questions, présente le catalogue, et prend les commandes automatiquement. Comme un vrai vendeur, mais sans salaire.</p></div>
-    <div class="feature-card"><div class="feature-icon">📦</div><h3>Gestion des commandes</h3><p>Chaque commande est enregistrée automatiquement. Gérez tout depuis votre dashboard web ou votre mini-site boutique.</p></div>
+    <div class="feature-card"><div class="feature-icon">📦</div><h3>Gestion des commandes</h3><p>Chaque commande est enregistrée automatiquement. Suivez vos livraisons depuis votre dashboard en temps réel.</p></div>
     <div class="feature-card"><div class="feature-icon">🔔</div><h3>Relances automatiques</h3><p>Vos clients inactifs reçoivent des messages personnalisés. Vous récupérez des ventes sans lever le petit doigt.</p></div>
-    <div class="feature-card"><div class="feature-icon">📊</div><h3>Dashboard en temps réel</h3><p>Visualisez vos revenus, commandes et clients depuis votre dashboard web. Accessible depuis n'importe quel navigateur.</p></div>
+    <div class="feature-card"><div class="feature-icon">📊</div><h3>Dashboard en temps réel</h3><p>Visualisez vos revenus, commandes et clients depuis n'importe quel appareil. Votre boutique dans votre poche.</p></div>
     <div class="feature-card"><div class="feature-icon">💰</div><h3>Paiement Mobile Money</h3><p>Vos clients paient via Mobile Money directement dans WhatsApp. Zéro friction, plus de ventes.</p></div>
     <div class="feature-card"><div class="feature-icon">🛍️</div><h3>Catalogue illimité</h3><p>Ajoutez tous vos produits avec descriptions et prix. L'IA les connaît par coeur et les présente parfaitement.</p></div>
   </div>
@@ -228,7 +255,7 @@
   <div class="pricing-grid">
     <div class="price-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div class="price-name">Starter</div><span style="background:rgba(0,229,160,0.2);color:#00e5a0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;">-20%</span></div>
-      <div class="price-amount"><span style="text-decoration:line-through;opacity:0.4;font-size:14px;font-weight:400;margin-right:8px;">40 000 XOF</span><br><span id="p-starter">35 000</span> <span id="p-currency-1" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
+      <div class="price-amount"><span style="text-decoration:line-through;opacity:0.4;font-size:14px;font-weight:400;margin-right:8px;">25 000 XOF</span><br><span id="p-starter">20 000</span> <span id="p-currency-1" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
       <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Parfait pour démarrer</div>
       <ul class="price-features">
@@ -239,11 +266,11 @@
         <li class="no">Relances automatiques</li>
         <li class="no">Rapport hebdomadaire</li>
       </ul>
-      <a href="/signup" class="price-btn">Commencer →</a>
+      <a href="/signup.html" class="price-btn">Commencer →</a>
     </div>
     <div class="price-card featured">
       <div class="price-name">Pro</div>
-      <div class="price-amount"><span style="text-decoration:line-through;opacity:0.4;font-size:14px;font-weight:400;margin-right:8px;">70 000 XOF</span><br><span id="p-pro">55 000</span> <span id="p-currency-2" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
+      <div class="price-amount"><span style="text-decoration:line-through;opacity:0.4;font-size:14px;font-weight:400;margin-right:8px;">55 000 XOF</span><br><span id="p-pro">40 000</span> <span id="p-currency-2" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
       <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Le plus choisi</div>
       <ul class="price-features">
@@ -254,11 +281,11 @@
         <li>Relances automatiques</li>
         <li>Rapport hebdomadaire</li>
       </ul>
-      <a href="/signup" class="price-btn">Commencer →</a>
+      <a href="/signup.html" class="price-btn">Commencer →</a>
     </div>
     <div class="price-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div class="price-name">Business</div><span style="background:rgba(0,229,160,0.2);color:#00e5a0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;">-23%</span></div>
-      <div class="price-amount"><span style="text-decoration:line-through;opacity:0.4;font-size:14px;font-weight:400;margin-right:8px;">145 000 XOF</span><br><span id="p-business">115 000</span> <span id="p-currency-3" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
+      <div class="price-amount"><span style="text-decoration:line-through;opacity:0.4;font-size:14px;font-weight:400;margin-right:8px;">130 000 XOF</span><br><span id="p-business">100 000</span> <span id="p-currency-3" style="font-size:14px;font-weight:400;opacity:0.7;">XOF/mois</span></div>
       <div class="price-note">Équivalent local selon votre pays</div>
       <div class="price-desc">Pour les grandes boutiques</div>
       <ul class="price-features">
@@ -269,7 +296,7 @@
         <li>Relances automatiques</li>
         <li>Support prioritaire</li>
       </ul>
-      <a href="/signup" class="price-btn">Commencer →</a>
+      <a href="/signup.html" class="price-btn">Commencer →</a>
     </div>
   </div>
 </section>
@@ -288,7 +315,7 @@
 <section class="cta-section">
   <h2>Prêt à automatiser vos ventes ?</h2>
   <p>Rejoignez des commerçants qui vendent 24h/24 avec WaziBot.</p>
-  <a href="/signup" class="cta-btn">💬 Démarrer l'essai gratuit</a>
+  <a href="/signup.html" class="cta-btn">💬 Démarrer l'essai gratuit</a>
 </section>
 
 <footer>
@@ -319,8 +346,8 @@
 
 <script>
 const PRICING = {
-  'XOF|XOF': { starter: '35 000', pro: '55 000', business: '115 000', currency: 'XOF' },
-  'XAF|XAF': { starter: '35 000', pro: '55 000', business: '115 000', currency: 'XAF' },
+  'XOF|XOF': { starter: '20 000', pro: '40 000', business: '100 000', currency: 'XOF' },
+  'XAF|XAF': { starter: '20 000', pro: '40 000', business: '100 000', currency: 'XAF' },
   'GN|GNF': { starter: '250 000', pro: '500 000', business: '1 250 000', currency: 'GNF' },
   'KE|KES': { starter: '3 500', pro: '7 000', business: '18 000', currency: 'KES' },
   'MR|MRO': { starter: '11 000', pro: '22 000', business: '55 000', currency: 'MRO' },
@@ -340,6 +367,60 @@ function updatePricing() {
   ['p-currency-1','p-currency-2','p-currency-3'].forEach(id => {
     document.getElementById(id).textContent = p.currency + '/mois';
   });
+}
+</script>
+<script>
+// ── Bandeau annonce ──────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const r = await fetch('/api/announcements/active');
+    if (!r.ok) return;
+    const ann = await r.json();
+    if (!ann) return;
+
+    const dismissed = sessionStorage.getItem('ann_dismissed_' + ann.id);
+    if (dismissed) return;
+
+    const COLORS = {
+      info:    { bg: '#1a2a4a', border: '#6496ff', text: '#a8c4ff', icon: 'ℹ️' },
+      update:  { bg: '#0a2a1a', border: '#00e5a0', text: '#80ffd0', icon: '🚀' },
+      promo:   { bg: '#2a1a00', border: '#f0a500', text: '#ffd080', icon: '🎁' },
+      warning: { bg: '#2a0a0a', border: '#ff4757', text: '#ff9aa0', icon: '⚠️' },
+    };
+    const c = COLORS[ann.type] || COLORS.info;
+
+    const banner = document.getElementById('ann-banner');
+    const textEl = document.getElementById('ann-banner-text');
+    const iconEl = document.getElementById('ann-banner-icon');
+
+    banner.style.background = c.bg;
+    banner.style.borderBottom = '1px solid ' + c.border;
+    banner.style.color = c.text;
+    iconEl.textContent = c.icon;
+
+    const fullText = ann.title + ' — ' + ann.message;
+    textEl.textContent = fullText;
+    if (fullText.length > 80) textEl.classList.add('scroll');
+
+    banner.classList.add('show');
+
+    // Décale le body pour pas que le contenu soit caché
+    const h = banner.offsetHeight;
+    document.body.style.paddingTop = (h + 4) + 'px';
+    document.querySelector('nav')?.style.setProperty('top', h + 'px');
+  } catch {}
+})();
+
+function closeBanner() {
+  const banner = document.getElementById('ann-banner');
+  if (!banner) return;
+  banner.style.display = 'none';
+  document.body.style.paddingTop = '';
+  // Mémorise la fermeture pour cette session
+  try {
+    const id = banner.dataset.annId;
+    if (id) sessionStorage.setItem('ann_dismissed_' + id, '1');
+  } catch {}
 }
 </script>
 </body>

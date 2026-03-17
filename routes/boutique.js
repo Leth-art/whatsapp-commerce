@@ -445,6 +445,23 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .cart-badge.show { display: flex; }
 .cart-badge:hover { transform: translateX(-50%) translateY(-2px); }
 
+
+/* ── BANDEAU ANNONCE ── */
+.ann-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  padding: 10px 16px; display: none; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 600; font-family: sans-serif;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15); animation: bannerIn 0.4s ease;
+}
+.ann-banner.show { display: flex; }
+@keyframes bannerIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+.ann-banner-icon { font-size: 16px; flex-shrink: 0; }
+.ann-banner-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ann-banner-text.scroll { animation: scrollText 18s linear infinite; display: inline-block; white-space: nowrap; }
+@keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+.ann-banner-close { background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.7; flex-shrink: 0; padding: 0 4px; }
+.ann-banner-close:hover { opacity: 1; }
+
 /* RESPONSIVE */
 @media (max-width: 600px) {
   .header { padding: 12px 16px; }
@@ -458,6 +475,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 </style>
 </head>
 <body>
+<!-- Bandeau annonce --><div class="ann-banner" id="ann-banner" role="alert">  <span class="ann-banner-icon" id="ann-banner-icon">ℹ️</span>  <div style="flex:1;overflow:hidden;">    <span class="ann-banner-text" id="ann-banner-text"></span>  </div>  <button class="ann-banner-close" onclick="closeBanner()" aria-label="Fermer">✕</button></div>
 
 <!-- HEADER -->
 <header class="header">
@@ -722,6 +740,60 @@ async function submitOrder() {
 }
 </script>
 
+<script>
+// ── Bandeau annonce ──────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const r = await fetch('/api/announcements/active');
+    if (!r.ok) return;
+    const ann = await r.json();
+    if (!ann) return;
+
+    const dismissed = sessionStorage.getItem('ann_dismissed_' + ann.id);
+    if (dismissed) return;
+
+    const COLORS = {
+      info:    { bg: '#1a2a4a', border: '#6496ff', text: '#a8c4ff', icon: 'ℹ️' },
+      update:  { bg: '#0a2a1a', border: '#00e5a0', text: '#80ffd0', icon: '🚀' },
+      promo:   { bg: '#2a1a00', border: '#f0a500', text: '#ffd080', icon: '🎁' },
+      warning: { bg: '#2a0a0a', border: '#ff4757', text: '#ff9aa0', icon: '⚠️' },
+    };
+    const c = COLORS[ann.type] || COLORS.info;
+
+    const banner = document.getElementById('ann-banner');
+    const textEl = document.getElementById('ann-banner-text');
+    const iconEl = document.getElementById('ann-banner-icon');
+
+    banner.style.background = c.bg;
+    banner.style.borderBottom = '1px solid ' + c.border;
+    banner.style.color = c.text;
+    iconEl.textContent = c.icon;
+
+    const fullText = ann.title + ' — ' + ann.message;
+    textEl.textContent = fullText;
+    if (fullText.length > 80) textEl.classList.add('scroll');
+
+    banner.dataset.annId = ann.id;
+    banner.classList.add('show');
+
+    // Décale le body pour pas que le contenu soit caché
+    const h = banner.offsetHeight;
+    document.body.style.paddingTop = (h + 4) + 'px';
+  } catch {}
+})();
+
+function closeBanner() {
+  const banner = document.getElementById('ann-banner');
+  if (!banner) return;
+  banner.style.display = 'none';
+  document.body.style.paddingTop = '';
+  // Mémorise la fermeture pour cette session
+  try {
+    const id = banner.dataset.annId;
+    if (id) sessionStorage.setItem('ann_dismissed_' + id, '1');
+  } catch {}
+}
+</script>
 </body>
 </html>`;
 };
