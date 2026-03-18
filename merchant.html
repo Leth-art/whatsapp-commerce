@@ -273,6 +273,42 @@ select.status-sel { background: var(--surface2); border: 1px solid var(--border)
   .products-grid { grid-template-columns: repeat(2, 1fr); }
   table { display: block; overflow-x: auto; }
 }
+
+/* ── IMAGE UPLOAD ── */
+.img-upload-area {
+  border: 2px dashed var(--border); border-radius: 12px;
+  cursor: pointer; overflow: hidden; position: relative;
+  min-height: 140px; background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s;
+}
+.img-upload-area:hover { border-color: var(--accent); }
+.img-upload-area input[type=file] { display: none; }
+.img-upload-area .preview {
+  width: 100%; height: 180px; object-fit: cover;
+  display: none; border-radius: 10px;
+}
+.img-upload-area.has-image .preview { display: block; }
+.img-upload-area.has-image .placeholder { display: none; }
+.img-upload-area.has-image { border-style: solid; border-color: var(--accent2); }
+.img-upload-area .placeholder {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 24px; color: var(--muted); font-size: 13px; text-align: center; pointer-events: none;
+}
+.img-upload-area .placeholder .icon { font-size: 32px; }
+.img-uploading {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+  display: none; align-items: center; justify-content: center;
+  border-radius: 10px; z-index: 2;
+}
+.img-uploading.show { display: flex; }
+.img-remove {
+  position: absolute; top: 8px; right: 8px; z-index: 3;
+  background: rgba(0,0,0,0.6); color: white; border: none;
+  padding: 4px 10px; border-radius: 8px; font-size: 11px;
+  cursor: pointer; display: none;
+}
+.img-upload-area.has-image .img-remove { display: block; }
 </style>
 </head>
 <body>
@@ -708,7 +744,7 @@ function renderRecentOrders() {
   el.innerHTML = `<table><thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead><tbody>
     ${recent.map(o => `<tr>
       <td><strong>#${(o.orderNumber||o.id||'').toString().slice(-6)}</strong></td>
-      <td>${o.customer?.name || o.customer?.whatsappNumber || o.customerName || '—'}</td>
+      <td>${o.customer?.name || o.customerName || o.customerPhone || '—'}</td>
       <td style="color:var(--accent2);font-weight:700">${fmtNum(o.totalAmount)} F</td>
       <td><span class="badge ${o.status}">${statusLabel(o.status)}</span></td>
       <td style="color:var(--muted)">${fmtDate(o.createdAt)}</td>
@@ -722,11 +758,10 @@ function renderOrders() {
   if (!filtered.length) { el.innerHTML = '<div class="empty"><div class="icon">📭</div><p>Aucune commande</p></div>'; return; }
   el.innerHTML = `<table><thead><tr><th>N°</th><th>Client</th><th>Articles</th><th>Montant</th><th>Statut</th><th>Date</th><th>Action</th></tr></thead><tbody>
     ${filtered.map(o => {
-      let items = [];
-        try { items = Array.isArray(o.items) ? o.items : JSON.parse(o.items||'[]'); } catch { items = []; }
+      const items = Array.isArray(o.items) ? o.items : (JSON.parse(o.items||'[]'));
       return `<tr>
         <td><strong>#${(o.orderNumber||o.id||'').toString().slice(-6)}</strong></td>
-        <td>${o.customer?.name || o.customer?.whatsappNumber || o.customerName || '—'}</td>
+        <td>${o.customer?.name || o.customerName || o.customerPhone || '—'}</td>
         <td style="color:var(--muted);font-size:12px">${items.map(i => `${i.name||i.productName} x${i.quantity}`).join(', ') || '—'}</td>
         <td style="color:var(--accent2);font-weight:700">${fmtNum(o.totalAmount)} F</td>
         <td><select class="status-sel" onchange="updateStatus('${o.id}',this.value)">

@@ -10,11 +10,11 @@ const { Merchant, Product } = require("../models/index");
 
 // ─── Thèmes disponibles ───────────────────────────────────────────────────────
 const THEMES = {
-  orange: { primary: "#E85C0E", secondary: "#FF9A00", bg: "#0a0508", surface: "#150d0a", text: "#F5F0EE" },
-  green:  { primary: "#00E5A0", secondary: "#00B37D", bg: "#050a08", surface: "#0a150f", text: "#EEF5F2" },
-  purple: { primary: "#7C5CFC", secondary: "#A855F7", bg: "#07050a", surface: "#100a15", text: "#F0EEF5" },
-  blue:   { primary: "#3B82F6", secondary: "#60A5FA", bg: "#05080a", surface: "#0a1015", text: "#EEF2F5" },
-  red:    { primary: "#EF4444", secondary: "#F97316", bg: "#0a0505", surface: "#150a0a", text: "#F5EEEE" },
+  orange: { primary: "#E85C0E", secondary: "#FF9A00", bg: "#ffffff", surface: "#f9f5f2", text: "#1a0e08" },
+  green:  { primary: "#00A878", secondary: "#00C896", bg: "#ffffff", surface: "#f2faf7", text: "#081a14" },
+  purple: { primary: "#7C5CFC", secondary: "#A855F7", bg: "#ffffff", surface: "#f5f3ff", text: "#0f0820" },
+  blue:   { primary: "#2563EB", secondary: "#3B82F6", bg: "#ffffff", surface: "#f0f5ff", text: "#08101a" },
+  red:    { primary: "#DC2626", secondary: "#EF4444", bg: "#ffffff", surface: "#fff5f5", text: "#1a0808" },
 };
 
 // ─── GET /boutique/:slug ──────────────────────────────────────────────────────
@@ -170,6 +170,68 @@ router.post("/:slug/order", async (req, res) => {
   }
 });
 
+
+// ─── POST /boutique/:slug/chat ────────────────────────────────────────────────
+router.post("/:slug/chat", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: "Message requis" });
+    const merchant = await Merchant.findOne({ where: { shopSlug: slug } });
+    if (!merchant) return res.status(404).json({ error: "Boutique introuvable" });
+    const products = await Product.findAll({ where: { merchantId: merchant.id, isAvailable: true } });
+    const reply = generateBotReply(message, merchant, products);
+    res.json({ reply });
+  } catch (err) {
+    res.status(500).json({ reply: "Désolé, je rencontre un problème. Contactez-nous sur WhatsApp !" });
+  }
+});
+
+// ─── Logique du mini bot ──────────────────────────────────────────────────────
+const generateBotReply = (message, merchant, products) => {
+  const msg = message.toLowerCase().trim();
+  const shopName = merchant.shopName || merchant.name;
+  const currency = merchant.currency || "XOF";
+  const phone = merchant.ownerPhone || "";
+
+  if (/^(bonjour|bonsoir|salut|hello|hi|yo|bjr|bsr|slt)/.test(msg))
+    return `Bonjour ! 👋 Bienvenue chez *${shopName}*.\n\nJe peux vous aider avec :\n• 📦 Notre catalogue\n• 💰 Les prix\n• 🚚 La livraison\n• 📞 Nous contacter`;
+
+  if (/prix|combien|tarif|catalogue|produit|article|vend/.test(msg)) {
+    if (!products.length) return "Nous préparons notre catalogue. Contactez-nous sur WhatsApp !";
+    const list = products.slice(0,8).map(p => `• *${p.name}* — ${Number(p.price).toLocaleString("fr-FR")} ${currency}`).join("\n");
+    return `🛍️ *Nos produits :*\n\n${list}${products.length > 8 ? `\n...et ${products.length-8} autres.` : ""}\n\nCliquez sur un produit pour commander !`;
+  }
+
+  const found = products.filter(p =>
+    p.name.toLowerCase().includes(msg) || (p.category||"").toLowerCase().includes(msg) || (p.description||"").toLowerCase().includes(msg)
+  );
+  if (found.length > 0) {
+    const p = found[0];
+    return `*${p.name}*\n\n💰 Prix : *${Number(p.price).toLocaleString("fr-FR")} ${currency}*\n${p.description ? `\n${p.description}` : ""}\n\nCliquez "🛒 Ajouter" sur la fiche produit pour commander !`;
+  }
+
+  if (/livr|délai|expédit|deliver/.test(msg))
+    return `📦 *Livraison*\n\nNous livrons${merchant.city ? ` à *${merchant.city}*` : ""} et dans les environs.\nContactez-nous pour les délais et frais !${phone ? `\n\n📱 +${phone}` : ""}`;
+
+  if (/paiement|payer|mobile money|mtn|moov|wave|orange/.test(msg))
+    return `💳 *Modes de paiement*\n\n• 📱 Mobile Money (MTN, Moov, Wave, Orange)\n• 💵 Paiement à la livraison`;
+
+  if (/contact|téléphone|numéro|whatsapp/.test(msg))
+    return phone ? `📞 *Nous contacter*\n\nWhatsApp : *+${phone}*\nDisponible lun-sam, 8h-20h.` : "Contactez-nous via le bouton WhatsApp sur cette page !";
+
+  if (/heure|ouvert|horaire/.test(msg))
+    return `🕐 *Horaires*\n\nLundi — Vendredi : 8h — 18h\nSamedi : 9h — 15h`;
+
+  if (/commander|acheter|order/.test(msg))
+    return `🛒 *Comment commander ?*\n\n1. Parcourez notre catalogue\n2. Cliquez sur "🛒 Ajouter"\n3. Validez votre panier\n4. Remplissez vos infos de livraison\n\nSimple et rapide ! 😊`;
+
+  if (/merci|thank|parfait|super|ok/.test(msg))
+    return `De rien ! 😊 N'hésitez pas si vous avez d'autres questions.`;
+
+  return `Je peux vous renseigner sur :\n\n• 📦 *catalogue* — Nos produits et prix\n• 🚚 *livraison* — Délais et zones\n• 💳 *paiement* — Modes acceptés\n• 📞 *contact* — Nous joindre\n\nOu tapez le nom d'un produit pour le trouver !`;
+};
+
 // ─── Génération du HTML du site ───────────────────────────────────────────────
 const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   const shopName = merchant.shopName || merchant.name;
@@ -222,8 +284,8 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   --bg: ${theme.bg};
   --surface: ${theme.surface};
   --text: ${theme.text};
-  --muted: rgba(255,255,255,0.4);
-  --border: rgba(255,255,255,0.08);
+  --muted: rgba(0,0,0,0.45);
+  --border: rgba(0,0,0,0.1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -249,7 +311,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
 /* HERO */
 .hero {
-  background: linear-gradient(135deg, rgba(232,92,14,0.15) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(232,92,14,0.08) 0%, transparent 60%);
   background-color: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 48px 24px;
@@ -300,7 +362,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
   overflow: hidden; transition: all 0.25s;
 }
-.product-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-3px); }
+.product-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 
 .product-img {
   width: 100%; height: 180px;
@@ -309,7 +371,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .product-img.placeholder {
   display: flex; align-items: center; justify-content: center;
   font-size: 48px; font-weight: 800; color: var(--primary);
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.07));
+  background: linear-gradient(135deg, rgba(0,0,0,0.04), rgba(0,0,0,0.08));
 }
 
 .product-body { padding: 16px; }
@@ -345,7 +407,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .theme-btn {
   width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border);
   cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
-  background: var(--surface); box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all 0.2s;
+  background: var(--surface); box-shadow: 0 4px 20px rgba(0,0,0,0.12); transition: all 0.2s;
 }
 .theme-btn:hover { transform: scale(1.1); }
 .theme-panel {
@@ -462,6 +524,74 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 .ann-banner-close { background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.7; flex-shrink: 0; padding: 0 4px; }
 .ann-banner-close:hover { opacity: 1; }
+
+
+/* ── MINI BOT CHAT ── */
+.chat-widget { position: fixed; bottom: 90px; right: 24px; z-index: 300; }
+.chat-toggle {
+  width: 56px; height: 56px; border-radius: 50%; border: none;
+  background: var(--primary); color: white; font-size: 24px;
+  cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; position: relative;
+}
+.chat-toggle:hover { transform: scale(1.1); }
+.chat-badge-dot {
+  position: absolute; top: -3px; right: -3px; width: 16px; height: 16px;
+  background: #ff4757; border-radius: 50%; font-size: 9px; font-weight: 700;
+  display: none; align-items: center; justify-content: center; color: white;
+}
+.chat-box {
+  position: absolute; bottom: 68px; right: 0; width: 320px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden; display: none;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25); animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.chat-box.open { display: flex; flex-direction: column; }
+.chat-header {
+  background: var(--primary); padding: 13px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.chat-header-info { display: flex; align-items: center; gap: 10px; }
+.chat-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.chat-title { font-weight: 700; font-size: 14px; color: white; }
+.chat-subtitle { font-size: 11px; color: rgba(255,255,255,0.8); }
+.chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; opacity: 0.8; }
+.chat-close:hover { opacity: 1; }
+.chat-messages { padding: 14px; height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; }
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.chat-msg { max-width: 88%; padding: 9px 13px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+.chat-msg.bot { background: rgba(0,0,0,0.06); color: var(--text); border-radius: 4px 14px 14px 14px; align-self: flex-start; }
+.chat-msg.user { background: var(--primary); color: white; border-radius: 14px 4px 14px 14px; align-self: flex-end; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 11px 14px !important; }
+.typing span { width: 7px; height: 7px; background: var(--muted,#999); border-radius: 50%; animation: bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform:scale(0.8); opacity:0.5; } 40% { transform:scale(1.2); opacity:1; } }
+.chat-quick { padding: 8px 10px; display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--border); }
+.chat-quick-btn {
+  padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted,#666); font-size: 11px; cursor: pointer; transition: all 0.2s;
+}
+.chat-quick-btn:hover { border-color: var(--primary); color: var(--primary); }
+.chat-input-area { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+.chat-input {
+  flex: 1; background: rgba(0,0,0,0.05); border: 1px solid var(--border);
+  color: var(--text); padding: 8px 13px; border-radius: 20px; font-size: 13px;
+  font-family: inherit; outline: none; transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--primary); }
+.chat-send {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--primary);
+  border: none; color: white; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.chat-send:hover { filter: brightness(1.1); }
+@media (max-width:600px) { .chat-widget { bottom:80px; right:12px; } .chat-box { width:290px; right:-12px; } }
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
@@ -795,6 +925,107 @@ function closeBanner() {
   } catch {}
 }
 </script>
+
+<!-- MINI BOT -->
+<div class="chat-widget">
+  <div class="chat-box" id="chat-box">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">🤖</div>
+        <div>
+          <div class="chat-title">Assistant ${shopName}</div>
+          <div class="chat-subtitle">● En ligne · Répond instantanément</div>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-quick">
+      <button class="chat-quick-btn" onclick="sendQuick('catalogue')">🛍️ Catalogue</button>
+      <button class="chat-quick-btn" onclick="sendQuick('livraison')">🚚 Livraison</button>
+      <button class="chat-quick-btn" onclick="sendQuick('paiement')">💳 Paiement</button>
+      <button class="chat-quick-btn" onclick="sendQuick('contact')">📞 Contact</button>
+    </div>
+    <div class="chat-input-area">
+      <input class="chat-input" id="chat-input" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter')sendBotMessage()">
+      <button class="chat-send" onclick="sendBotMessage()">➤</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()">
+    <span id="chat-icon">💬</span>
+    <div class="chat-badge-dot" id="chat-badge-dot">1</div>
+  </button>
+</div>
+
+<script>
+const SLUG = '${merchant.shopSlug}';
+const MID = '${merchant.id}';
+let chatOpen = false;
+let chatStarted = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chat-box').classList.toggle('open', chatOpen);
+  document.getElementById('chat-icon').textContent = chatOpen ? '✕' : '💬';
+  document.getElementById('chat-badge-dot').style.display = 'none';
+  if (chatOpen && !chatStarted) {
+    chatStarted = true;
+    setTimeout(() => addBotMsg('Bonjour ! 👋 Je suis l\'assistant de cette boutique. Comment puis-je vous aider ?'), 300);
+  }
+}
+
+function addBotMsg(text) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg bot';
+  el.innerHTML = text.replace(/\n/g,'<br>').replace(/\*(.*?)\*/g,'<strong>$1</strong>');
+  document.getElementById('chat-messages').appendChild(el);
+  scrollChat();
+}
+function addUserMsg(text) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg user';
+  el.textContent = text;
+  document.getElementById('chat-messages').appendChild(el);
+  scrollChat();
+}
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'chat-msg bot typing';
+  el.id = 'typing-dot';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  document.getElementById('chat-messages').appendChild(el);
+  scrollChat();
+}
+function removeTyping() { document.getElementById('typing-dot')?.remove(); }
+function scrollChat() { const m = document.getElementById('chat-messages'); m.scrollTop = m.scrollHeight; }
+
+async function sendBotMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addUserMsg(text);
+  showTyping();
+  try {
+    const r = await fetch('/boutique/' + SLUG + '/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await r.json();
+    removeTyping();
+    setTimeout(() => addBotMsg(data.reply || 'Désolé, pouvez-vous reformuler ?'), 150);
+  } catch {
+    removeTyping();
+    addBotMsg('Désolé, je rencontre un problème. Contactez-nous sur WhatsApp !');
+  }
+}
+function sendQuick(q) {
+  document.getElementById('chat-input').value = q;
+  sendBotMessage();
+}
+setTimeout(() => { if (!chatOpen) document.getElementById('chat-badge-dot').style.display = 'flex'; }, 3000);
+</script>
+
 </body>
 </html>`;
 };
