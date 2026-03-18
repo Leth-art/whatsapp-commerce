@@ -64,10 +64,14 @@ router.patch("/merchants/:id", validateMerchantId, async (req, res) => {
     // Whitelist des champs modifiables
     const data = filterFields(req.body, MERCHANT_ALLOWED_FIELDS);
 
-    // Empêcher la modification de champs critiques via l'API publique
-    delete data.plan;
-    delete data.isActive;
-    delete data.subscriptionExpiresAt;
+    // Protection: ces champs ne peuvent être modifiés que via les routes admin
+    // SAUF si la requête vient avec un header admin (vérifié par requireApiKey)
+    const isAdminRequest = req.headers['x-admin'] === 'true';
+    if (!isAdminRequest) {
+      delete data.plan;
+      delete data.isActive;
+      delete data.subscriptionExpiresAt;
+    }
 
     await merchant.update(data);
     res.json({ success: true, merchant });
@@ -245,6 +249,153 @@ router.post("/merchants/:id/payment-request", validateMerchantId, async (req, re
     console.error("Erreur payment-request:", err);
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// ─── Routes Admin ─────────────────────────────────────────────────────────────
+
+// Activer/renouveler abonnement
+router.post("/admin/activate/:id", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    const { plan } = req.body;
+    const validPlans = ["starter", "pro", "business"];
+    const finalPlan = validPlans.includes(plan) ? plan : merchant.plan || "starter";
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await merchant.update({ plan: finalPlan, isActive: true, subscriptionExpiresAt: expiresAt, lastPaymentId: null });
+    res.json({ success: true, plan: finalPlan, expiresAt });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Activer/désactiver boutique
+router.post("/admin/toggle/:id", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    await merchant.update({ isActive: req.body.isActive });
+    res.json({ success: true, isActive: req.body.isActive });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Supprimer une boutique
+router.delete("/admin/merchants/:id", async (req, res) => {
+  try {
+    const { ConversationSession } = require("../models/index");
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    await Product.destroy({ where: { merchantId: req.params.id } });
+    await Order.destroy({ where: { merchantId: req.params.id } });
+    await Customer.destroy({ where: { merchantId: req.params.id } });
+    await ConversationSession.destroy({ where: { merchantId: req.params.id } });
+    await merchant.destroy();
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Marquer comme relancé
+router.post("/admin/merchants/:id/mark-reminded", async (req, res) => {
+  try {
+    const merchant = await Merchant.findByPk(req.params.id);
+    if (!merchant) return res.status(404).json({ error: "Introuvable" });
+    try { await merchant.update({ lastRemindedAt: new Date() }); } catch {}
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ─── Annonces ─────────────────────────────────────────────────────────────────
+router.get("/announcements/active", async (req, res) => {
+  try {
+    const { Announcement } = require("../models/index");
+    const ann = await Announcement.findOne({
+      where: { isActive: true, showBanner: true },
+      order: [["createdAt", "DESC"]],
+    });
+    if (!ann) return res.json(null);
+    res.json({ id: ann.id, title: ann.title, message: ann.message, type: ann.type });
+  } catch { res.json(null); }
+});
+
+router.get("/admin/announcements", async (req, res) => {
+  try {
+    const { Announcement } = require("../models/index");
+    const anns = await Announcement.findAll({ order: [["createdAt", "DESC"]], limit: 50 });
+    res.json(anns);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post("/admin/announcements", async (req, res) => {
+  try {
+    const { Announcement } = require("../models/index");
+    const { title, message, type, showBanner, sendEmail } = req.body;
+    if (!title || !message) return res.status(400).json({ error: "Titre et message requis" });
+    const ann = await Announcement.create({
+      id: uuidv4(), title: title.slice(0,200), message: message.slice(0,2000),
+      type: ["info","warning","promo","update"].includes(type) ? type : "info",
+      showBanner: showBanner !== false, isActive: true,
+    });
+    let emailResult = { skipped: true };
+    if (sendEmail) {
+      try {
+        const { sendAnnouncementEmails } = require("../modules/announcements");
+        emailResult = await sendAnnouncementEmails(title, message.replace(/\n/g,"<br>"), message);
+        await ann.update({ emailSent: true, emailCount: emailResult.sent || 0 });
+      } catch (err) { console.error("Email error:", err.message); }
+    }
+    res.json({ success: true, announcement: ann, emailResult });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.patch("/admin/announcements/:id", async (req, res) => {
+  try {
+    const { Announcement } = require("../models/index");
+    const ann = await Announcement.findByPk(req.params.id);
+    if (!ann) return res.status(404).json({ error: "Introuvable" });
+    await ann.update({ isActive: req.body.isActive, showBanner: req.body.showBanner });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.delete("/admin/announcements/:id", async (req, res) => {
+  try {
+    const { Announcement } = require("../models/index");
+    const ann = await Announcement.findByPk(req.params.id);
+    if (!ann) return res.status(404).json({ error: "Introuvable" });
+    await ann.destroy();
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ─── Upload image produit ─────────────────────────────────────────────────────
+router.post("/merchants/:id/products/:pid/image", validateMerchantId, async (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+    if (!imageBase64) return res.status(400).json({ error: "Image requise" });
+    const product = await Product.findByPk(req.params.pid);
+    if (!product) return res.status(404).json({ error: "Produit introuvable" });
+    if (product.merchantId !== req.params.id) return res.status(403).json({ error: "Accès refusé" });
+
+    let imageUrl = "";
+    try {
+      const cloudinary = require("cloudinary").v2;
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
+      const result = await cloudinary.uploader.upload(imageBase64, {
+        folder: "wazibot_products",
+        transformation: [{ width: 800, height: 800, crop: "limit", quality: "auto" }],
+      });
+      imageUrl = result.secure_url;
+    } catch {
+      // Fallback: store base64 directly (not recommended for production)
+      imageUrl = imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+    }
+
+    await product.update({ imageUrl });
+    res.json({ success: true, imageUrl });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

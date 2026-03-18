@@ -6,7 +6,7 @@
 
 const { sendText, sendButtons, sendList } = require("./whatsappClient");
 const { getAllProducts } = require("../modules/catalog");
-const { createOrderFromCart } = require("../modules/orders");
+// createOrderFromCart remplacé par version Sequelize inline
 const { clearCart } = require("../modules/crm");
 
 // ─── États de la conversation ─────────────────────────────────────────────────
@@ -332,10 +332,44 @@ const handleConfirmOrder = async (phoneNumberId, token, to, merchant, session, m
     const cart = session.cart || {};
     const cartMap = new Map(Object.entries(cart).map(([id, qty]) => [id, Number(qty)]));
 
-    const order = await createOrderFromCart(
-      merchant, customer, cartMap,
-      session.pendingAddress || "", "mobile_money"
-    );
+    // Créer la commande avec Sequelize
+    const { Product, Order } = require("../models/index");
+    const { v4: uuidv4 } = require("uuid");
+
+    const products = await Product.findAll({ where: { merchantId: merchant.id } });
+    const items = [];
+    let totalAmount = 0;
+
+    for (const [productId, qty] of cartMap.entries()) {
+      const product = products.find(p => p.id === productId);
+      if (!product || !product.isAvailable) continue;
+      const quantity = Math.min(Number(qty), product.stock || 999);
+      const subtotal = product.price * quantity;
+      totalAmount += subtotal;
+      items.push({ productId: product.id, name: product.name, price: product.price, quantity, total: subtotal });
+    }
+
+    let order = null;
+    if (items.length > 0) {
+      const orderNumber = "WB-" + Date.now().toString().slice(-6);
+      order = await Order.create({
+        id: uuidv4(),
+        orderNumber,
+        merchantId: merchant.id,
+        customerId: customer.id,
+        items,
+        totalAmount,
+        deliveryAddress: session.pendingAddress || "",
+        paymentMethod: "mobile_money",
+        status: "pending",
+      });
+      // Mettre à jour les stats client
+      await customer.update({
+        totalOrders: (customer.totalOrders || 0) + 1,
+        totalSpent: (customer.totalSpent || 0) + totalAmount,
+        lastOrderAt: new Date(),
+      });
+    }
 
     if (order) {
       await clearCart(session);
@@ -343,9 +377,9 @@ const handleConfirmOrder = async (phoneNumberId, token, to, merchant, session, m
       session.state = STATES.MAIN_MENU;
       await session.save();
 
+      const itemLines = items.map(i => `• ${i.name} x${i.quantity} — ${i.total.toLocaleString("fr-FR")} ${currency}`).join("\n");
       await sendText(phoneNumberId, token, to,
-        order.toWhatsApp ? order.toWhatsApp(currency) :
-        `✅ *Commande confirmée !*\n\nN° *${order.orderNumber}*\n\nNous vous contacterons dès que votre commande est prête. Merci ! 🙏`
+        `✅ *Commande confirmée !*\n\nN° *${order.orderNumber}*\n${itemLines}\n\n💰 Total : *${totalAmount.toLocaleString("fr-FR")} ${currency}*\n\nNous vous contacterons dès que votre commande est prête. Merci ! 🙏`
       );
 
       // Notifier le commerçant
@@ -403,7 +437,7 @@ const notifyMerchant = async (merchant, order, currency) => {
       `🔔 *Nouvelle commande — ${merchant.shopName || merchant.name}*\n\n` +
       `📦 N° : *${order.orderNumber}*\n${items}\n\n` +
       `💰 Total : *${order.totalAmount.toLocaleString("fr-FR")} ${currency}*\n\n` +
-      `👉 Dashboard : https://whatsapp-commerce-1roe.onrender.com/merchant`
+      `👉 Dashboard : ${process.env.APP_BASE_URL || "https://chatbot-saas-lcsl.onrender.com"}/merchant`
     );
   } catch (err) {
     console.error("Erreur notification commerçant:", err.message);

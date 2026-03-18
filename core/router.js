@@ -1,6 +1,6 @@
 const { Merchant } = require("../models/index");
 const { getOrCreateCustomer, getOrCreateSession, addMessageToSession, updateCustomerName, clearCart } = require("../modules/crm");
-const { createOrderFromCart } = require("../modules/orders");
+// createOrderFromCart remplacé par version Sequelize inline
 const { generateAIResponse } = require("./aiEngine");
 const { handleMenuMessage } = require("./menuBot");
 
@@ -88,24 +88,57 @@ const handleMessage = async ({ phoneNumberId, from, content, messageId }) => {
 };
 
 const processOrder = async ({ merchant, customer, session, actionData }) => {
-  let cart = session.cart;
+  const { Product, Order } = require("../models/index");
+  const { v4: uuidv4 } = require("uuid");
+
+  let cartObj = session.cart || {};
   if (actionData.items && Object.keys(actionData.items).length > 0) {
-    cart = new Map(Object.entries(actionData.items).map(([id, qty]) => [id, Number(qty)]));
+    cartObj = actionData.items;
   }
 
-  const order = await createOrderFromCart(
-    merchant, customer, cart,
-    actionData.address || "", actionData.payment || "mobile_money"
-  );
+  if (!cartObj || Object.keys(cartObj).length === 0) return null;
 
-  if (order) {
-    await clearCart(session);
-    console.log(`✅ Commande créée : ${order.orderNumber} — ${order.totalAmount.toLocaleString("fr-FR")} ${merchant.currency}`);
-    await notifyMerchant(merchant, order);
-    return order.toWhatsApp ? order.toWhatsApp(merchant.currency) : `✅ Commande ${order.orderNumber} confirmée !`;
+  const products = await Product.findAll({ where: { merchantId: merchant.id } });
+  const items = [];
+  let totalAmount = 0;
+
+  for (const [productId, qty] of Object.entries(cartObj)) {
+    const product = products.find(p => p.id === productId);
+    if (!product || !product.isAvailable) continue;
+    const quantity = Math.min(Number(qty), product.stock || 999);
+    const subtotal = product.price * quantity;
+    totalAmount += subtotal;
+    items.push({ productId: product.id, name: product.name, price: product.price, quantity, total: subtotal });
   }
 
-  return null;
+  if (!items.length) return null;
+
+  const orderNumber = "WB-" + Date.now().toString().slice(-6);
+  const order = await Order.create({
+    id: uuidv4(),
+    orderNumber,
+    merchantId: merchant.id,
+    customerId: customer.id,
+    items,
+    totalAmount,
+    deliveryAddress: actionData.address || session.pendingAddress || "",
+    paymentMethod: actionData.payment || "mobile_money",
+    status: "pending",
+  });
+
+  // Mettre à jour les stats client
+  await customer.update({
+    totalOrders: (customer.totalOrders || 0) + 1,
+    totalSpent: (customer.totalSpent || 0) + totalAmount,
+    lastOrderAt: new Date(),
+  });
+
+  await clearCart(session);
+  console.log(`✅ Commande créée : ${orderNumber} — ${totalAmount.toLocaleString("fr-FR")} ${merchant.currency}`);
+  await notifyMerchant(merchant, order);
+
+  const itemLines = items.map(i => `• ${i.name} x${i.quantity} — ${i.total.toLocaleString("fr-FR")} ${merchant.currency}`).join("\n");
+  return `✅ *Commande confirmée !*\n\nN° *${orderNumber}*\n${itemLines}\n\n💰 Total : *${totalAmount.toLocaleString("fr-FR")} ${merchant.currency}*\n\nNous vous contacterons dès que votre commande est prête. Merci ! 🙏`;
 };
 
 // ─── Notification WhatsApp au commerçant à chaque nouvelle commande ───
@@ -130,7 +163,7 @@ const notifyMerchant = async (merchant, order) => {
       `${items}\n\n` +
       `💰 Total : *${order.totalAmount.toLocaleString("fr-FR")} ${merchant.currency}*\n\n` +
       `Connectez-vous à votre dashboard pour confirmer :\n` +
-      `https://whatsapp-commerce-1roe.onrender.com/dashboard`;
+      `${process.env.APP_BASE_URL || 'https://chatbot-saas-lcsl.onrender.com'}/merchant`;
 
     await sendText(ADMIN_PHONE_ID, ADMIN_TOKEN, merchant.ownerPhone, message);
     console.log(`🔔 Commerçant notifié : ${merchant.name} → ${merchant.ownerPhone}`);
@@ -142,3 +175,5 @@ const notifyMerchant = async (merchant, order) => {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 
+
+module.exports = { handleMessage };
