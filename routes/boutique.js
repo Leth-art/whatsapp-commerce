@@ -958,8 +958,7 @@ function closeBanner() {
 </div>
 
 <script>
-const SLUG = '${merchant.shopSlug}';
-const MID = '${merchant.id}';
+// SLUG et MID déjà définis par le script panier ci-dessus
 let chatOpen = false;
 let chatStarted = false;
 
