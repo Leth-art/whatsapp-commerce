@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { Merchant, Product, Customer, Order, Announcement } = require("../models/index");
-const { updateOrderStatus, getMerchantOrders } = require("../modules/orders");
+const { Merchant, Product, Customer, Order } = require("../models/index");
+// orders module replaced with inline Sequelize
 const { canAddProduct } = require("../modules/planLimits");
 const { validateMerchantId } = require("../middleware/security");
 const { v4: uuidv4 } = require("uuid");
@@ -148,8 +148,29 @@ router.delete("/merchants/:mid/products/:pid", validateMerchantId, async (req, r
 // ─── Commandes ────────────────────────────────────────────────────────────────
 router.get("/merchants/:id/orders", validateMerchantId, async (req, res) => {
   try {
-    const orders = await getMerchantOrders(req.params.id, req.query.status);
-    res.json(orders);
+    const where = { merchantId: req.params.id };
+    if (req.query.status) where.status = req.query.status;
+
+    const orders = await Order.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+      limit: 500,
+    });
+
+    // Joindre les infos client pour chaque commande
+    const { Customer } = require("../models/index");
+    const ordersWithCustomer = await Promise.all(orders.map(async (o) => {
+      const plain = o.toJSON();
+      if (o.customerId) {
+        const customer = await Customer.findByPk(o.customerId, {
+          attributes: ["id", "name", "whatsappNumber"],
+        });
+        plain.customer = customer ? customer.toJSON() : null;
+      }
+      return plain;
+    }));
+
+    res.json(ordersWithCustomer);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -160,8 +181,9 @@ router.patch("/orders/:id/status", async (req, res) => {
     if (!VALID_STATUSES.includes(status)) {
       return res.status(400).json({ error: `Statut invalide. Valeurs : ${VALID_STATUSES.join(", ")}` });
     }
-    const order = await updateOrderStatus(req.params.id, status);
+    const order = await Order.findByPk(req.params.id);
     if (!order) return res.status(404).json({ error: "Commande introuvable" });
+    await order.update({ status });
     res.json({ success: true, status: order.status });
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
@@ -223,88 +245,6 @@ router.post("/merchants/:id/payment-request", validateMerchantId, async (req, re
     console.error("Erreur payment-request:", err);
     res.status(500).json({ error: err.message });
   }
-});
-
-
-// ─── Annonces ─────────────────────────────────────────────────────────────────
-
-// GET public — bandeau actif
-router.get("/announcements/active", async (req, res) => {
-  try {
-    const announcement = await Announcement.findOne({
-      where: { isActive: true, showBanner: true },
-      order: [["createdAt", "DESC"]],
-    });
-    if (!announcement) return res.json(null);
-    res.json({
-      id: announcement.id,
-      title: announcement.title,
-      message: announcement.message,
-      type: announcement.type,
-    });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// GET admin — toutes les annonces
-router.get("/admin/announcements", async (req, res) => {
-  try {
-    const announcements = await Announcement.findAll({
-      order: [["createdAt", "DESC"]],
-      limit: 50,
-    });
-    res.json(announcements);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// POST admin — créer une annonce
-router.post("/admin/announcements", async (req, res) => {
-  try {
-    const { title, message, type, showBanner, sendEmail } = req.body;
-    if (!title || !message) return res.status(400).json({ error: "Titre et message requis" });
-
-    const { v4: uuidv4 } = require("uuid");
-    const announcement = await Announcement.create({
-      id: uuidv4(),
-      title: title.slice(0, 200),
-      message: message.slice(0, 2000),
-      type: ["info", "warning", "promo", "update"].includes(type) ? type : "info",
-      showBanner: showBanner !== false,
-      isActive: true,
-    });
-
-    let emailResult = { skipped: true };
-    if (sendEmail) {
-      try {
-        const { sendAnnouncementEmails } = require("../modules/announcements");
-        emailResult = await sendAnnouncementEmails(title, message.replace(/\n/g, "<br>"), message);
-        await announcement.update({ emailSent: true, emailCount: emailResult.sent || 0 });
-      } catch (err) {
-        console.error("Email error:", err.message);
-      }
-    }
-
-    res.json({ success: true, announcement, emailResult });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// PATCH admin — activer/désactiver
-router.patch("/admin/announcements/:id", async (req, res) => {
-  try {
-    const ann = await Announcement.findByPk(req.params.id);
-    if (!ann) return res.status(404).json({ error: "Introuvable" });
-    await ann.update({ isActive: req.body.isActive, showBanner: req.body.showBanner });
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// DELETE admin
-router.delete("/admin/announcements/:id", async (req, res) => {
-  try {
-    const ann = await Announcement.findByPk(req.params.id);
-    if (!ann) return res.status(404).json({ error: "Introuvable" });
-    await ann.destroy();
-    res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;

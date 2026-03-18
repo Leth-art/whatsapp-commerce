@@ -24,7 +24,7 @@ router.get("/:slug", async (req, res) => {
 
     // Cherche par slug
     const merchant = await Merchant.findOne({
-      where: { shopSlug: slug, siteActive: true },
+      where: { shopSlug: slug, siteActive: true, isActive: true },
     });
 
     if (!merchant) {
@@ -32,7 +32,7 @@ router.get("/:slug", async (req, res) => {
         <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Boutique introuvable</title>
         <style>body{background:#050508;color:#F0F0F8;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center}</style>
         </head><body><div><div style="font-size:48px;margin-bottom:16px">🔍</div>
-        <h2>Boutique introuvable</h2><p style="color:#4A4A6A;margin-top:8px">Ce lien n'est pas valide.</p>
+        <h2>Boutique introuvable</h2><p style="color:#4A4A6A;margin-top:8px">Ce lien n'est pas valide ou la boutique est suspendue.</p>
         <a href="/" style="color:#E85C0E;margin-top:20px;display:block">Créer votre boutique →</a></div></body></html>
       `);
     }
@@ -84,6 +84,7 @@ router.post("/:slug/order", async (req, res) => {
 
     const merchant = await Merchant.findOne({ where: { shopSlug: slug } });
     if (!merchant) return res.status(404).json({ error: "Boutique introuvable" });
+    if (!merchant.isActive) return res.status(403).json({ error: "Cette boutique est actuellement suspendue." });
 
     const { Customer, Order, ConversationSession } = require("../models/index");
     const { v4: uuidv4 } = require("uuid");

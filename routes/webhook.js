@@ -55,6 +55,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
   const data = JSON.parse(req.body);
   const messages = parseWebhook(data);
 
+  const { Merchant } = require("../models/index");
+
   for (const msg of messages) {
     // Rate limiting par numéro client
     const rateCheck = await checkRateLimit(msg.from);
@@ -63,12 +65,29 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       continue;
     }
 
-    // Ajouter à la queue
+    // Vérifier que le commerçant est actif
+    const merchant = await Merchant.findOne({
+      where: { phoneNumberId: msg.phoneNumberId },
+      attributes: ["id", "name", "isActive"],
+    }).catch(() => null);
+
+    if (!merchant) {
+      console.warn(`⚠️ Aucun commerçant trouvé pour phoneNumberId: ${msg.phoneNumberId}`);
+      continue;
+    }
+
+    if (!merchant.isActive) {
+      console.log(`⛔ Message ignoré — boutique suspendue : ${merchant.name}`);
+      continue;
+    }
+
+    // Ajouter à la queue avec merchantId
     await addMessageToQueue({
       phoneNumberId: msg.phoneNumberId,
       from: msg.from,
       content: msg.content,
       messageId: msg.messageId,
+      merchantId: merchant.id,
     });
   }
 });
