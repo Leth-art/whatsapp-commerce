@@ -833,7 +833,7 @@ async function toggleMaintenance() {
   );
 }
 
-// ── Modale Token 360dialog ──
+// ── Modale Détails Commerçant ──
 let currentMerchantId = null;
 
 function openTokenModal(id, name, token, phoneId) { viewMerchantDetails(id); }
@@ -1092,12 +1092,6 @@ function getMerchantStatus(m) {
     </div>
   </div>
 </div>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(() => {
-    console.log('✅ Admin PWA prêt');
-  }).catch(err => console.log('SW erreur:', err));
-}
-</script>
+
 </body>
 </html>
