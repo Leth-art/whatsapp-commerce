@@ -570,7 +570,7 @@ function updateCartUI(){
     body.innerHTML='<div class="cart-empty-state"><div style="font-size:44px;margin-bottom:8px">🛒</div><p>Votre panier est vide</p><button onclick="toggleCart()" style="background:var(--p);color:white;border:none;padding:9px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px">Continuer</button></div>';
     ftr.style.display='none';
   }else{
-    body.innerHTML=Object.entries(cart).map(([id,it])=>\`<div class="ci"><div class="ci-img">\${it.img?'<img src="'+it.img+'" alt="">':it.name.charAt(0)}</div><div class="ci-body"><div class="ci-name">\${it.name}</div><div class="ci-price">\${(it.price*it.qty).toLocaleString('fr-FR')} \${CUR}</div><div class="ci-ctrl"><button class="qb" onclick="cqty('\${id}',-1)">−</button><span class="qv">\${it.qty}</span><button class="qb" onclick="cqty('\${id}',1)">+</button><button class="ci-rm" onclick="removeCI('\${id}')">×</button></div></div></div>\`).join('');
+    body.innerHTML=Object.entries(cart).map(([id,it])=>'<div class="ci"><div class="ci-img">'+(it.img?'<img src="'+it.img+'" alt="">':it.name.charAt(0))+'</div><div class="ci-body"><div class="ci-name">'+it.name+'</div><div class="ci-price">'+(it.price*it.qty).toLocaleString('fr-FR')+' '+CUR+'</div><div class="ci-ctrl"><button class="qb" onclick="cqty(\''+id+'\',-1)">−</button><span class="qv">'+it.qty+'</span><button class="qb" onclick="cqty(\''+id+'\',1)">+</button><button class="ci-rm" onclick="removeCI(\''+id+'\')">×</button></div></div></div>').join('');
     ftr.style.display='block';
   }
 }
@@ -603,15 +603,14 @@ function addFromQV(){addToCart(qvC.id,qvC.name,qvC.price,qvC.img);closeQV();}
 function openCheckout(){
   const its=Object.entries(cart);if(!its.length)return;
   const tot=its.reduce((s,[,i])=>s+i.price*i.qty,0);
-  document.getElementById('co-body').innerHTML=\`
-    <div class="co-sum">\${its.map(([,i])=>'<div class="co-si"><span>'+i.name+' × '+i.qty+'</span><span>'+(i.price*i.qty).toLocaleString('fr-FR')+' '+CUR+'</span></div>').join('')}<div class="co-si"><span>Total</span><span>\${tot.toLocaleString('fr-FR')} \${CUR}</span></div></div>
-    <p class="co-stl">Vos coordonnées</p>
-    <div class="co-fi"><label>Nom complet *</label><input id="co-name" type="text" placeholder="Ex: Akosua Mensah"></div>
-    <div class="co-fi"><label>Téléphone / WhatsApp *</label><input id="co-ph" type="tel" placeholder="Ex: 22890000000"></div>
-    <div class="co-fi"><label>Adresse de livraison *</label><textarea id="co-addr" placeholder="Quartier, rue, point de repère..."></textarea></div>
-    <div class="co-fi"><label>Mode de paiement</label><select id="co-pay"><option value="mobile_money">📱 Mobile Money (MTN, Moov, Wave)</option><option value="cash">💵 Paiement à la livraison</option><option value="orange_money">🟠 Orange Money</option></select></div>
-    <button class="btn-order" id="co-btn" onclick="submitOrder()">✓ Confirmer la commande</button>
-  \`;
+  document.getElementById('co-body').innerHTML=
+    '<div class="co-sum">'+its.map(([,i])=>'<div class="co-si"><span>'+i.name+' × '+i.qty+'</span><span>'+(i.price*i.qty).toLocaleString('fr-FR')+' '+CUR+'</span></div>').join('')+'<div class="co-si"><span>Total</span><span>'+tot.toLocaleString('fr-FR')+' '+CUR+'</span></div></div>'+
+    '<p class="co-stl">Vos coordonnées</p>'+
+    '<div class="co-fi"><label>Nom complet *</label><input id="co-name" type="text" placeholder="Ex: Akosua Mensah"></div>'+
+    '<div class="co-fi"><label>Téléphone / WhatsApp *</label><input id="co-ph" type="tel" placeholder="Ex: 22890000000"></div>'+
+    '<div class="co-fi"><label>Adresse de livraison *</label><textarea id="co-addr" placeholder="Quartier, rue, point de repère..."></textarea></div>'+
+    '<div class="co-fi"><label>Mode de paiement</label><select id="co-pay"><option value="mobile_money">📱 Mobile Money (MTN, Moov, Wave)</option><option value="cash">💵 Paiement à la livraison</option><option value="orange_money">🟠 Orange Money</option></select></div>'+
+    '<button class="btn-order" id="co-btn" onclick="submitOrder()">✓ Confirmer la commande</button>';
   toggleCart();
   document.getElementById('co-ov').classList.add('open');
 }

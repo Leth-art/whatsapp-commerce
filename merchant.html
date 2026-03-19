@@ -21,6 +21,7 @@
   --warn: #ffc453;
   --danger: #d82c0d;
   --info: #0070f3;
+  --purple: #5c4db1;
   --radius: 8px;
   --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.04);
 }
@@ -200,6 +201,8 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
 .stat-card.orange .s-icon{background:#fff0e8;color:#e85c0e}
 .stat-card.yellow .s-icon{background:#fff8e0;color:#c47a00}
 .stat-card.blue .s-icon{background:#e8f1ff;color:var(--info)}
+.stat-card.purple .s-icon{background:#f0eeff;color:var(--purple)}
+.stat-card.purple .s-value{color:var(--purple)}
 .stat-card.purple .s-icon{background:#f0eeff;color:#5c4db1}
 .stat-card .s-value{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.3px}
 .stat-card.green .s-value{color:var(--accent)}
@@ -387,26 +390,36 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
         <button class="btn btn-primary btn-sm period-btn active" onclick="loadStats('weekly',this)">7 jours</button>
         <button class="btn btn-ghost btn-sm period-btn" onclick="loadStats('monthly',this)">30 jours</button>
       </div>
-      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr)">
-        <div class="stat-card purple" style="--c:var(--purple)">
-          <div class="s-icon" style="background:rgba(100,150,255,0.1)">💬</div>
-          <div class="s-value" style="color:var(--purple)" id="st-conversations">—</div>
-          <div class="s-label">Conversations IA</div>
-        </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px">
         <div class="stat-card green">
-          <div class="s-icon">🔄</div>
-          <div class="s-value" id="st-conversion">—</div>
-          <div class="s-label">Taux de conversion</div>
+          <div class="s-icon">💰</div>
+          <div class="s-value" id="st-revenue">—</div>
+          <div class="s-label">Revenus générés (F)</div>
         </div>
         <div class="stat-card orange">
+          <div class="s-icon">📦</div>
+          <div class="s-value" id="st-total-orders">—</div>
+          <div class="s-label">Commandes totales</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="s-icon">💬</div>
+          <div class="s-value" id="st-conversations">—</div>
+          <div class="s-label">Conversations</div>
+        </div>
+        <div class="stat-card yellow">
           <div class="s-icon">🛒</div>
           <div class="s-value" id="st-avg">—</div>
           <div class="s-label">Panier moyen (F)</div>
         </div>
-        <div class="stat-card yellow">
+        <div class="stat-card purple">
           <div class="s-icon">👥</div>
           <div class="s-value" id="st-returning">—</div>
           <div class="s-label">Clients fidèles</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="s-icon">🔄</div>
+          <div class="s-value" id="st-conversion">—</div>
+          <div class="s-label">Taux IA</div>
         </div>
       </div>
       <div class="section-tag" style="margin-top:8px">CLIENTS</div>
@@ -958,7 +971,9 @@ async function loadStats(period, btn) {
     if (!r.ok) return;
     const data = await r.json();
     const m = data.metrics || {};
-    document.getElementById('st-conversations').textContent = m.total_conversations ?? '—';
+    document.getElementById('st-revenue').textContent = m.revenue_generated ? fmtNum(Math.round(m.revenue_generated)) : '0';
+    document.getElementById('st-total-orders').textContent = m.total_orders ?? '0';
+    document.getElementById('st-conversations').textContent = m.total_conversations ?? '0';
     document.getElementById('st-conversion').textContent = m.ai_rate != null ? m.ai_rate + '%' : '—';
     document.getElementById('st-avg').textContent = m.revenue_generated ? fmtNum(Math.round(m.revenue_generated / Math.max(m.total_orders || 1, 1))) : '—';
     document.getElementById('st-returning').textContent = m.returning_customers ?? '—';
