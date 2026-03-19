@@ -605,6 +605,8 @@ async function initDashboard() {
 
 async function loadAll() {
   await Promise.all([loadMerchant(), loadOrders(), loadProducts()]);
+  // Précharge les stats en arrière-plan
+  loadStats('weekly', document.querySelector('.period-btn')).catch(() => {});
 }
 
 // ── MERCHANT ─────────────────────────────────────────────────────────────────
@@ -868,7 +870,7 @@ function updateStats() {
 
 async function loadStats(period, btn) {
   document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   try {
     const r = await fetch(`${BASE}/analytics/merchant/${merchantId}?period=${period}`, { headers: H });
     if (!r.ok) return;
