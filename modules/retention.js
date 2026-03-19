@@ -155,8 +155,8 @@ const startCronJobs = () => {
     }
   }, { timezone: "Africa/Lome" });
 
-  // ─── RAPPEL ABONNEMENT J-1 (9h) ───
-  cron.schedule("0 9 * * *", async () => {
+  // ─── RAPPEL ABONNEMENT J-1 (9h30) ───
+  cron.schedule("30 9 * * *", async () => {
     const demain = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const apresdemain = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
     const merchants = await Merchant.findAll({
@@ -166,6 +166,75 @@ const startCronJobs = () => {
       const plan = (merchant.plan || "starter").toUpperCase();
       await notifyMerchant(merchant, msg("rappelJ1", merchant, merchant.name, plan));
       console.log(`🚨 Rappel J-1 → ${merchant.name}`);
+      await sleep(2000);
+    }
+  }, { timezone: "Africa/Lome" });
+
+
+  // ─── RAPPEL FIN D'ESSAI J-3 (10h) ───
+  cron.schedule("0 10 * * *", async () => {
+    const dans3jours = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const dans4jours = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000);
+    // Commerçants en période d'essai (créés il y a 4-5 jours)
+    const merchants = await Merchant.findAll({
+      where: {
+        isActive: true,
+        subscriptionExpiresAt: { [Op.between]: [dans3jours, dans4jours] },
+        plan: "starter", // période d'essai = plan starter avec expiration dans 7j
+      },
+    });
+    for (const merchant of merchants) {
+      const expDate = new Date(merchant.subscriptionExpiresAt).toLocaleDateString("fr-FR");
+      const trialMsg = `⏳ *Votre essai WaziBot se termine bientôt !* — Bonjour ${merchant.name} !
+
+` +
+        `Votre période d'essai gratuite expire le *${expDate}*.
+
+` +
+        `Pour continuer à recevoir des commandes automatiquement, choisissez votre plan :
+` +
+        `• Starter : 35 000 XOF/mois
+` +
+        `• Pro : 55 000 XOF/mois
+` +
+        `• Business : 115 000 XOF/mois
+
+` +
+        `Paiement via *My Touchpoint*. Accédez à votre dashboard pour renouveler :
+` +
+        `${process.env.APP_BASE_URL || "https://chatbot-saas-lcsl.onrender.com"}/merchant`;
+      await notifyMerchant(merchant, trialMsg);
+      console.log(`⏳ Rappel fin essai J-3 → ${merchant.name}`);
+      await sleep(2000);
+    }
+  }, { timezone: "Africa/Lome" });
+
+  // ─── RAPPEL FIN D'ESSAI J-1 (10h30) ───
+  cron.schedule("30 10 * * *", async () => {
+    const demain = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const apresdemain = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    const merchants = await Merchant.findAll({
+      where: {
+        isActive: true,
+        subscriptionExpiresAt: { [Op.between]: [demain, apresdemain] },
+        plan: "starter",
+      },
+    });
+    for (const merchant of merchants) {
+      const urgentMsg = `🚨 *DERNIÈRE CHANCE — Essai WaziBot !* — Bonjour ${merchant.name} !
+
+` +
+        `Votre essai gratuit expire *demain* !
+
+` +
+        `Sans renouvellement, votre boutique sera suspendue et vos clients ne pourront plus commander.
+
+` +
+        `Renouvelez maintenant via *My Touchpoint* :
+` +
+        `${process.env.APP_BASE_URL || "https://chatbot-saas-lcsl.onrender.com"}/merchant`;
+      await notifyMerchant(merchant, urgentMsg);
+      console.log(`🚨 Rappel fin essai J-1 → ${merchant.name}`);
       await sleep(2000);
     }
   }, { timezone: "Africa/Lome" });

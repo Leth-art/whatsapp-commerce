@@ -228,9 +228,24 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
   .page-content{padding:16px}
   .page-topbar{padding:14px 16px}
 }
+
+/* ── BANDEAU ANNONCE ── */
+.ann-banner{position:fixed;top:0;left:0;right:0;z-index:9999;padding:9px 16px;display:none;align-items:center;gap:10px;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ann-banner.show{display:flex}
+.ann-txt{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ann-txt.scroll{animation:scrollTxt 20s linear infinite;display:inline-block}
+@keyframes scrollTxt{0%{transform:translateX(80%)}100%{transform:translateX(-100%)}}
+.ann-x-btn{background:none;border:none;cursor:pointer;font-size:18px;opacity:.7;color:inherit}
 </style>
 </head>
 <body>
+
+<!-- Bandeau annonce (visible uniquement par le commerçant) -->
+<div class="ann-banner" id="ann-banner">
+  <span id="ann-icon">ℹ️</span>
+  <span class="ann-txt" id="ann-txt"></span>
+  <button class="ann-x-btn" onclick="closeMerchantBanner()">✕</button>
+</div>
 
 <!-- ── LOGIN ─────────────────────────────────────────────────────────── -->
 <div class="login-screen" id="login-screen">
@@ -487,16 +502,80 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header"><h3>🔑 Mon ID boutique</h3></div>
-        <div style="padding:24px">
-          <div style="background:var(--surface2);border:1px dashed var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-            <code id="set-id" style="font-size:13px;color:var(--accent2);word-break:break-all"></code>
-            <button class="btn btn-ghost btn-sm" onclick="copyId()">📋 Copier</button>
+
+      <!-- Abonnement & Renouvellement -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>💳 Abonnement</h3>
+          <span id="plan-badge" style="font-size:12px;padding:4px 10px;border-radius:20px;background:var(--accent-light);color:var(--accent);font-weight:700">STARTER</span>
+        </div>
+        <div style="padding:20px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+            <div style="background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border)">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Plan actuel</div>
+              <div id="renewal-plan" style="font-size:16px;font-weight:800;color:var(--text)">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border)">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Expire le</div>
+              <div id="renewal-expiry" style="font-size:16px;font-weight:800;color:var(--text)">—</div>
+            </div>
           </div>
-          <p style="font-size:12px;color:var(--muted);margin-top:10px">⚠️ Conservez cet ID précieusement. Il vous permet de vous connecter.</p>
+
+          <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:16px;margin-bottom:20px">
+            <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">📱 Comment renouveler ?</div>
+            <ol style="font-size:13px;color:var(--text);line-height:2;padding-left:16px">
+              <li>Téléchargez <strong>My Touchpoint</strong> (Android ou iOS)</li>
+              <li>Effectuez le paiement Mobile Money</li>
+              <li>Copiez la référence de transaction</li>
+              <li>Collez-la ci-dessous et cliquez "Envoyer"</li>
+            </ol>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <a href="https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint" target="_blank" style="background:var(--text);color:white;padding:7px 14px;border-radius:7px;text-decoration:none;font-size:12px;font-weight:600">▶ Google Play</a>
+              <a href="https://apps.apple.com/app/mytouchpoint/id6451056179" target="_blank" style="background:var(--text);color:white;padding:7px 14px;border-radius:7px;text-decoration:none;font-size:12px;font-weight:600"> App Store</a>
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px">Choisir un plan</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px" id="plan-selector">
+            <div class="plan-opt" onclick="selectPlan('starter',35000)" data-plan="starter" style="border:2px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:.15s">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Starter</div>
+              <div style="font-size:17px;font-weight:800;color:var(--text)">35 000</div>
+              <div style="font-size:10px;color:var(--muted)">XOF/mois</div>
+            </div>
+            <div class="plan-opt" onclick="selectPlan('pro',55000)" data-plan="pro" style="border:2px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:.15s">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Pro</div>
+              <div style="font-size:17px;font-weight:800;color:var(--text)">55 000</div>
+              <div style="font-size:10px;color:var(--muted)">XOF/mois</div>
+            </div>
+            <div class="plan-opt" onclick="selectPlan('business',115000)" data-plan="business" style="border:2px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:.15s">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Business</div>
+              <div style="font-size:17px;font-weight:800;color:var(--text)">115 000</div>
+              <div style="font-size:10px;color:var(--muted)">XOF/mois</div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Référence de transaction My Touchpoint *</label>
+            <input type="text" id="transaction-ref" placeholder="Ex: MTP-20260101-XXXXX">
+          </div>
+          <button class="btn btn-primary" onclick="submitPaymentRequest()" id="payment-btn">
+            📤 Envoyer la demande de renouvellement
+          </button>
+          <p id="payment-feedback" style="font-size:13px;margin-top:10px;display:none"></p>
         </div>
       </div>
+
+      <!-- ID Boutique -->
+      <div class="card">
+        <div class="card-header"><h3>🔑 Mon ID boutique</h3></div>
+        <div style="padding:20px">
+          <div style="background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <code id="set-id" style="font-size:13px;color:var(--accent);word-break:break-all"></code>
+            <button class="btn btn-ghost btn-sm" onclick="copyId()">📋 Copier</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:10px">⚠️ Conservez cet ID précieusement. C'est votre clé d'accès au dashboard.</p>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -631,12 +710,13 @@ async function loadMerchant() {
   const h = now.getHours();
   const greet = h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
   document.getElementById('dash-greeting').textContent = `${greet} ! Voici l'état de votre boutique.`;
+  checkExpiryWarning();
 
   // Settings
   document.getElementById('set-name').value = merchantData.shopName || merchantData.name || '';
   document.getElementById('set-persona').value = merchantData.aiPersona || '';
   document.getElementById('set-welcome').value = merchantData.welcomeMessage || '';
-  document.getElementById('set-id').textContent = merchantId;
+  if (document.getElementById('set-id')) document.getElementById('set-id').textContent = merchantId;
 }
 
 // ── ORDERS ───────────────────────────────────────────────────────────────────
@@ -877,14 +957,14 @@ async function loadStats(period, btn) {
     const r = await fetch(`${BASE}/analytics/merchant/${merchantId}?period=${period}`, { headers: H });
     if (!r.ok) return;
     const data = await r.json();
-    const m = data.metrics?.[period] || {};
+    const m = data.metrics || {};
     document.getElementById('st-conversations').textContent = m.total_conversations ?? '—';
-    document.getElementById('st-conversion').textContent = m.conversion_rate ?? '—';
-    document.getElementById('st-avg').textContent = m.average_order_value ? fmtNum(m.average_order_value) : '—';
+    document.getElementById('st-conversion').textContent = m.ai_rate != null ? m.ai_rate + '%' : '—';
+    document.getElementById('st-avg').textContent = m.revenue_generated ? fmtNum(Math.round(m.revenue_generated / Math.max(m.total_orders || 1, 1))) : '—';
     document.getElementById('st-returning').textContent = m.returning_customers ?? '—';
-    document.getElementById('st-new-customers').textContent = m.new_customers ?? '—';
+    document.getElementById('st-new-customers').textContent = m.total_customers ?? '—';
     document.getElementById('st-returning2').textContent = m.returning_customers ?? '—';
-    document.getElementById('st-retention').textContent = m.retention_rate ?? '—';
+    document.getElementById('st-retention').textContent = m.retention_rate != null ? m.retention_rate + '%' : '—';
   } catch {}
 }
 
@@ -999,7 +1079,7 @@ function showPage(name) {
     document.querySelectorAll('.mobile-nav-item')[idx]?.classList.add('active');
   }
   if (name === 'stats') loadStats('weekly', document.querySelector('.period-btn'));
-  if (name === 'settings') { loadSiteInfo(); }
+  if (name === 'settings') { loadSiteInfo(); loadRenewalInfo(); }
 }
 
 function logout() {
@@ -1021,6 +1101,129 @@ function toast(msg, type = 'success') {
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+// ── Alerte expiration abonnement ─────────────────────────────────────────────
+function checkExpiryWarning() {
+  if (!merchantData) return;
+  const expiry = merchantData.subscriptionExpiresAt;
+  if (!expiry) return;
+  const daysLeft = Math.ceil((new Date(expiry) - new Date()) / (1000 * 60 * 60 * 24));
+  if (daysLeft > 7) return;
+  
+  const color = daysLeft <= 1 ? '#d82c0d' : daysLeft <= 3 ? '#c47a00' : '#0070f3';
+  const msg = daysLeft <= 0 
+    ? '🔒 Votre abonnement a expiré. Renouvelez pour réactiver votre boutique.'
+    : daysLeft === 1 
+    ? '🚨 Votre abonnement expire demain ! Renouvelez maintenant.'
+    : `⚠️ Votre abonnement expire dans ${daysLeft} jours. Pensez à renouveler.`;
+  
+  const existing = document.getElementById('expiry-warning');
+  if (existing) existing.remove();
+  
+  const warning = document.createElement('div');
+  warning.id = 'expiry-warning';
+  warning.style.cssText = `background:${color};color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px`;
+  warning.innerHTML = '<span>' + msg + '</span><button onclick="showPage(\'settings\')" style="background:rgba(255,255,255,.2);border:none;color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;font-size:12px;">Renouveler →</button>';
+  
+  const heroCard = document.querySelector('.hero-card');
+  if (heroCard) heroCard.parentNode.insertBefore(warning, heroCard);
+}
+
+
+// ── ABONNEMENT ────────────────────────────────────────────────────────────────
+let selectedPlan = 'starter';
+let selectedAmount = 35000;
+
+function selectPlan(plan, amount) {
+  selectedPlan = plan;
+  selectedAmount = amount;
+  document.querySelectorAll('.plan-opt').forEach(el => {
+    const isSelected = el.dataset.plan === plan;
+    el.style.borderColor = isSelected ? 'var(--accent)' : 'var(--border)';
+    el.style.background = isSelected ? 'var(--accent-light)' : 'transparent';
+  });
+}
+
+function loadRenewalInfo() {
+  if (!merchantData) return;
+  const plan = (merchantData.plan || 'starter').toUpperCase();
+  const expiry = merchantData.subscriptionExpiresAt
+    ? new Date(merchantData.subscriptionExpiresAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'})
+    : '—';
+  document.getElementById('renewal-plan').textContent = plan;
+  document.getElementById('renewal-expiry').textContent = expiry;
+  document.getElementById('plan-badge').textContent = plan;
+}
+
+async function submitPaymentRequest() {
+  const ref = document.getElementById('transaction-ref').value.trim();
+  if (!ref || ref.length < 3) { toast('❌ Référence de transaction requise', 'error'); return; }
+  const btn = document.getElementById('payment-btn');
+  const feedback = document.getElementById('payment-feedback');
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
+  try {
+    const r = await fetch(`${BASE}/api/merchants/${merchantId}/payment-request`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ plan: selectedPlan, transactionRef: ref, amount: selectedAmount, currency: 'XOF' })
+    });
+    const data = await r.json();
+    if (data.success) {
+      feedback.textContent = '✅ ' + data.message;
+      feedback.style.color = 'var(--accent)';
+      feedback.style.display = 'block';
+      document.getElementById('transaction-ref').value = '';
+      toast('✅ Demande envoyée ! Validation sous 24h.', 'success');
+    } else {
+      feedback.textContent = '❌ ' + (data.error || 'Erreur');
+      feedback.style.color = 'var(--danger)';
+      feedback.style.display = 'block';
+    }
+  } catch {
+    toast('❌ Erreur de connexion', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '📤 Envoyer la demande de renouvellement';
+  }
+}
+
+// ── Bandeau annonce (commerçant seulement) ───────────────────────────────────
+(async () => {
+  try {
+    const r = await fetch('/api/announcements/active');
+    if (!r.ok) return;
+    const ann = await r.json();
+    if (!ann) return;
+    if (sessionStorage.getItem('ann_m_' + ann.id)) return;
+    const COLORS = {
+      info:    { bg: '#1e3a5f', text: '#93c5fd', icon: 'ℹ️' },
+      update:  { bg: '#064e3b', text: '#6ee7b7', icon: '🚀' },
+      promo:   { bg: '#78350f', text: '#fcd34d', icon: '🎁' },
+      warning: { bg: '#7f1d1d', text: '#fca5a5', icon: '⚠️' },
+    };
+    const col = COLORS[ann.type] || COLORS.info;
+    const banner = document.getElementById('ann-banner');
+    banner.style.background = col.bg;
+    banner.style.color = col.text;
+    document.getElementById('ann-icon').textContent = col.icon;
+    const txtEl = document.getElementById('ann-txt');
+    const txt = ann.title + ' — ' + ann.message;
+    txtEl.textContent = txt;
+    if (txt.length > 80) txtEl.classList.add('scroll');
+    banner.dataset.annId = ann.id;
+    banner.classList.add('show');
+    // Décale le layout pour pas que le contenu soit caché
+    document.getElementById('app-layout').style.marginTop = (banner.offsetHeight + 4) + 'px';
+  } catch {}
+})();
+
+function closeMerchantBanner() {
+  const b = document.getElementById('ann-banner');
+  if (!b) return;
+  b.style.display = 'none';
+  document.getElementById('app-layout').style.marginTop = '';
+  try { if (b.dataset.annId) sessionStorage.setItem('ann_m_' + b.dataset.annId, '1'); } catch {}
+}
+
+
 </script>
 </body>
 </html>
