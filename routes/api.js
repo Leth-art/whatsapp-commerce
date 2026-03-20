@@ -97,6 +97,7 @@ router.post("/merchants/:id/products", validateMerchantId, async (req, res) => {
   try {
     const merchant = await Merchant.findByPk(req.params.id);
     if (!merchant) return res.status(404).json({ error: "Commerçant introuvable" });
+    if (!merchant.isActive) return res.status(403).json({ error: "Compte suspendu. Renouvelez votre abonnement pour ajouter des produits." });
 
     const currentCount = await Product.count({ where: { merchantId: req.params.id } });
     const check = await canAddProduct(merchant, currentCount);

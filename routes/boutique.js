@@ -82,6 +82,14 @@ router.post("/:slug/chat", async (req, res) => {
     if (!message) return res.status(400).json({ error: "Message requis" });
     const merchant = await Merchant.findOne({ where: { shopSlug: slug } });
     if (!merchant) return res.status(404).json({ error: "Boutique introuvable" });
+
+    // Vérifier la limite de messages du plan
+    const { canSendMessage } = require("../modules/planLimits");
+    const msgCheck = await canSendMessage(merchant);
+    if (!msgCheck.allowed) {
+      return res.json({ reply: "Je suis temporairement indisponible. Contactez-nous directement sur WhatsApp !" });
+    }
+
     const products = await Product.findAll({ where: { merchantId: merchant.id, isAvailable: true } });
     res.json({ reply: generateBotReply(message, merchant, products) });
   } catch { res.status(500).json({ reply: "Désolé, problème technique. Contactez-nous sur WhatsApp !" }); }

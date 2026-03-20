@@ -141,6 +141,23 @@
     .flow { gap:6px; }
     .flow-arrow { display:none; }
   }
+
+.steps-container { display: flex; flex-direction: column; gap: 28px; margin-top: 32px; }
+.step-block { display: flex; gap: 20px; align-items: flex-start; }
+.step-number { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; font-family: 'Syne', sans-serif; }
+.step-content { flex: 1; padding-top: 8px; }
+.step-content h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.step-content p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.step-tip { margin-top: 10px; background: rgba(232,92,14,.08); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text); }
+.step-url { margin-top: 10px; background: var(--card); border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 16px; font-size: 14px; font-family: monospace; color: var(--text); }
+.share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+.share-item { display: flex; gap: 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.share-icon { font-size: 20px; flex-shrink: 0; }
+.copy-message-box { background: var(--card); border: 1px solid rgba(232,92,14,.2); border-radius: 10px; padding: 14px; margin-top: 14px; }
+.copy-message-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px; }
+.copy-message-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+@media(max-width:600px){.share-grid{grid-template-columns:1fr}.step-block{gap:14px}}
+
 </style>
 </head>
 <body>
@@ -196,140 +213,90 @@
 
 <hr class="divider">
 
-<section id="numero-dedie">
-  <div class="section-tag">⚠️ Important</div>
-  <h2>Le numéro dédié — ce qu'il faut absolument savoir</h2>
-  <p class="subtitle">C'est le point le plus important à comprendre avant de commencer.</p>
-  <div class="warn-box">
-    <div class="icon">⚠️</div>
-    <div>
-      <h4>Vous avez besoin d'un numéro WhatsApp séparé pour le bot</h4>
-      <p>WaziBot doit être connecté à un numéro WhatsApp dédié à votre boutique. Ce numéro ne peut plus être utilisé comme WhatsApp classique une fois connecté. Vous ne pourrez plus envoyer des messages à vos amis ou famille depuis ce numéro.</p>
-    </div>
-  </div>
-  <div class="compare">
-    <div class="compare-col bad">
-      <h4>❌ Utiliser votre numéro personnel</h4>
-      <ul>
-        <li>Vous perdez accès à WhatsApp classique</li>
-        <li>Vos groupes familiaux disparaissent</li>
-        <li>Vos contacts personnels ne peuvent plus vous joindre</li>
-        <li>Mélange entre vie privée et boutique</li>
-        <li>Le bot répond à tous vos messages</li>
-      </ul>
-    </div>
-    <div class="compare-col good">
-      <h4>✅ Utiliser un numéro dédié boutique</h4>
-      <ul>
-        <li>Votre numéro personnel reste intact</li>
-        <li>Séparation claire vie privée / boutique</li>
-        <li>Image professionnelle pour vos clients</li>
-        <li>Le bot gère uniquement les clients</li>
-        <li>Coût : ~500 FCFA/mois (puce MTN/Moov)</li>
-      </ul>
-    </div>
-  </div>
-  <div class="info-box">
-    <div class="icon">💡</div>
-    <div>
-      <h4>Conseil pratique</h4>
-      <p>Achetez une nouvelle puce MTN, Moov ou Togocel dédiée à votre boutique. Donnez ce numéro à vos clients pour les commandes WhatsApp. Gardez votre numéro personnel pour votre vie privée. C'est la configuration idéale et la plus simple.</p>
-    </div>
-  </div>
-</section>
+
 
 <hr class="divider">
 
-<section id="demarrage">
-  <div class="section-tag">Démarrage</div>
-  <h2>Comment démarrer en 5 étapes</h2>
-  <p class="subtitle">Suivez ces étapes dans l'ordre pour lancer votre boutique WaziBot.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
+<section>
+  <h2>Comment rendre votre boutique visible</h2>
+  <p class="subtitle">Suivez ces étapes pour que vos clients trouvent et commandent sur votre site</p>
+
+  <div class="steps-container">
+
+    <div class="step-block">
+      <div class="step-number">01</div>
       <div class="step-content">
-        <h3>Obtenez une puce dédiée pour votre boutique</h3>
-        <p>Achetez une nouvelle puce MTN, Moov, Togocel ou autre opérateur. Ce sera le numéro WhatsApp de votre boutique que vous donnerez à vos clients.</p>
-        <div class="info-box" style="margin-top:12px;">
-          <div class="icon">💡</div>
-          <div><h4>Coût estimé</h4><p>~500 FCFA pour la puce + abonnement opérateur mensuel. Un investissement minime comparé au temps gagné !</p></div>
-        </div>
+        <h3>Créez votre boutique</h3>
+        <p>Inscrivez-vous sur WaziBot, choisissez votre secteur d'activité (mode, alimentation, tech...) et votre boutique est créée automatiquement avec un lien unique.</p>
+        <div class="step-tip">⏱️ Moins de 2 minutes pour démarrer</div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
+
+    <div class="step-block">
+      <div class="step-number">02</div>
       <div class="step-content">
-        <h3>Créez votre compte WaziBot</h3>
-        <p>Remplissez le formulaire d'inscription sur notre site avec les informations de votre boutique. Ajoutez vos premiers produits directement dans le formulaire.</p>
-        <p>Vous recevrez un <strong>ID unique</strong> — conservez-le précieusement, c'est votre clé d'accès au dashboard.</p>
+        <h3>Ajoutez vos produits avec photos</h3>
+        <p>Depuis votre dashboard → <strong>Produits</strong>, ajoutez chaque article avec une photo nette, un nom clair et un prix. Un bon visuel = 3x plus de ventes.</p>
+        <div class="step-tip">📸 Conseil : photographiez vos produits en plein jour, sur fond blanc ou neutre</div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">3</div>
+
+    <div class="step-block">
+      <div class="step-number">03</div>
       <div class="step-content">
-        <h3>Votre site boutique est créé automatiquement</h3>
-        <p>Dès votre inscription, WaziBot crée automatiquement un <strong>mini-site professionnel</strong> pour votre boutique avec tous vos produits.</p>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:16px;">
-          <div style="color:var(--accent2);font-size:12px;margin-bottom:8px;">🌐 VOTRE SITE WEB</div>
-          <div style="font-family:monospace;color:var(--accent);font-size:14px;margin-bottom:12px;">wazibot.com/boutique/votre-boutique</div>
-          <ul style="color:var(--muted);font-size:13px;line-height:2;">
-            <li>✅ Catalogue avec photos produits</li>
-            <li>✅ Panier et formulaire de commande</li>
-            <li>✅ Mini bot assistant 24h/24</li>
-            <li>✅ 5 thèmes de couleur au choix</li>
-            <li>✅ Compatible mobile</li>
-          </ul>
-        </div>
-        <div class="info-box" style="margin-top:16px;">
-          <div class="icon">💡</div>
-          <div><h4>Vous avez déjà un site ?</h4><p>Pas de problème ! Dans votre dashboard → Paramètres → Site web, vous pouvez indiquer l'URL de votre propre site. Les clients y seront redirigés.</p></div>
-        </div>
+        <h3>Copiez votre lien boutique</h3>
+        <p>Allez dans <strong>Paramètres → Site web</strong> et copiez votre lien unique. C'est ce lien que vos clients utilisent pour visiter et commander sur votre boutique.</p>
+        <div class="step-url">wazibot.com/boutique/<span style="color:var(--accent)">votre-nom</span></div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">4</div>
+
+    <div class="step-block">
+      <div class="step-number">04</div>
       <div class="step-content">
-        <h3>Partagez votre lien et commencez à vendre</h3>
-        <p>Votre boutique est prête. Partagez le lien de votre site et votre numéro WhatsApp avec vos clients !</p>
-        <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;gap:16px;align-items:flex-start;">
-            <div style="width:36px;height:36px;background:rgba(0,229,160,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent2);font-size:14px;flex-shrink:0;">4a</div>
-            <div>
-              <strong style="display:block;margin-bottom:6px;">Partagez votre lien boutique</strong>
-              <p style="color:var(--muted);font-size:13px;">Copiez le lien depuis Dashboard → Paramètres → Site web et partagez-le sur WhatsApp, Instagram, Facebook.</p>
-            </div>
+        <h3>Partagez partout — chaque jour</h3>
+        <div class="share-grid">
+          <div class="share-item">
+            <div class="share-icon">💬</div>
+            <div><strong>WhatsApp status</strong><br>Postez votre lien en statut. Tous vos contacts le voient 24h. Répétez chaque semaine.</div>
           </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;gap:16px;align-items:flex-start;">
-            <div style="width:36px;height:36px;background:rgba(0,229,160,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent2);font-size:14px;flex-shrink:0;">4b</div>
-            <div>
-              <strong style="display:block;margin-bottom:6px;">Gérez vos commandes depuis le dashboard</strong>
-              <p style="color:var(--muted);font-size:13px;">Accédez à votre dashboard directement depuis le bas de votre site boutique → lien <strong>"Espace commerçant"</strong>. Ou allez sur <strong>/merchant</strong> avec votre ID boutique.</p>
-              <div style="background:#0e0e1a;border-radius:10px;padding:12px 16px;border:1px solid #1e1e2e;font-size:12px;margin-top:8px;">
-                <div style="color:#6b6b8a;margin-bottom:6px;">● Votre site boutique → bas de page</div>
-                <div style="color:#e85c0e;font-weight:700;">→ Espace commerçant</div>
-                <div style="color:#6b6b8a;font-size:11px;margin-top:4px;">Votre ID est pré-rempli automatiquement !</div>
-              </div>
-            </div>
+          <div class="share-item">
+            <div class="share-icon">👥</div>
+            <div><strong>Groupes WhatsApp</strong><br>Partagez dans les groupes famille, quartier, école. Demandez à vos proches de transférer.</div>
+          </div>
+          <div class="share-item">
+            <div class="share-icon">📘</div>
+            <div><strong>Groupes Facebook</strong><br>Postez dans "Achat/vente Lomé", groupes de votre ville. Gratuit et efficace.</div>
+          </div>
+          <div class="share-item">
+            <div class="share-icon">📸</div>
+            <div><strong>Instagram / TikTok</strong><br>Mettez le lien en bio. Publiez des photos de produits avec votre lien boutique.</div>
           </div>
         </div>
-        <div class="info-box" style="margin-top:16px;">
-          <div class="icon">✅</div>
-          <div><h4>C'est parti !</h4><p>Votre boutique est en ligne. Envoyez le lien à vos premiers clients et regardez les commandes arriver !</p></div>
+        <div class="copy-message-box">
+          <div class="copy-message-label">Message prêt à copier-coller</div>
+          <div class="copy-message-text">Commandez facilement mes produits sur ma boutique en ligne 👉 wazibot.com/boutique/votre-nom — Livraison disponible, paiement Mobile Money accepté !</div>
         </div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">5</div>
+
+    <div class="step-block">
+      <div class="step-number">05</div>
       <div class="step-content">
-        <h3>Testez et partagez votre numéro !</h3>
-        <p>Envoyez "Bonjour" à votre numéro de boutique depuis un autre téléphone. Le bot doit répondre automatiquement avec votre message d'accueil.</p>
-        <p>Si ça fonctionne — félicitations ! Partagez votre numéro de boutique à vos clients et laissez WaziBot travailler pour vous.</p>
-        <div class="info-box" style="margin-top:12px;">
-          <div class="icon">🎉</div>
-          <div><h4>Votre boutique est en ligne !</h4><p>Vous avez 7 jours d'essai gratuit pour tester toutes les fonctionnalités. Après l'essai, choisissez votre plan via My Touchpoint.</p></div>
-        </div>
+        <h3>Le bot répond automatiquement 24h/24</h3>
+        <p>Quand un client visite votre boutique, un assistant chat apparaît. Il répond aux questions sur vos produits, vos prix et votre livraison — même pendant que vous dormez.</p>
+        <div class="step-tip">🤖 Vous n'avez rien à configurer, le bot est activé automatiquement</div>
       </div>
     </div>
+
+    <div class="step-block">
+      <div class="step-number">06</div>
+      <div class="step-content">
+        <h3>Recevez les commandes sur WhatsApp</h3>
+        <p>Quand un client confirme une commande sur votre boutique, vous recevez immédiatement une notification WhatsApp avec tous ses détails. Gérez vos commandes depuis votre dashboard.</p>
+        <div class="step-tip">📱 Notification instantanée à chaque nouvelle commande</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -370,7 +337,7 @@
     </div>
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Puis-je utiliser mon numéro personnel pour le bot ?<span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Techniquement oui, mais ce n'est pas recommandé. Une fois connecté à WaziBot, ce numéro ne fonctionnera plus comme WhatsApp classique. Nous vous conseillons fortement d'utiliser une puce dédiée à votre boutique.</div>
+      <</div>
     </div>
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Comment le bot sait-il quoi répondre ?<span class="faq-arrow">▼</span></div>
