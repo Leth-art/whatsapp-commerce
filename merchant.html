@@ -695,6 +695,7 @@ async function initDashboard() {
   document.getElementById('app-layout').classList.add('visible');
   document.getElementById('mobile-nav').style.display = 'block';
   await loadAll();
+  loadMerchantBanner(); // Charge le bandeau annonce après connexion
 }
 
 async function loadAll() {
@@ -1207,7 +1208,7 @@ async function submitPaymentRequest() {
 }
 
 // ── Bandeau annonce (commerçant seulement) ───────────────────────────────────
-(async () => {
+async function loadMerchantBanner() {
   try {
     const r = await fetch('/api/announcements/active');
     if (!r.ok) return;
@@ -1231,16 +1232,16 @@ async function submitPaymentRequest() {
     if (txt.length > 80) txtEl.classList.add('scroll');
     banner.dataset.annId = ann.id;
     banner.classList.add('show');
-    // Décale le layout pour pas que le contenu soit caché
-    document.getElementById('app-layout').style.marginTop = (banner.offsetHeight + 4) + 'px';
-  } catch {}
-})();
+    // Décale le body pour pas que le contenu soit caché
+    document.body.style.paddingTop = (banner.offsetHeight + 4) + 'px';
+  } catch(e) {}
+}
 
 function closeMerchantBanner() {
   const b = document.getElementById('ann-banner');
   if (!b) return;
   b.style.display = 'none';
-  document.getElementById('app-layout').style.marginTop = '';
+  document.body.style.paddingTop = '';
   try { if (b.dataset.annId) sessionStorage.setItem('ann_m_' + b.dataset.annId, '1'); } catch {}
 }
 
