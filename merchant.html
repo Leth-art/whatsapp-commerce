@@ -964,8 +964,14 @@ function updateStats() {
 }
 
 async function loadStats(period, btn) {
-  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.period-btn').forEach(b => {
+    b.classList.remove('active','btn-primary');
+    b.classList.add('btn-ghost');
+  });
+  if (btn) {
+    btn.classList.add('active','btn-primary');
+    btn.classList.remove('btn-ghost');
+  }
   try {
     const r = await fetch(`${BASE}/analytics/merchant/${merchantId}?period=${period}`, { headers: H });
     if (!r.ok) return;

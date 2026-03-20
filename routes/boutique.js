@@ -6,12 +6,38 @@ const express = require("express");
 const router = express.Router();
 const { Merchant, Product } = require("../models/index");
 
+// Thèmes par secteur d'activité
 const THEMES = {
-  orange: { primary: "#E85C0E", dark: "#C44D0B", light: "#FEF0E8", bg: "#fff", surface: "#f6f6f7", text: "#1a1a1a", muted: "#6d7175" },
-  green:  { primary: "#008060", dark: "#006048", light: "#E3F5F0", bg: "#fff", surface: "#f4f9f7", text: "#1a1a1a", muted: "#6d7175" },
-  purple: { primary: "#5c4db1", dark: "#4a3d92", light: "#EEF0FF", bg: "#fff", surface: "#f7f6fb", text: "#1a1a1a", muted: "#6d7175" },
-  blue:   { primary: "#0061c2", dark: "#004fa3", light: "#E8F1FF", bg: "#fff", surface: "#f6f8fb", text: "#1a1a1a", muted: "#6d7175" },
-  red:    { primary: "#c0392b", dark: "#a93226", light: "#FDEEEC", bg: "#fff", surface: "#fdf6f6", text: "#1a1a1a", muted: "#6d7175" },
+  // Mode & Vêtements
+  mode:       { primary: "#C2185B", dark: "#AD1457", light: "#FCE4EC", bg: "#fff", surface: "#fdf6f9", text: "#1a1a1a", muted: "#6d7175", label: "👗 Mode & Vêtements" },
+  // Alimentation & Restauration
+  food:       { primary: "#E65100", dark: "#BF360C", light: "#FBE9E7", bg: "#fff", surface: "#fdf7f5", text: "#1a1a1a", muted: "#6d7175", label: "🍽️ Alimentation" },
+  // Beauté & Cosmétiques
+  beaute:     { primary: "#7B1FA2", dark: "#6A1B9A", light: "#F3E5F5", bg: "#fff", surface: "#faf5fc", text: "#1a1a1a", muted: "#6d7175", label: "💄 Beauté & Cosmétiques" },
+  // High-Tech & Électronique
+  tech:       { primary: "#0061c2", dark: "#004fa3", light: "#E3F2FD", bg: "#fff", surface: "#f5f9fe", text: "#1a1a1a", muted: "#6d7175", label: "📱 High-Tech" },
+  // Épicerie & Supermarché
+  epicerie:   { primary: "#2E7D32", dark: "#1B5E20", light: "#E8F5E9", bg: "#fff", surface: "#f4faf4", text: "#1a1a1a", muted: "#6d7175", label: "🛒 Épicerie" },
+  // Artisanat & Décoration
+  artisanat:  { primary: "#5D4037", dark: "#4E342E", light: "#EFEBE9", bg: "#fff", surface: "#faf8f7", text: "#1a1a1a", muted: "#6d7175", label: "🏺 Artisanat & Déco" },
+  // Santé & Pharmacie
+  sante:      { primary: "#00897B", dark: "#00695C", light: "#E0F2F1", bg: "#fff", surface: "#f3fbfa", text: "#1a1a1a", muted: "#6d7175", label: "💊 Santé & Pharmacie" },
+  // Bijoux & Accessoires
+  bijoux:     { primary: "#F9A825", dark: "#F57F17", light: "#FFFDE7", bg: "#fff", surface: "#fffdf0", text: "#1a1a1a", muted: "#6d7175", label: "💍 Bijoux & Accessoires" },
+  // Sport & Fitness
+  sport:      { primary: "#1565C0", dark: "#0D47A1", light: "#E3F2FD", bg: "#fff", surface: "#f5f8fe", text: "#1a1a1a", muted: "#6d7175", label: "⚽ Sport & Fitness" },
+  // Maison & Mobilier
+  maison:     { primary: "#558B2F", dark: "#33691E", light: "#F1F8E9", bg: "#fff", surface: "#f7fbf2", text: "#1a1a1a", muted: "#6d7175", label: "🏠 Maison & Mobilier" },
+  // Bébé & Enfants
+  bebe:       { primary: "#F06292", dark: "#E91E8C", light: "#FCE4EC", bg: "#fff", surface: "#fdf5f8", text: "#1a1a1a", muted: "#6d7175", label: "👶 Bébé & Enfants" },
+  // Services & Professionnel
+  services:   { primary: "#37474F", dark: "#263238", light: "#ECEFF1", bg: "#fff", surface: "#f6f8f9", text: "#1a1a1a", muted: "#6d7175", label: "🔧 Services" },
+  // Aliases pour rétrocompat
+  orange: { primary: "#E85C0E", dark: "#C44D0B", light: "#FEF0E8", bg: "#fff", surface: "#f6f6f7", text: "#1a1a1a", muted: "#6d7175", label: "🏪 Général" },
+  green:  { primary: "#008060", dark: "#006048", light: "#E3F5F0", bg: "#fff", surface: "#f4f9f7", text: "#1a1a1a", muted: "#6d7175", label: "🏪 Général Vert" },
+  purple: { primary: "#5c4db1", dark: "#4a3d92", light: "#EEF0FF", bg: "#fff", surface: "#f7f6fb", text: "#1a1a1a", muted: "#6d7175", label: "🏪 Général Violet" },
+  blue:   { primary: "#0061c2", dark: "#004fa3", light: "#E8F1FF", bg: "#fff", surface: "#f6f8fb", text: "#1a1a1a", muted: "#6d7175", label: "🏪 Général Bleu" },
+  red:    { primary: "#c0392b", dark: "#a93226", light: "#FDEEEC", bg: "#fff", surface: "#fdf6f6", text: "#1a1a1a", muted: "#6d7175", label: "🏪 Général Rouge" },
 };
 
 router.get("/:slug", async (req, res) => {
@@ -362,11 +388,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .theme-sw{position:fixed;bottom:90px;left:22px;z-index:300}
 .theme-tog-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--bd);background:white;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:.15s}
 .theme-tog-btn:hover{transform:scale(1.08)}
-.theme-pan{position:absolute;bottom:46px;left:0;background:white;border:1px solid var(--bd);border-radius:12px;padding:12px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.1);min-width:150px}
+.theme-pan{position:absolute;bottom:46px;left:0;background:white;border:1px solid var(--bd);border-radius:12px;padding:14px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.1);min-width:200px}
 .theme-pan.open{display:block}
 .theme-pan-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mt);margin-bottom:9px}
 .tdots{display:flex;gap:7px;flex-wrap:wrap}
-.tdot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s}
+.tdot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s}
 .tdot:hover,.tdot.active{border-color:#1a1a1a;transform:scale(1.1)}
 /* WA FLOAT */
 .wa-float{display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#25D366;color:white;text-decoration:none;padding:11px 22px;border-radius:30px;font-weight:700;font-size:13px;box-shadow:0 4px 14px rgba(37,211,102,.4);z-index:299;align-items:center;gap:7px;white-space:nowrap}
@@ -509,13 +535,21 @@ ${whatsappNumber?`<a href="https://wa.me/${whatsappNumber}" target="_blank" clas
 <div class="theme-sw">
   <div class="theme-pan" id="tpan">
     <div class="theme-pan-lbl">🎨 Thème</div>
-    <div class="tdots">
-      <div class="tdot ${merchant.siteTheme==='orange'?'active':''}" style="background:#E85C0E" onclick="changeTheme('orange')" title="Orange"></div>
-      <div class="tdot ${merchant.siteTheme==='green'?'active':''}" style="background:#008060" onclick="changeTheme('green')" title="Vert"></div>
-      <div class="tdot ${merchant.siteTheme==='purple'?'active':''}" style="background:#5c4db1" onclick="changeTheme('purple')" title="Violet"></div>
-      <div class="tdot ${merchant.siteTheme==='blue'?'active':''}" style="background:#0061c2" onclick="changeTheme('blue')" title="Bleu"></div>
-      <div class="tdot ${merchant.siteTheme==='red'?'active':''}" style="background:#c0392b" onclick="changeTheme('red')" title="Rouge"></div>
+    <div class="tdots" style="display:flex;flex-wrap:wrap;gap:6px">
+      <div class="tdot ${merchant.siteTheme==='mode'?'active':''}" style="background:#C2185B" onclick="changeTheme('mode')" title="👗 Mode"></div>
+      <div class="tdot ${merchant.siteTheme==='food'?'active':''}" style="background:#E65100" onclick="changeTheme('food')" title="🍽️ Alimentation"></div>
+      <div class="tdot ${merchant.siteTheme==='beaute'?'active':''}" style="background:#7B1FA2" onclick="changeTheme('beaute')" title="💄 Beauté"></div>
+      <div class="tdot ${merchant.siteTheme==='tech'?'active':''}" style="background:#0061c2" onclick="changeTheme('tech')" title="📱 High-Tech"></div>
+      <div class="tdot ${merchant.siteTheme==='epicerie'?'active':''}" style="background:#2E7D32" onclick="changeTheme('epicerie')" title="🛒 Épicerie"></div>
+      <div class="tdot ${merchant.siteTheme==='artisanat'?'active':''}" style="background:#5D4037" onclick="changeTheme('artisanat')" title="🏺 Artisanat"></div>
+      <div class="tdot ${merchant.siteTheme==='sante'?'active':''}" style="background:#00897B" onclick="changeTheme('sante')" title="💊 Santé"></div>
+      <div class="tdot ${merchant.siteTheme==='bijoux'?'active':''}" style="background:#F9A825" onclick="changeTheme('bijoux')" title="💍 Bijoux"></div>
+      <div class="tdot ${merchant.siteTheme==='sport'?'active':''}" style="background:#1565C0" onclick="changeTheme('sport')" title="⚽ Sport"></div>
+      <div class="tdot ${merchant.siteTheme==='maison'?'active':''}" style="background:#558B2F" onclick="changeTheme('maison')" title="🏠 Maison"></div>
+      <div class="tdot ${merchant.siteTheme==='bebe'?'active':''}" style="background:#F06292" onclick="changeTheme('bebe')" title="👶 Bébé"></div>
+      <div class="tdot ${merchant.siteTheme==='services'?'active':''}" style="background:#37474F" onclick="changeTheme('services')" title="🔧 Services"></div>
     </div>
+    <div style="font-size:9px;color:var(--mt);margin-top:8px;text-align:center" id="theme-label-current">${THEMES[merchant.siteTheme]?.label||'Choisir un thème'}</div>
   </div>
   <button class="theme-tog-btn" onclick="document.getElementById('tpan').classList.toggle('open')">🎨</button>
 </div>
@@ -640,8 +674,11 @@ function filterCat(cat,btn){
 }
 
 // THEME
+const THEME_LABELS={'mode':'👗 Mode','food':'🍽️ Alimentation','beaute':'💄 Beauté','tech':'📱 High-Tech','epicerie':'🛒 Épicerie','artisanat':'🏺 Artisanat','sante':'💊 Santé','bijoux':'💍 Bijoux','sport':'⚽ Sport','maison':'🏠 Maison','bebe':'👶 Bébé','services':'🔧 Services','orange':'🏪 Général','green':'🏪 Vert','purple':'🏪 Violet','blue':'🏪 Bleu','red':'🏪 Rouge'};
 async function changeTheme(t){
   document.querySelectorAll('.tdot').forEach(d=>d.classList.remove('active'));event.target.classList.add('active');
+  const lbl=document.getElementById('theme-label-current');
+  if(lbl)lbl.textContent=THEME_LABELS[t]||t;
   document.getElementById('tpan').classList.remove('open');
   try{await fetch('/boutique/'+SLUG+'/theme',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:t,merchantId:MID})});location.reload();}catch{}
 }
