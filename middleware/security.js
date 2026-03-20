@@ -42,10 +42,15 @@ const sanitizeInput = (req, res, next) => {
     if (!obj || typeof obj !== "object") return obj;
     for (const key of Object.keys(obj)) {
       if (typeof obj[key] === "string") {
-        // Supprime les caractères dangereux
         obj[key] = obj[key]
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-          .replace(/javascript:/gi, "")
+          .replace(/javascript\s*:/gi, "")
+          .replace(/on\w+\s*=/gi, "")           // onload=, onerror=, onclick=, etc.
+          .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
+          .replace(/<object[^>]*>.*?<\/object>/gi, "")
+          .replace(/<embed[^>]*/gi, "")
+          .replace(/data\s*:\s*text\/html/gi, "") // data:text/html XSS
+          .replace(/vbscript\s*:/gi, "")
           .trim();
       } else if (typeof obj[key] === "object") {
         sanitize(obj[key]);
@@ -78,8 +83,10 @@ const corsMiddleware = (req, res, next) => {
   ].filter(Boolean);
 
   const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else if (!origin) {
+    // Requête directe (curl, server-to-server) — pas de header CORS
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-api-key, Authorization");
@@ -101,13 +108,27 @@ const securityLogger = (req, res, next) => {
   next();
 };
 
+// ─── 9. Limiteur de taille des requêtes ─────────────────────────────────────
+// À utiliser dans app.js : app.use(express.json({ limit: "2mb" }))
+// Exporté pour documentation — la limite est configurée dans app.js via express.json()
+const BODY_SIZE_LIMIT = "2mb";
+
+// ─── 10. Rate limiter strict pour authentification ───────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // max 20 tentatives de connexion par IP
+  message: { error: "Trop de tentatives. Réessayez dans 15 minutes." },
+});
+
 module.exports = {
   helmetMiddleware,
   globalLimiter,
   onboardingLimiter,
   apiLimiter,
+  authLimiter,
   sanitizeInput,
   validateMerchantId,
   corsMiddleware,
   securityLogger,
+  BODY_SIZE_LIMIT,
 };

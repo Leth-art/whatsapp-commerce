@@ -120,9 +120,10 @@
   .faq-item { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
   .faq-q { padding:20px 24px; font-weight:600; font-size:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
   .faq-q:hover { background:var(--surface2); }
-  .faq-a { padding:0 24px 20px; color:var(--muted); font-size:14px; line-height:1.7; display:none; }
-  .faq-item.open .faq-a { display:block; }
+  .faq-a { padding:0 24px 20px; color:var(--muted); font-size:14px; line-height:1.7; display:none; max-height:0; overflow:hidden; transition:max-height .3s ease, padding .3s ease; }
+  .faq-item.open .faq-a { display:block; max-height:400px; }
   .faq-item.open .faq-arrow { transform:rotate(180deg); }
+  .faq-arrow { display:inline-block; transition:transform .25s; margin-left:auto; float: right; }
   .faq-arrow { transition:transform 0.2s; color:var(--muted); }
   .cta-section {
     text-align:center; padding:80px 24px;
@@ -166,7 +167,6 @@
   <div class="logo">Wazi<span>Bot</span></div>
   <ul class="nav-links">
     <li><a href="#comment-ca-marche">Comment ça marche</a></li>
-    <li><a href="#numero-dedie">Numéro dédié</a></li>
     <li><a href="#demarrage">Démarrage</a></li>
     <li><a href="#faq">FAQ</a></li>
   </ul>
@@ -217,7 +217,7 @@
 
 <hr class="divider">
 
-<section>
+<section id="demarrage">
   <h2>Comment rendre votre boutique visible</h2>
   <p class="subtitle">Suivez ces étapes pour que vos clients trouvent et commandent sur votre site</p>
 
