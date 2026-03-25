@@ -9,7 +9,15 @@ const onboardingRouter = require("./routes/onboarding");
 const analyticsRouter = require("./routes/analytics");
 const boutiqueRouter = require("./routes/boutique");
 const { startCronJobs } = require("./modules/retention");
+const { Pool } = require('pg');
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  family: 4 // 🔥 FORCE IPv4
+});
 // Optimisations (avec fallback si fichier absent)
 const safeRequire = (path) => { try { return require(path); } catch { return {}; } };
 
