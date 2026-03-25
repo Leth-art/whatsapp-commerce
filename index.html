@@ -5,8 +5,8 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="shortcut icon" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WaziBot — Votre boutique en ligne + bot IA pour vendre 24h/24</title>
-<meta name="description" content="Créez votre boutique en ligne en 2 minutes. Bot IA intégré, commandes web, dashboard marchand. et fidélisez vos acheteurs. Essai gratuit 7 jours.">
+<title>WaziBot — Boutique en ligne + Bot IA pour tous les secteurs</title>
+<meta name="description" content="Automatisez vos ventes sur WhatsApp avec l'IA. Répondez à vos clients 24h/24, gérez vos commandes et fidélisez vos acheteurs. Essai gratuit 7 jours.">
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
 <meta name="google-site-verification" content="F5x-7lvuRpoX4HKexWgYI_VOUpeu8tef4-xSv0CrlO4" />
 <style>
@@ -35,7 +35,7 @@
   .btn-secondary{color:var(--text);font-size:15px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:8px;transition:gap 0.2s;}
   .btn-secondary:hover{gap:12px;}
   .hero-visual{display:flex;justify-content:center;align-items:center;}
-  .phone-mockup{background:#1a1a1a;border-radius:40px;width:300px;padding:20px;box-shadow:0 40px 80px rgba(26,18,8,0.3);}
+  /* phone-mockup removed */
   .phone-screen{background:#e5ddd5;border-radius:24px;padding:16px;min-height:460px;}
   .chat-header{background:var(--accent2);border-radius:12px 12px 0 0;padding:12px 16px;display:flex;align-items:center;gap:10px;margin:-16px -16px 16px;}
   .chat-avatar{width:36px;height:36px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-size:18px;}
@@ -67,7 +67,7 @@
   .feature-card{background:white;border-radius:20px;padding:32px;border:1px solid var(--border);transition:all 0.3s;}
   .feature-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(26,18,8,0.08);}
   .feature-icon{width:52px;height:52px;border-radius:14px;background:rgba(232,92,14,0.1);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px;}
-  .feature-card h3{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:600;margin-bottom:10px;}
+  .feature-card h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:600;margin-bottom:10px;}
   .feature-card p{color:var(--muted);font-size:14px;line-height:1.6;}
   .countries-banner{background:white;border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:60px;text-align:center;}
   .countries-banner p{color:var(--muted);font-size:14px;margin-bottom:16px;}
@@ -143,33 +143,32 @@
 .ann-banner-close:hover { opacity: 1; }
 
 
-/* ── SITE MOCKUP (hero) ── */
-.site-mockup{width:360px;border-radius:16px;overflow:hidden;box-shadow:0 40px 80px rgba(26,18,8,0.25);border:1px solid rgba(0,0,0,.1);background:white;}
-.browser-bar{background:#f0f0f0;padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #ddd;}
-.browser-dots{display:flex;gap:5px;}.browser-dots span{width:11px;height:11px;border-radius:50%;display:block;}
-.browser-url{flex:1;background:white;border-radius:20px;padding:4px 12px;font-size:11px;color:#666;text-align:center;}
-.browser-url strong{color:var(--accent);}
-.site-preview{position:relative;}
-.sp-header{background:white;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;}
-.sp-logo{font-size:14px;font-weight:800;}.sp-logo span{color:var(--accent);}
-.sp-wa-btn{background:var(--accent);color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;}
-.sp-hero{background:var(--accent);padding:16px 14px;text-align:center;color:white;}
-.sp-badge{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:6px;}
-.sp-title{font-size:18px;font-weight:800;margin-bottom:2px;}.sp-title em{font-style:normal;text-decoration:underline;text-underline-offset:3px;}
-.sp-sub{font-size:10px;opacity:.85;}
-.sp-products{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 10px;background:#f6f6f7;}
-.sp-product{background:white;border-radius:8px;overflow:hidden;border:1px solid #eee;}
-.sp-prod-img{height:52px;display:flex;align-items:center;justify-content:center;}
-.sp-prod-info{padding:6px 8px;}
-.sp-prod-name{font-size:9px;font-weight:700;color:#1a1a1a;}
-.sp-prod-price{font-size:9px;color:var(--accent);font-weight:700;margin-top:1px;}
-.sp-bot{position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.sp-bot-box{background:white;border-radius:12px 12px 4px 12px;padding:10px 12px;max-width:200px;box-shadow:0 4px 16px rgba(0,0,0,.12);border:1px solid #eee;}
-.sp-bot-hdr{font-size:10px;font-weight:700;color:var(--accent);margin-bottom:6px;}
-.sp-bot-msg{font-size:10px;background:#f3f4f6;padding:5px 8px;border-radius:4px 10px 10px 10px;margin-bottom:4px;color:#1a1a1a;line-height:1.4;}
-.sp-bot-reply{font-size:10px;background:var(--accent);color:white;padding:5px 8px;border-radius:10px 4px 10px 10px;margin-bottom:4px;text-align:right;line-height:1.4;}
-.sp-bot-btn{width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 10px rgba(232,92,14,.4);}
-@media(max-width:768px){.site-mockup{width:100%;max-width:360px;}}
+/* ── SITE MOCKUP HERO ── */
+.site-mockup-hero{width:340px;border-radius:14px;overflow:hidden;box-shadow:0 32px 72px rgba(26,18,8,0.22);border:1px solid rgba(0,0,0,.1);background:white;flex-shrink:0;}
+.smh-bar{background:#f0f0f0;padding:9px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ddd;}
+.smh-dots{display:flex;gap:4px;}.smh-dots span{width:9px;height:9px;border-radius:50%;display:block;background:#ddd;}
+.smh-dots span:nth-child(1){background:#ff5f57;}.smh-dots span:nth-child(2){background:#febc2e;}.smh-dots span:nth-child(3){background:#28c840;}
+.smh-url{flex:1;background:white;border-radius:20px;padding:3px 10px;font-size:10px;color:#888;text-align:center;}.smh-url b{color:var(--accent);}
+.smh-screen{position:relative;}
+.smh-header{background:white;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;}
+.smh-logo{font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;}.smh-logo span{color:var(--accent);}
+.smh-wa{background:var(--accent);color:white;font-size:11px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.smh-hero-strip{background:var(--accent);padding:14px 12px;color:white;text-align:center;}
+.smh-badge{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:5px;}
+.smh-htitle{font-size:16px;font-weight:800;font-family:'Poppins',sans-serif;margin-bottom:2px;}.smh-htitle em{font-style:normal;text-decoration:underline;text-underline-offset:3px;}
+.smh-sub{font-size:9px;opacity:.8;}
+.smh-products{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 8px;background:#f6f6f7;}
+.smh-prod{background:white;border-radius:6px;overflow:hidden;border:1px solid #eee;}
+.smh-pimg{height:44px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.smh-pname{font-size:8px;font-weight:700;color:#1a1a1a;padding:3px 5px 0;}
+.smh-pprice{font-size:8px;color:var(--accent);font-weight:700;padding:1px 5px 4px;}
+.smh-bot-widget{position:absolute;bottom:8px;right:8px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.smh-bot-bubble{background:white;border-radius:10px 10px 3px 10px;padding:8px 10px;max-width:170px;box-shadow:0 3px 12px rgba(0,0,0,.12);border:1px solid #eee;}
+.smh-bot-hdr{font-size:9px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+.smh-bmsg{font-size:9px;background:#f3f4f6;padding:4px 7px;border-radius:3px 8px 8px 8px;margin-bottom:3px;color:#1a1a1a;line-height:1.4;}
+.smh-breply{font-size:9px;background:var(--accent);color:white;padding:4px 7px;border-radius:8px 3px 8px 8px;margin-bottom:3px;text-align:right;line-height:1.4;}
+.smh-bot-btn{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 3px 10px rgba(232,92,14,.35);}
+@media(max-width:900px){.site-mockup-hero{width:100%;max-width:340px;}}
 
 </style>
 </head>
@@ -197,80 +196,52 @@
 
 <section class="hero">
   <div class="hero-content">
-    <div class="hero-badge"><span>🟢</span> Boutique en ligne + Bot IA — Prêt en 2 minutes</div>
+    <div class="hero-badge"><span>🟢</span> Boutique web + Bot IA — Tous secteurs</div>
     <h1>Votre boutique en ligne,<br><em>prête en 2 minutes</em></h1>
-    <p>WaziBot crée automatiquement votre site marchand professionnel avec un bot IA intégré. Vos clients commandent 24h/24 depuis votre boutique — vous recevez chaque commande sur WhatsApp.</p>
+    <p>WaziBot crée votre site marchand professionnel avec bot IA intégré. Mode, food, tech, éducation — chaque secteur a son ambiance. Vos clients commandent 24h/24, vous recevez chaque commande instantanément.</p>
     <div class="hero-actions">
       <a href="/signup" class="btn-primary">Commencer gratuitement →</a>
       <a href="#fonctionnalites" class="btn-secondary">Voir comment ça marche →</a>
     </div>
   </div>
   <div class="hero-visual">
-    <div class="site-mockup">
-        <!-- Browser chrome -->
-        <div class="browser-bar">
-          <div class="browser-dots">
-            <span style="background:#ff5f57"></span>
-            <span style="background:#febc2e"></span>
-            <span style="background:#28c840"></span>
-          </div>
-          <div class="browser-url">wazibot.com/boutique/<strong>ma-boutique</strong></div>
+    <div class="site-mockup-hero">
+      <div class="smh-bar">
+        <div class="smh-dots"><span></span><span></span><span></span></div>
+        <div class="smh-url">wazibot.com/boutique/<b>votre-nom</b></div>
+      </div>
+      <div class="smh-screen">
+        <div class="smh-header">
+          <div class="smh-logo"><span>Ma</span> Boutique</div>
+          <div class="smh-wa">💬</div>
         </div>
-        <!-- Site preview -->
-        <div class="site-preview">
-          <!-- Header -->
-          <div class="sp-header">
-            <div class="sp-logo"><span>Ma</span> Boutique</div>
-            <div class="sp-wa-btn">💬 WhatsApp</div>
-          </div>
-          <!-- Hero -->
-          <div class="sp-hero">
-            <div class="sp-badge">👗 Boutique officielle</div>
-            <div class="sp-title">Ma <em>Boutique</em></div>
-            <div class="sp-sub">Livraison disponible · Paiement Mobile Money</div>
-          </div>
-          <!-- Products -->
-          <div class="sp-products">
-            <div class="sp-product">
-              <div class="sp-prod-img" style="background:#fce7f3;font-size:22px">👗</div>
-              <div class="sp-prod-info">
-                <div class="sp-prod-name">Robe Wax</div>
-                <div class="sp-prod-price">15 000 F</div>
-              </div>
-            </div>
-            <div class="sp-product">
-              <div class="sp-prod-img" style="background:#e3f5f0;font-size:22px">👟</div>
-              <div class="sp-prod-info">
-                <div class="sp-prod-name">Basket sport</div>
-                <div class="sp-prod-price">8 500 F</div>
-              </div>
-            </div>
-            <div class="sp-product">
-              <div class="sp-prod-img" style="background:#fef9c3;font-size:22px">👜</div>
-              <div class="sp-prod-info">
-                <div class="sp-prod-name">Sac à main</div>
-                <div class="sp-prod-price">12 000 F</div>
-              </div>
-            </div>
-          </div>
-          <!-- Bot widget -->
-          <div class="sp-bot">
-            <div class="sp-bot-box">
-              <div class="sp-bot-hdr">🤖 Assistant Boutique</div>
-              <div class="sp-bot-msg">Bonjour ! 👋 Puis-je vous aider ?</div>
-              <div class="sp-bot-reply">Oui, vous avez des robes wax ?</div>
-              <div class="sp-bot-msg">Oui ! Robe wax bleue à 15 000 F, disponible maintenant. Ajouter au panier ?</div>
-            </div>
-            <div class="sp-bot-btn">💬</div>
-          </div>
+        <div class="smh-hero-strip">
+          <div class="smh-badge">👗 Boutique officielle</div>
+          <div class="smh-htitle">Ma <em>Boutique</em></div>
+          <div class="smh-sub">Livraison · Mobile Money accepté</div>
         </div>
-      </div></div>
+        <div class="smh-products">
+          <div class="smh-prod"><div class="smh-pimg" style="background:#fce7f3">👗</div><div class="smh-pname">Robe Wax</div><div class="smh-pprice">15 000 F</div></div>
+          <div class="smh-prod"><div class="smh-pimg" style="background:#e3f5f0">👟</div><div class="smh-pname">Basket</div><div class="smh-pprice">8 500 F</div></div>
+          <div class="smh-prod"><div class="smh-pimg" style="background:#fef9c3">💄</div><div class="smh-pname">Cosmétique</div><div class="smh-pprice">5 000 F</div></div>
+        </div>
+        <div class="smh-bot-widget">
+          <div class="smh-bot-bubble">
+            <div class="smh-bot-hdr">🤖 Assistant</div>
+            <div class="smh-bmsg">Bonjour ! Je peux vous aider ? 👋</div>
+            <div class="smh-breply">Vous avez des robes wax ?</div>
+            <div class="smh-bmsg">Oui ! Robe wax à 15 000 F. Ajouter au panier ?</div>
+          </div>
+          <div class="smh-bot-btn">💬</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <div class="stats">
   <div class="stat"><div class="number">24h/24</div><div class="label">Disponibilité de l'assistant</div></div>
-  <div class="stat"><div class="number">3s</div><div class="label">Temps de réponse moyen</div></div>
+  <div class="stat"><div class="number">12+</div><div class="label">Secteurs couverts</div></div>
   <div class="stat"><div class="number">+40%</div><div class="label">Ventes en moyenne</div></div>
   <div class="stat"><div class="number">7j</div><div class="label">Essai gratuit sans CB</div></div>
 </div>
@@ -291,8 +262,8 @@
     <div class="feature-card"><div class="feature-icon">🔔</div><h3>Relances automatiques</h3><p>Vos clients inactifs reçoivent des messages personnalisés. Vous récupérez des ventes sans lever le petit doigt.</p></div>
     <div class="feature-card"><div class="feature-icon">📊</div><h3>Dashboard en temps réel</h3><p>Visualisez vos revenus, commandes et clients depuis votre dashboard web. Accessible depuis n'importe quel navigateur, 24h/24.</p></div>
     <div class="feature-card"><div class="feature-icon">💰</div><h3>Paiement Mobile Money</h3><p>Vos clients paient via Mobile Money directement sur votre boutique. Zéro friction, plus de ventes.</p></div>
-    <div class="feature-card"><div class="feature-icon">🌐</div><h3>Mini-site boutique</h3><p>Un site professionnel créé automatiquement pour vous. Vos clients y commandent directement — avec un bot 24h/24 intégré.</p></div>
-    <div class="feature-card"><div class="feature-icon">🛍️</div><h3>Catalogue & commandes web</h3><p>Ajoutez vos produits avec photos et prix. Vos clients commandent depuis le site ou WhatsApp — tout est centralisé dans votre dashboard.</p></div>
+    <div class="feature-card"><div class="feature-icon">🌐</div><h3>Site professionnel automatique</h3><p>Commerce, restauration, éducation, services — un site créé automatiquement pour vous avec bot 24h/24 intégré. Zéro code requis.</p></div>
+    <div class="feature-card"><div class="feature-icon">🎨</div><h3>12 thèmes sectoriels</h3><p>Mode, food, beauté, tech, santé, éducation... Chaque boutique a une ambiance propre à son secteur d'activité, avec typographie et couleurs adaptées.</p></div>
   </div>
 </section>
 
@@ -320,12 +291,9 @@
     <div style="font-size:28px;">📱</div>
     <div>
       <div style="color:white;font-weight:700;font-size:15px;margin-bottom:4px;">Paiement via My Touchpoint</div>
-      <div style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;">Téléchargez l'application <strong style="color:rgba(255,255,255,0.8);">My Touchpoint</strong> sur votre téléphone pour effectuer vos paiements d'abonnement en toute sécurité. Disponible sur Android et iOS.</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;">Effectuez vos paiements d'abonnement via <strong style="color:rgba(255,255,255,0.8);">My Touchpoint</strong> (Mobile Money). Sécurisé et disponible partout en Afrique.</div>
     </div>
-    <div style="display:flex;gap:10px;flex-shrink:0;">
-      <a href="https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint&hl=fr" target="_blank" style="background:rgba(255,255,255,0.1);color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px;">▶ Google Play</a>
-      <a href="https://apps.apple.com/bf/app/mytouchpoint/id6451056179" target="_blank" style="background:rgba(255,255,255,0.1);color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px;"> App Store</a>
-    </div>
+    
   </div>
 
   <div class="pricing-grid">
@@ -499,5 +467,41 @@ function closeBanner() {
   } catch {}
 }
 </script>
+
+<script>
+// ── Protection source code / devtools ──────────────────────────────────────
+(function(){
+  // Désactiver clic droit
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  // Désactiver Ctrl+U, Ctrl+S, Ctrl+A (select all), F12
+  document.addEventListener('keydown', function(e){
+    // Ctrl+U (view-source), Ctrl+S (save), Ctrl+Shift+I/J/C (devtools)
+    if(
+      (e.ctrlKey && (e.key==='u'||e.key==='U'||e.key==='s'||e.key==='S')) ||
+      (e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C'].includes(e.key)) ||
+      e.key==='F12'
+    ){
+      e.preventDefault();
+      return false;
+    }
+  });
+  // Détection ouverture DevTools (méthode de timing)
+  var devtools = {open: false, orientation: null};
+  var threshold = 160;
+  setInterval(function(){
+    var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    if(widthThreshold || heightThreshold){
+      if(!devtools.open){
+        devtools.open = true;
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;background:#f6f6f7;"><div><div style="font-size:48px;margin-bottom:16px">🔒</div><h2 style="color:#1a1a1a;margin-bottom:8px">Accès restreint</h2><p style="color:#6d7175">Veuillez fermer les outils de développement pour continuer.</p></div></div>';
+      }
+    } else {
+      devtools.open = false;
+    }
+  }, 500);
+})();
+</script>
+
 </body>
 </html>
