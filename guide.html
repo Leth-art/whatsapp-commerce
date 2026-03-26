@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>Guide complet — WaziBot</title>
-<link href='https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
 <style>
   :root {
     --bg: #ffffff;
@@ -20,7 +20,7 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
-  body { font-family:'Plus Jakarta Sans',sans-serif; background:#ffffff; color:var(--text); line-height:1.7; }
+  body { font-family:'Inter',sans-serif; background:#ffffff; color:var(--text); line-height:1.7; }
   nav {
     position:fixed; top:0; left:0; right:0; z-index:100;
     background:rgba(255,255,255,0.95); backdrop-filter:blur(20px);
@@ -28,7 +28,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 32px;
   }
-  .logo { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; }
+  .logo { font-family:'Poppins',sans-serif; font-size:20px; font-weight:700; }
   .logo span { color:var(--accent); }
   .nav-links { display:flex; gap:24px; list-style:none; }
   .nav-links a { color:var(--muted); text-decoration:none; font-size:14px; transition:color 0.2s; }
@@ -41,7 +41,7 @@
     background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,92,14,0.08) 0%, transparent 70%);
   }
   .hero h1 {
-    font-family:'Syne',sans-serif; font-size:clamp(40px,7vw,72px);
+    font-family:'Poppins',sans-serif; font-size:clamp(40px,7vw,72px);
     font-weight:700; line-height:1.1; margin-bottom:20px;
   }
   .hero h1 span { color:var(--accent); }
@@ -53,7 +53,7 @@
   .badge.blue { border-color:rgba(100,150,255,0.3); color:#6496ff; }
   section { padding:80px 24px; max-width:900px; margin:0 auto; }
   .section-tag { display:inline-block; background:rgba(232,92,14,0.15); color:var(--accent); font-size:12px; font-weight:700; letter-spacing:2px; padding:6px 14px; border-radius:50px; margin-bottom:16px; text-transform:uppercase; }
-  h2 { font-family:'Syne',sans-serif; font-size:clamp(28px,4vw,40px); font-weight:700; margin-bottom:16px; }
+  h2 { font-family:'Poppins',sans-serif; font-size:clamp(28px,4vw,40px); font-weight:700; margin-bottom:16px; }
   .subtitle { color:var(--muted); font-size:16px; margin-bottom:48px; max-width:600px; }
   .steps { display:flex; flex-direction:column; gap:0; }
   .step { display:flex; gap:24px; position:relative; }
@@ -64,11 +64,11 @@
   .step-num {
     width:56px; height:56px; border-radius:50%; border:2px solid var(--accent);
     display:flex; align-items:center; justify-content:center;
-    font-family:'Syne',sans-serif; font-size:20px; font-weight:700;
+    font-family:'Poppins',sans-serif; font-size:20px; font-weight:700;
     color:var(--accent); flex-shrink:0; background:#ffffff;
   }
   .step-content { padding:0 0 48px; flex:1; }
-  .step-content h3 { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
+  .step-content h3 { font-family:'Poppins',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
   .step-content p { color:var(--muted); font-size:15px; margin-bottom:12px; }
   .warn-box {
     background:rgba(240,165,0,0.08); border:1px solid rgba(240,165,0,0.3);
@@ -93,7 +93,7 @@
   }
   .card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 32px rgba(232,92,14,0.12); }
   .card-icon { font-size:32px; margin-bottom:12px; }
-  .card h3 { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:8px; }
+  .card h3 { font-family:'Poppins',sans-serif; font-size:17px; font-weight:700; margin-bottom:8px; }
   .card p { color:var(--muted); font-size:14px; line-height:1.6; }
   .flow {
     background:var(--surface); border:1px solid var(--border); border-radius:20px;
@@ -130,7 +130,7 @@
     background:linear-gradient(135deg, rgba(232,92,14,0.06), rgba(0,229,160,0.04));
     border-top:1px solid var(--border);
   }
-  .cta-section h2 { font-family:'Syne',sans-serif; font-size:36px; margin-bottom:16px; }
+  .cta-section h2 { font-family:'Poppins',sans-serif; font-size:36px; margin-bottom:16px; }
   .cta-section p { color:var(--muted); margin-bottom:32px; }
   .btn-cta { background:var(--accent); color:white; padding:16px 40px; border-radius:50px; font-size:16px; font-weight:700; text-decoration:none; display:inline-block; transition:all 0.2s; }
   .btn-cta:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(232,92,14,0.4); }
@@ -145,9 +145,9 @@
 
 .steps-container { display: flex; flex-direction: column; gap: 28px; margin-top: 32px; }
 .step-block { display: flex; gap: 20px; align-items: flex-start; }
-.step-number { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; font-family: 'Syne', sans-serif; }
+.step-number { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; font-family: 'Poppins', sans-serif; }
 .step-content { flex: 1; padding-top: 8px; }
-.step-content h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.step-content h3 { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
 .step-content p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 .step-tip { margin-top: 10px; background: rgba(232,92,14,.08); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text); }
 .step-url { margin-top: 10px; background: var(--card); border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 16px; font-size: 14px; font-family: monospace; color: var(--text); }
