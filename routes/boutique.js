@@ -337,13 +337,13 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   html += ".cart-pill{position:absolute;top:-7px;right:-7px;background:var(--p);color:white;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid white}.cart-pill.show{display:flex}\n";
   // HERO — with image background
   html += ".hero{position:relative;min-height:480px;display:flex;align-items:center;overflow:hidden}\n";
-  html += ".hero-bg{position:absolute;inset:0;background-image:url('"+theme.heroImg+"');background-size:cover;background-position:center;filter:brightness(.85)}\n";
-  html += ".hero-overlay{position:absolute;inset:0;background:"+theme.heroOverlay+"}\n";
+  html += ".hero-bg{position:absolute;inset:0;background-image:url('"+theme.heroImg+"');background-size:cover;background-position:center;filter:brightness(1)}\n";
+  html += ".hero-overlay{display:none}\n";
   html += ".hero-in{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:60px 24px;width:100%}\n";
   html += ".hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);color:white;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:20px;border:1px solid rgba(255,255,255,.3)}\n";
-  html += ".hero h1{font-family:"+hf+";font-size:clamp(32px,5vw,60px);font-weight:800;line-height:1.1;color:white;margin-bottom:14px;letter-spacing:-.5px;text-shadow:0 2px 20px rgba(0,0,0,.2);max-width:600px}\n";
+  html += ".hero h1{font-family:"+hf+";font-size:clamp(32px,5vw,60px);font-weight:800;line-height:1.1;color:white;margin-bottom:14px;letter-spacing:-.5px;text-shadow:0 2px 16px rgba(0,0,0,.8),0 4px 32px rgba(0,0,0,.6);max-width:600px}\n";
   html += ".hero h1 em{font-style:normal;color:white;text-decoration:underline;text-decoration-color:"+p+";text-decoration-thickness:3px;text-underline-offset:6px}\n";
-  html += ".hero p{color:rgba(255,255,255,.9);font-size:17px;line-height:1.7;margin-bottom:32px;max-width:480px;text-shadow:0 1px 8px rgba(0,0,0,.2)}\n";
+  html += ".hero p{color:rgba(255,255,255,.95);font-size:17px;line-height:1.7;margin-bottom:32px;max-width:480px;text-shadow:0 2px 12px rgba(0,0,0,.9)}\n";
   html += ".hero-cta{display:flex;gap:12px;flex-wrap:wrap}\n";
   html += ".btn-hp{background:white;color:var(--p);border:none;padding:14px 28px;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.15)}\n";
   html += ".btn-hp:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.2)}\n";
