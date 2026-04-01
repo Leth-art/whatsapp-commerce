@@ -245,6 +245,52 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
 
 <!-- Bandeau annonce (visible uniquement par le commerçant) -->
 <div class="ann-banner" id="ann-banner">
+  <div id="touchpoint-payment-section" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+  
+  <div style="flex: 1; min-width: 250px;">
+    <h3 style="margin: 0 0 8px 0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text);">
+      Renouveler via My Touchpoint
+    </h3>
+    <p style="margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5;">
+      Votre abonnement WaziBot nécessite un paiement. Copiez le numéro de transfert ci-dessous et effectuez votre paiement directement depuis votre application My Touchpoint.
+    </p>
+  </div>
+
+  <div style="background: var(--surface2); padding: 12px 20px; border-radius: 8px; border: 1px dashed var(--accent); display: flex; align-items: center; gap: 16px;">
+    <div>
+      <span style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Numéro de transfert officiel</span>
+      <strong id="touchpoint-number" style="font-size: 20px; color: var(--text); letter-spacing: 1px;">+228 90 58 35 22</strong>
+    </div>
+    
+    <button onclick="copyTouchpointNumber(this)" style="background: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='var(--accent2)'" onmouseout="this.style.backgroundColor='var(--accent)'">
+      Copier
+    </button>
+  </div>
+
+</div>
+
+<script>
+function copyTouchpointNumber(btnElement) {
+  const number = document.getElementById('touchpoint-number').innerText;
+  
+  navigator.clipboard.writeText(number).then(() => {
+    // Changement visuel temporaire pour confirmer la copie
+    const originalText = btnElement.innerText;
+    const originalBg = btnElement.style.backgroundColor;
+    
+    btnElement.innerText = "Copié ! ✅";
+    btnElement.style.backgroundColor = "#008060"; // Vert de validation
+    
+    setTimeout(() => {
+      btnElement.innerText = originalText;
+      btnElement.style.backgroundColor = originalBg;
+    }, 3000);
+  }).catch(err => {
+    console.error('Erreur lors de la copie', err);
+    alert("Impossible de copier automatiquement. Veuillez sélectionner le numéro manuellement.");
+  });
+}
+</script>
   <span id="ann-icon">ℹ️</span>
   <span class="ann-txt" id="ann-txt"></span>
   <button class="ann-x-btn" onclick="closeMerchantBanner()">✕</button>
