@@ -170,9 +170,48 @@
 .smh-bot-btn{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 3px 10px rgba(232,92,14,.35);}
 @media(max-width:900px){.site-mockup-hero{width:100%;max-width:340px;}}
 
+
+/* ── CONSENT BANNER ── */
+.consent-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
+.consent-overlay.hidden{display:none;}
+.consent-box{background:#fff;border-radius:20px 20px 20px 20px;max-width:680px;width:100%;padding:28px 32px;box-shadow:0 -8px 40px rgba(0,0,0,.15);animation:slideUpConsent .3s ease;}
+@keyframes slideUpConsent{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.consent-logo{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;margin-bottom:12px;color:#1a1a1a;}
+.consent-logo span{color:#e85c0e;}
+.consent-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:8px;font-family:'Poppins',sans-serif;}
+.consent-text{font-size:13px;color:#6a6a8a;line-height:1.7;margin-bottom:20px;}
+.consent-text a{color:#e85c0e;text-decoration:none;font-weight:600;}
+.consent-text a:hover{text-decoration:underline;}
+.consent-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.consent-accept{background:#e85c0e;color:white;border:none;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.consent-accept:hover{background:#c44d0b;}
+.consent-refuse{background:transparent;color:#6a6a8a;border:1.5px solid #e1e3e5;padding:11px 22px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;}
+.consent-refuse:hover{border-color:#1a1a1a;color:#1a1a1a;}
+.consent-settings{background:transparent;color:#6a6a8a;border:none;padding:11px 16px;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;}
+@media(max-width:500px){.consent-box{padding:22px 20px;border-radius:16px 16px 0 0;}.consent-btns{flex-direction:column;}.consent-accept,.consent-refuse{width:100%;text-align:center;}}
+
 </style>
 </head>
 <body>
+
+<!-- ── CONSENT BANNER ── -->
+<div class="consent-overlay" id="consent-overlay">
+  <div class="consent-box">
+    <div class="consent-logo">Wazi<span>Bot</span></div>
+    <div class="consent-title">Nous respectons votre vie privée 🔒</div>
+    <p class="consent-text">
+      WaziBot utilise uniquement des données essentielles au fonctionnement du service (identifiant de session, préférences). 
+      Aucun cookie publicitaire, aucun tracker tiers. En continuant, vous acceptez notre 
+      <a href="/privacy" target="_blank">politique de confidentialité</a>.
+    </p>
+    <div class="consent-btns">
+      <button class="consent-accept" onclick="acceptConsent()">✓ Accepter et continuer</button>
+      <button class="consent-refuse" onclick="refuseConsent()">Refuser le non-essentiel</button>
+      <button class="consent-settings" onclick="window.open('/privacy','_blank')">En savoir plus</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- Bandeau annonce -->
 <div class="ann-banner" id="ann-banner" role="alert">
@@ -503,5 +542,33 @@ function closeBanner() {
 })();
 </script>
 
+<script>
+
+// ── CONSENT BANNER ────────────────────────────────────────────────────────────
+(function(){
+  var consent = localStorage.getItem('wz_consent');
+  if(consent) {
+    document.getElementById('consent-overlay').classList.add('hidden');
+  }
+})();
+
+function acceptConsent(){
+  localStorage.setItem('wz_consent', 'accepted');
+  localStorage.setItem('wz_consent_date', new Date().toISOString());
+  document.getElementById('consent-overlay').style.animation='none';
+  document.getElementById('consent-overlay').style.opacity='0';
+  document.getElementById('consent-overlay').style.transition='opacity .25s';
+  setTimeout(function(){document.getElementById('consent-overlay').classList.add('hidden');},250);
+}
+
+function refuseConsent(){
+  localStorage.setItem('wz_consent', 'refused');
+  localStorage.setItem('wz_consent_date', new Date().toISOString());
+  document.getElementById('consent-overlay').style.opacity='0';
+  document.getElementById('consent-overlay').style.transition='opacity .25s';
+  setTimeout(function(){document.getElementById('consent-overlay').classList.add('hidden');},250);
+}
+
+</script>
 </body>
 </html>
