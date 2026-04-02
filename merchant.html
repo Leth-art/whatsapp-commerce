@@ -2,6 +2,20 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#008060">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WaziBot">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png">
+<link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128.png">
+<meta name="msapplication-TileImage" content="/icons/icon-144.png">
+<meta name="msapplication-TileColor" content="#008060">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WaziBot — Dashboard Marchand</title>
@@ -239,58 +253,34 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
 .ann-txt.scroll{animation:scrollTxt 20s linear infinite;display:inline-block}
 @keyframes scrollTxt{0%{transform:translateX(80%)}100%{transform:translateX(-100%)}}
 .ann-x-btn{background:none;border:none;cursor:pointer;font-size:18px;opacity:.7;color:inherit}
+
+/* ── PWA INSTALL BANNER ── */
+.pwa-banner{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:white;border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 -4px 20px rgba(0,0,0,.1);transform:translateY(100%);transition:transform .3s ease;animation:none}
+.pwa-banner.show{transform:translateY(0)}
+.pwa-banner-icon{width:44px;height:44px;background:var(--accent-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.pwa-banner-text{flex:1}
+.pwa-banner-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.pwa-banner-sub{font-size:11px;color:var(--muted)}
+.pwa-banner-btns{display:flex;gap:8px;flex-shrink:0}
+.pwa-install-btn{background:var(--accent);color:white;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.pwa-dismiss-btn{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1}
+@media(max-width:500px){.pwa-banner{flex-wrap:wrap}.pwa-banner-btns{width:100%}.pwa-install-btn{flex:1;text-align:center}}
+
+/* ── OFFLINE INDICATOR ── */
+.offline-bar{position:fixed;top:0;left:0;right:0;z-index:2000;background:#374151;color:white;text-align:center;padding:8px;font-size:13px;font-weight:500;display:none}
+.offline-bar.show{display:block}
+
+/* ── UPDATE AVAILABLE ── */
+.update-bar{position:fixed;top:0;left:0;right:0;z-index:2000;background:var(--accent);color:white;display:none;align-items:center;justify-content:center;gap:12px;padding:10px 20px;font-size:13px;font-weight:600}
+.update-bar.show{display:flex}
+.update-btn{background:white;color:var(--accent);border:none;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+
 </style>
 </head>
 <body>
 
 <!-- Bandeau annonce (visible uniquement par le commerçant) -->
 <div class="ann-banner" id="ann-banner">
-  <div id="touchpoint-payment-section" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-  
-  <div style="flex: 1; min-width: 250px;">
-    <h3 style="margin: 0 0 8px 0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text);">
-      Renouveler via My Touchpoint
-    </h3>
-    <p style="margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5;">
-      Votre abonnement WaziBot nécessite un paiement. Copiez le numéro de transfert ci-dessous et effectuez votre paiement directement depuis votre application My Touchpoint.
-    </p>
-  </div>
-
-  <div style="background: var(--surface2); padding: 12px 20px; border-radius: 8px; border: 1px dashed var(--accent); display: flex; align-items: center; gap: 16px;">
-    <div>
-      <span style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px;">Numéro de transfert officiel</span>
-      <strong id="touchpoint-number" style="font-size: 20px; color: var(--text); letter-spacing: 1px;">+228 90 58 35 22</strong>
-    </div>
-    
-    <button onclick="copyTouchpointNumber(this)" style="background: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='var(--accent2)'" onmouseout="this.style.backgroundColor='var(--accent)'">
-      Copier
-    </button>
-  </div>
-
-</div>
-
-<script>
-function copyTouchpointNumber(btnElement) {
-  const number = document.getElementById('touchpoint-number').innerText;
-  
-  navigator.clipboard.writeText(number).then(() => {
-    // Changement visuel temporaire pour confirmer la copie
-    const originalText = btnElement.innerText;
-    const originalBg = btnElement.style.backgroundColor;
-    
-    btnElement.innerText = "Copié ! ✅";
-    btnElement.style.backgroundColor = "#008060"; // Vert de validation
-    
-    setTimeout(() => {
-      btnElement.innerText = originalText;
-      btnElement.style.backgroundColor = originalBg;
-    }, 3000);
-  }).catch(err => {
-    console.error('Erreur lors de la copie', err);
-    alert("Impossible de copier automatiquement. Veuillez sélectionner le numéro manuellement.");
-  });
-}
-</script>
   <span id="ann-icon">ℹ️</span>
   <span class="ann-txt" id="ann-txt"></span>
   <button class="ann-x-btn" onclick="closeMerchantBanner()">✕</button>
@@ -1293,5 +1283,148 @@ function closeMerchantBanner() {
 
 
 </script>
+
+<!-- PWA Install Banner -->
+<div class="offline-bar" id="offline-bar">📡 Pas de connexion — certaines fonctions indisponibles</div>
+<div class="update-bar" id="update-bar">
+  🚀 Une mise à jour est disponible !
+  <button class="update-btn" onclick="applyUpdate()">Mettre à jour</button>
+</div>
+
+<div class="pwa-banner" id="pwa-banner">
+  <div class="pwa-banner-icon">🏪</div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">Installer WaziBot</div>
+    <div class="pwa-banner-sub">Accès rapide depuis votre écran d'accueil</div>
+  </div>
+  <div class="pwa-banner-btns">
+    <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
+    <button class="pwa-dismiss-btn" onclick="dismissPWA()">✕</button>
+  </div>
+</div>
+
+
+<script>
+// ── SERVICE WORKER REGISTRATION ───────────────────────────────────────────────
+let swRegistration = null;
+let newWorker = null;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      swRegistration = await navigator.serviceWorker.register('/sw.js');
+      console.log('[PWA] Service Worker registered');
+
+      // Detect update available
+      swRegistration.addEventListener('updatefound', () => {
+        newWorker = swRegistration.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            document.getElementById('update-bar').classList.add('show');
+          }
+        });
+      });
+    } catch(err) {
+      console.log('[PWA] SW registration failed:', err);
+    }
+  });
+
+  // Reload when update applied
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+
+function applyUpdate() {
+  if (newWorker) {
+    newWorker.postMessage({ action: 'skipWaiting' });
+  }
+  document.getElementById('update-bar').classList.remove('show');
+}
+
+// ── INSTALL PROMPT ─────────────────────────────────────────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner only if not already installed and not dismissed before
+  const dismissed = localStorage.getItem('pwa_dismissed');
+  const installed = localStorage.getItem('pwa_installed');
+  if (!dismissed && !installed) {
+    setTimeout(() => {
+      document.getElementById('pwa-banner').classList.add('show');
+    }, 3000); // Show after 3 seconds
+  }
+});
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+  document.getElementById('pwa-banner').classList.remove('show');
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    localStorage.setItem('pwa_installed', '1');
+    toast('✅ WaziBot installé sur votre écran d\'accueil !', 'success');
+  }
+  deferredPrompt = null;
+}
+
+function dismissPWA() {
+  document.getElementById('pwa-banner').classList.remove('show');
+  localStorage.setItem('pwa_dismissed', '1');
+}
+
+// Hide banner if already installed (standalone mode)
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+  localStorage.setItem('pwa_installed', '1');
+  document.getElementById('pwa-banner').classList.remove('show');
+}
+
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('pwa_installed', '1');
+  document.getElementById('pwa-banner').classList.remove('show');
+  deferredPrompt = null;
+  toast('✅ Application installée !', 'success');
+});
+
+// ── OFFLINE DETECTION ─────────────────────────────────────────────────────────
+function updateOnlineStatus() {
+  const bar = document.getElementById('offline-bar');
+  if (!navigator.onLine) {
+    bar.classList.add('show');
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────────────────────────
+async function requestPushPermission() {
+  if (!('Notification' in window) || !swRegistration) return;
+  
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    console.log('[PWA] Push notifications granted');
+    toast('🔔 Notifications activées !', 'success');
+  }
+}
+
+// Ask for push permission after login
+const _origInit = window.initDashboard;
+if (typeof initDashboard !== 'undefined') {
+  const originalInit = initDashboard;
+  window.initDashboard = async function() {
+    await originalInit();
+    // Ask for push after 5s
+    setTimeout(requestPushPermission, 5000);
+  };
+}
+</script>
+
 </body>
 </html>

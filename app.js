@@ -81,7 +81,7 @@ connectDB().then(async () => {
   await initQueue().catch(() => {});
 
   startCronJobs();
-
+  
   // Restaure les sessions Baileys au démarrage
   try {
     const { restoreAllSessions } = require('./core/baileys');
@@ -92,6 +92,10 @@ connectDB().then(async () => {
   }
 });
 
+app.use(express.static(__dirname + '/public', { dotfiles: 'deny' }));
+// sw.js doit être à la racine, pas dans /public
+app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));
+app.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/manifest.json'));
 app.use((req, res, next) => {
   if ((req.originalUrl === "/webhook" || req.originalUrl === "/subscription/webhook") && req.method === "POST") return next();
   express.json()(req, res, next);
