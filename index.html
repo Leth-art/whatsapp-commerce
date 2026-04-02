@@ -190,6 +190,22 @@
 .consent-settings{background:transparent;color:#6a6a8a;border:none;padding:11px 16px;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;}
 @media(max-width:500px){.consent-box{padding:22px 20px;border-radius:16px 16px 0 0;}.consent-btns{flex-direction:column;}.consent-accept,.consent-refuse{width:100%;text-align:center;}}
 
+
+/* ── LOGIN MODAL (index) ── */
+.login-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.login-modal-ov.open{display:flex}
+.login-modal{background:#fff;border-radius:20px;width:100%;max-width:400px;padding:36px;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:lmIn .25s ease}
+@keyframes lmIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.lm-logo{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;text-align:center;margin-bottom:6px}
+.lm-logo span{color:#e85c0e}
+.lm-sub{text-align:center;font-size:13px;color:#6a6a8a;margin-bottom:24px}
+.lm-input{width:100%;border:1.5px solid #e1e3e5;border-radius:10px;padding:12px 16px;font-size:14px;font-family:inherit;color:#0a0a14;outline:none;text-align:center;margin-bottom:10px;transition:.15s}
+.lm-input:focus{border-color:#e85c0e}
+.lm-btn{width:100%;background:#e85c0e;color:white;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.lm-btn:hover{background:#c44d0b}
+.lm-err{color:#d82c0d;font-size:13px;text-align:center;margin-top:8px;display:none}
+.lm-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#6a6a8a;line-height:1}
+
 </style>
 </head>
 <body>
@@ -230,7 +246,7 @@
     <li><a href="#temoignages">Témoignages</a></li>
     <li><a href="/guide">Guide d'utilisation</a></li>
   </ul>
-  <a href="/signup" class="nav-cta">Essai gratuit 7 jours</a>
+  <a href="/merchant" class="nav-cta" style="background:transparent;color:var(--dark);border:1.5px solid var(--border);margin-right:8px;font-weight:600" onclick="openLoginModal(event)">Se connecter</a><a href="/signup" class="nav-cta">Essai gratuit 7 jours</a>
 </nav>
 
 <section class="hero">
@@ -570,5 +586,42 @@ function refuseConsent(){
 }
 
 </script>
+
+<!-- Login modal -->
+<div class="login-modal-ov" id="lm-overlay" onclick="if(event.target===this)closeLM()">
+  <div class="login-modal" style="position:relative">
+    <button class="lm-close" onclick="closeLM()">✕</button>
+    <div class="lm-logo">Wazi<span>Bot</span></div>
+    <div class="lm-sub">Entrez votre ID boutique pour accéder à votre dashboard</div>
+    <input class="lm-input" id="lm-input" type="text" placeholder="Votre ID boutique (UUID)" autocomplete="off">
+    <button class="lm-btn" onclick="doIndexLogin()">Accéder à mon dashboard →</button>
+    <div class="lm-err" id="lm-err">❌ ID introuvable. Vérifiez votre identifiant.</div>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#6a6a8a">
+      Pas encore inscrit ? <a href="/signup" style="color:#e85c0e;font-weight:600">Créer ma boutique →</a>
+    </div>
+  </div>
+</div>
+<script>
+function openLoginModal(e) {
+  e.preventDefault();
+  document.getElementById('lm-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('lm-input').focus(), 100);
+}
+function closeLM() { document.getElementById('lm-overlay').classList.remove('open'); }
+async function doIndexLogin() {
+  const id = document.getElementById('lm-input').value.trim();
+  const err = document.getElementById('lm-err');
+  err.style.display = 'none';
+  if (!id) return;
+  try {
+    const r = await fetch('/api/merchants/' + id, { headers: { 'Content-Type': 'application/json', 'x-api-key': 'wazibot-secret-key-2026' } });
+    if (!r.ok) { err.style.display = 'block'; return; }
+    window.location.href = '/merchant?id=' + encodeURIComponent(id);
+  } catch { err.style.display = 'block'; }
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLM(); });
+document.getElementById('lm-input') && document.getElementById('lm-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') doIndexLogin(); });
+</script>
+
 </body>
 </html>

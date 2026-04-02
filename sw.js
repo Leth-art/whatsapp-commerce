@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
   '/merchant.html',
   '/favicon.svg',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap',
+  
 ];
 
 // ─── INSTALL — mise en cache des assets statiques ─────────────────────────────

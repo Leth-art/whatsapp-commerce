@@ -293,7 +293,7 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
     <p>Connectez-vous avec votre<br>ID de boutique pour accéder à votre dashboard</p>
     <input type="text" id="login-input" placeholder="Votre ID boutique (UUID)" autocomplete="off">
     <button class="btn-login" onclick="doLogin()">Accéder à mon dashboard →</button>
-    <div class="login-error" id="login-error">ID introuvable. Vérifiez votre identifiant.</div>
+    <div class="login-error" id="login-error">❌ ID introuvable. Votre ID se trouve dans vos emails d'inscription ou dans Paramètres → Mon ID boutique.</div>
     <div style="margin-top:20px;font-size:12px;color:var(--muted);">
       Pas encore inscrit ? <a href="/signup" style="color:var(--accent);text-decoration:none;">Créer une boutique →</a>
     </div>
@@ -513,6 +513,14 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
               <button class="btn btn-ghost btn-sm" onclick="copySiteUrl()">📋 Copier le lien</button>
               <a id="site-open-btn" href="#" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">🔗 Ouvrir</a>
             </div>
+
+          <!-- Thème de la boutique -->
+          <div style="margin-top:20px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;font-weight:600">🎨 Thème de votre boutique</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px" id="theme-selector-grid"></div>
+            <button class="btn btn-ghost btn-sm" onclick="saveTheme()">Appliquer le thème</button>
+          </div>
+
           </div>
 
           <!-- Custom site section -->
@@ -1137,7 +1145,7 @@ function showPage(name) {
     document.querySelectorAll('.mobile-nav-item')[idx]?.classList.add('active');
   }
   if (name === 'stats') loadStats('weekly', document.querySelector('.period-btn'));
-  if (name === 'settings') { loadSiteInfo(); loadRenewalInfo(); }
+  if (name === 'settings') { loadSiteInfo(); loadRenewalInfo(); renderThemeSelector(); }
 }
 
 function logout() {
@@ -1242,6 +1250,58 @@ async function submitPaymentRequest() {
     btn.disabled = false; btn.textContent = '📤 Envoyer la demande de renouvellement';
   }
 }
+
+
+// ── THEME SELECTOR ────────────────────────────────────────────────────────────
+const THEMES_LIST = [
+  {key:'mode',     label:'👗 Mode',          color:'#BE185D'},
+  {key:'food',     label:'🍽️ Alimentation',  color:'#C2410C'},
+  {key:'beaute',   label:'💄 Beauté',         color:'#7C3AED'},
+  {key:'tech',     label:'📱 High-Tech',      color:'#1D4ED8'},
+  {key:'epicerie', label:'🛒 Épicerie',        color:'#15803D'},
+  {key:'artisanat',label:'🏺 Artisanat',       color:'#92400E'},
+  {key:'sante',    label:'💊 Santé',           color:'#0D9488'},
+  {key:'bijoux',   label:'💍 Bijoux',          color:'#B45309'},
+  {key:'sport',    label:'⚽ Sport',           color:'#1E40AF'},
+  {key:'maison',   label:'🏠 Maison',          color:'#4D7C0F'},
+  {key:'bebe',     label:'👶 Bébé',            color:'#DB2777'},
+  {key:'services', label:'🔧 Services',        color:'#374151'},
+  {key:'orange',   label:'🏪 Général',         color:'#EA580C'},
+];
+
+let selectedTheme = 'orange';
+
+function renderThemeSelector() {
+  const grid = document.getElementById('theme-selector-grid');
+  if (!grid) return;
+  const current = merchantData?.siteTheme || 'orange';
+  selectedTheme = current;
+  grid.innerHTML = THEMES_LIST.map(t => `
+    <div onclick="selectTheme('${t.key}')" id="theme-opt-${t.key}"
+      style="border:2px solid ${t.key===current?t.color:'var(--border)'};border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:.15s;background:${t.key===current?t.color+'18':'transparent'}">
+      <div style="font-size:11px;font-weight:700;color:${t.key===current?t.color:'var(--muted)'}">${t.label}</div>
+    </div>`).join('');
+}
+
+function selectTheme(key) {
+  selectedTheme = key;
+  renderThemeSelector();
+}
+
+async function saveTheme() {
+  if (!merchantData?.shopSlug) { toast('❌ Slug boutique introuvable', 'error'); return; }
+  try {
+    const r = await fetch(`/boutique/${merchantData.shopSlug}/theme`, {
+      method: 'PATCH', headers: H,
+      body: JSON.stringify({ theme: selectedTheme, merchantId })
+    });
+    if (r.ok) {
+      toast('✅ Thème appliqué !', 'success');
+      await loadMerchant();
+    } else toast('❌ Erreur', 'error');
+  } catch { toast('❌ Erreur connexion', 'error'); }
+}
+
 
 // ── Bandeau annonce (commerçant seulement) ───────────────────────────────────
 async function loadMerchantBanner() {
