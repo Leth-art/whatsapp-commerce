@@ -149,73 +149,164 @@ const generateBotReply = (message, merchant, products) => {
 };
 
 // ─── Thèmes visuels par secteur ───────────────────────────────────────────────
+// ─── Thèmes visuels par secteur ─────────────────────────────────────────────
 const THEMES = {
-  mode:      { primary:"#BE185D", dark:"#9D174D", light:"#FCE7F3", bg:"#fff", surface:"#fdf2f8", text:"#1a1a1a", muted:"#6b7280", label:"👗 Mode & Vêtements",
-    heroImg:"https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&q=80",
-    heroOverlay:"rgba(190,24,93,0.55)", font:"'Playfair Display',serif", bodyFont:"'DM Sans',sans-serif",
-    tagline:"Découvrez les dernières tendances", badge:"Mode & Vêtements", emoji:"👗",
-    feat:["✂️ Tailles disponibles","🚚 Livraison rapide","↩️ Retours faciles"] },
-  food:      { primary:"#C2410C", dark:"#9A3412", light:"#FFF7ED", bg:"#fffdf9", surface:"#fff7ed", text:"#1c1917", muted:"#78716c", label:"🍽️ Alimentation & Cuisine",
-    heroImg:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=80",
-    heroOverlay:"rgba(194,65,12,0.6)", font:"'Abril Fatface',cursive", bodyFont:"'Nunito',sans-serif",
+
+  // 👗 MODE — Rose élégant, Playfair Display
+  mode: {
+    primary:"#BE185D", dark:"#9D174D", light:"#FCE7F3",
+    bg:"#fff", surface:"#fdf2f8", text:"#1a1a1a", muted:"#6b7280",
+    label:"👗 Mode & Vêtements",
+    heroImg:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Playfair Display',serif", bodyFont:"'DM Sans',sans-serif",
+    tagline:"Découvrez les dernières tendances mode", badge:"Mode & Vêtements", emoji:"👗",
+    feat:["✂️ Tailles disponibles","🚚 Livraison rapide","↩️ Échanges faciles"],
+  },
+
+  // 🍽️ FOOD — Orange brûlé, Abril Fatface
+  food: {
+    primary:"#D97706", dark:"#B45309", light:"#FEF3C7",
+    bg:"#fffdf7", surface:"#fef9ee", text:"#1c1507", muted:"#78716c",
+    label:"🍽️ Alimentation & Restauration",
+    heroImg:"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Abril Fatface',cursive", bodyFont:"'Nunito',sans-serif",
     tagline:"Des saveurs authentiques livrées chez vous", badge:"Alimentation", emoji:"🍽️",
-    feat:["🌿 Produits frais","⚡ Livraison express","🏠 Commande à domicile"] },
-  beaute:    { primary:"#7C3AED", dark:"#6D28D9", light:"#EDE9FE", bg:"#fdfcff", surface:"#f5f3ff", text:"#1a1a2e", muted:"#6b7280", label:"💄 Beauté & Cosmétiques",
-    heroImg:"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=900&q=80",
-    heroOverlay:"rgba(124,58,237,0.55)", font:"'Cormorant Garamond',serif", bodyFont:"'Jost',sans-serif",
+    feat:["🌿 Produits frais du jour","⚡ Livraison express","🏠 Commande à domicile"],
+  },
+
+  // 💄 BEAUTÉ — Violet luxe, Cormorant Garamond
+  beaute: {
+    primary:"#7C3AED", dark:"#6D28D9", light:"#EDE9FE",
+    bg:"#fdfcff", surface:"#f5f3ff", text:"#1a1a2e", muted:"#6b7280",
+    label:"💄 Beauté & Cosmétiques",
+    heroImg:"https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Cormorant Garamond',serif", bodyFont:"'Jost',sans-serif",
     tagline:"Sublimez votre beauté naturelle", badge:"Beauté & Cosmétiques", emoji:"💄",
-    feat:["🌸 Produits naturels","✨ Conseils beauté","🎁 Coffrets cadeaux"] },
-  tech:      { primary:"#1D4ED8", dark:"#1E40AF", light:"#DBEAFE", bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b", label:"📱 High-Tech & Électronique",
-    heroImg:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&q=80",
-    heroOverlay:"rgba(29,78,216,0.65)", font:"'Space Grotesk',sans-serif", bodyFont:"'Inter',sans-serif",
+    feat:["🌸 Produits naturels","✨ Conseils beauté","🎁 Coffrets cadeaux"],
+  },
+
+  // 📱 TECH — Bleu moderne, Space Grotesk
+  tech: {
+    primary:"#2563EB", dark:"#1D4ED8", light:"#DBEAFE",
+    bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b",
+    label:"📱 High-Tech & Électronique",
+    heroImg:"https://images.unsplash.com/photo-1593640408182-31c228d54d3c?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Space Grotesk',sans-serif", bodyFont:"'Inter',sans-serif",
     tagline:"La technologie à portée de main", badge:"High-Tech", emoji:"📱",
-    feat:["🔧 Garantie incluse","📦 Livraison sécurisée","🛡️ Produits certifiés"] },
-  epicerie:  { primary:"#15803D", dark:"#166534", light:"#DCFCE7", bg:"#f9fff9", surface:"#f0fdf4", text:"#14532d", muted:"#6b7280", label:"🛒 Épicerie & Supermarché",
-    heroImg:"https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80",
-    heroOverlay:"rgba(21,128,61,0.55)", font:"'Poppins',sans-serif", bodyFont:"'Poppins',sans-serif",
+    feat:["🔧 Garantie incluse","📦 Livraison sécurisée","🛡️ Produits certifiés"],
+  },
+
+  // 🛒 ÉPICERIE — Vert forêt, Poppins
+  epicerie: {
+    primary:"#15803D", dark:"#166534", light:"#DCFCE7",
+    bg:"#f9fff9", surface:"#f0fdf4", text:"#14532d", muted:"#6b7280",
+    label:"🛒 Épicerie & Supermarché",
+    heroImg:"https://images.unsplash.com/photo-1579113800032-c38bd7635818?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Poppins',sans-serif", bodyFont:"'Poppins',sans-serif",
     tagline:"Votre épicerie du quartier en ligne", badge:"Épicerie", emoji:"🛒",
-    feat:["🥦 Produits frais","🚚 Livraison quotidienne","💰 Prix imbattables"] },
-  artisanat: { primary:"#92400E", dark:"#78350F", light:"#FEF3C7", bg:"#fffdf7", surface:"#fefce8", text:"#1c1507", muted:"#78716c", label:"🏺 Artisanat & Décoration",
-    heroImg:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&q=80",
-    heroOverlay:"rgba(146,64,14,0.6)", font:"'Libre Baskerville',serif", bodyFont:"'Source Sans Pro',sans-serif",
+    feat:["🥦 Produits frais","🚚 Livraison quotidienne","💰 Prix imbattables"],
+  },
+
+  // 🏺 ARTISANAT — Marron terre, Libre Baskerville
+  artisanat: {
+    primary:"#92400E", dark:"#78350F", light:"#FEF3C7",
+    bg:"#fffdf7", surface:"#fefce8", text:"#1c1507", muted:"#78716c",
+    label:"🏺 Artisanat & Décoration",
+    heroImg:"https://images.unsplash.com/photo-1489659639091-8b687bc4386e?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Libre Baskerville',serif", bodyFont:"'Source Sans Pro',sans-serif",
     tagline:"L'art et le savoir-faire africain", badge:"Artisanat & Déco", emoji:"🏺",
-    feat:["🤝 Fait main","🌍 Artisans locaux","🎁 Pièces uniques"] },
-  sante:     { primary:"#0D9488", dark:"#0F766E", light:"#CCFBF1", bg:"#f9fffd", surface:"#f0fdfa", text:"#0f3d38", muted:"#6b7280", label:"💊 Santé & Pharmacie",
-    heroImg:"https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=80",
-    heroOverlay:"rgba(13,148,136,0.6)", font:"'Nunito',sans-serif", bodyFont:"'Nunito',sans-serif",
+    feat:["🤝 Fait main","🌍 Artisans locaux","🎁 Pièces uniques"],
+  },
+
+  // 💊 SANTÉ — Teal médical, Nunito
+  sante: {
+    primary:"#0D9488", dark:"#0F766E", light:"#CCFBF1",
+    bg:"#f9fffd", surface:"#f0fdfa", text:"#0f3d38", muted:"#6b7280",
+    label:"💊 Santé & Pharmacie",
+    heroImg:"https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Nunito',sans-serif", bodyFont:"'Nunito',sans-serif",
     tagline:"Votre santé, notre priorité", badge:"Santé & Pharmacie", emoji:"💊",
-    feat:["✅ Produits certifiés","🚚 Livraison urgente","👨‍⚕️ Conseils santé"] },
-  bijoux:    { primary:"#B45309", dark:"#92400E", light:"#FEF9C3", bg:"#fffef0", surface:"#fefce8", text:"#1c1507", muted:"#78716c", label:"💍 Bijoux & Accessoires",
-    heroImg:"https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=900&q=80",
-    heroOverlay:"rgba(180,83,9,0.5)", font:"'Cormorant Garamond',serif", bodyFont:"'Lato',sans-serif",
+    feat:["✅ Produits certifiés","🚚 Livraison urgente","👨‍⚕️ Conseils santé"],
+  },
+
+  // 💍 BIJOUX — Or prestige, Cormorant Garamond
+  bijoux: {
+    primary:"#B45309", dark:"#92400E", light:"#FEF9C3",
+    bg:"#fffef5", surface:"#fefce8", text:"#1c1507", muted:"#78716c",
+    label:"💍 Bijoux & Accessoires",
+    heroImg:"https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Cormorant Garamond',serif", bodyFont:"'Lato',sans-serif",
     tagline:"Des bijoux d'exception pour chaque occasion", badge:"Bijoux & Accessoires", emoji:"💍",
-    feat:["💎 Or & argent","📦 Coffret cadeau","🔐 Authenticité garantie"] },
-  sport:     { primary:"#1E40AF", dark:"#1E3A8A", light:"#DBEAFE", bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b", label:"⚽ Sport & Fitness",
-    heroImg:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&q=80",
-    heroOverlay:"rgba(30,64,175,0.65)", font:"'Barlow Condensed',sans-serif", bodyFont:"'Barlow',sans-serif",
+    feat:["💎 Or & argent","📦 Coffret cadeau","🔐 Authenticité garantie"],
+  },
+
+  // ⚽ SPORT — Bleu dynamique, Barlow Condensed
+  sport: {
+    primary:"#1E40AF", dark:"#1E3A8A", light:"#DBEAFE",
+    bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b",
+    label:"⚽ Sport & Fitness",
+    heroImg:"https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Barlow Condensed',sans-serif", bodyFont:"'Barlow',sans-serif",
     tagline:"Équipez-vous pour la performance", badge:"Sport & Fitness", emoji:"⚽",
-    feat:["🏆 Équipement pro","🚚 Livraison rapide","🔄 Échanges faciles"] },
-  maison:    { primary:"#4D7C0F", dark:"#3F6212", light:"#ECFCCB", bg:"#fafff5", surface:"#f7ffe8", text:"#1a2e05", muted:"#6b7280", label:"🏠 Maison & Mobilier",
-    heroImg:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&q=80",
-    heroOverlay:"rgba(77,124,15,0.55)", font:"'Raleway',sans-serif", bodyFont:"'Raleway',sans-serif",
+    feat:["🏆 Équipement pro","🚚 Livraison rapide","🔄 Échanges faciles"],
+  },
+
+  // 🏠 MAISON — Vert olive, Raleway
+  maison: {
+    primary:"#4D7C0F", dark:"#3F6212", light:"#ECFCCB",
+    bg:"#fafff5", surface:"#f7ffe8", text:"#1a2e05", muted:"#6b7280",
+    label:"🏠 Maison & Mobilier",
+    heroImg:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Raleway',sans-serif", bodyFont:"'Raleway',sans-serif",
     tagline:"Créez l'intérieur de vos rêves", badge:"Maison & Mobilier", emoji:"🏠",
-    feat:["🏡 Livraison à domicile","🔨 Installation possible","✨ Design exclusif"] },
-  bebe:      { primary:"#DB2777", dark:"#BE185D", light:"#FCE7F3", bg:"#fff9fc", surface:"#fdf2f8", text:"#1a1a1a", muted:"#9ca3af", label:"👶 Bébé & Enfants",
-    heroImg:"https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=900&q=80",
-    heroOverlay:"rgba(219,39,119,0.45)", font:"'Nunito',sans-serif", bodyFont:"'Nunito',sans-serif",
+    feat:["🏡 Livraison à domicile","🔨 Installation possible","✨ Design exclusif"],
+  },
+
+  // 👶 BÉBÉ — Rose doux, Nunito
+  bebe: {
+    primary:"#DB2777", dark:"#BE185D", light:"#FCE7F3",
+    bg:"#fff9fc", surface:"#fdf2f8", text:"#1a1a1a", muted:"#9ca3af",
+    label:"👶 Bébé & Enfants",
+    heroImg:"https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Nunito',sans-serif", bodyFont:"'Nunito',sans-serif",
     tagline:"Tout pour le bonheur de vos enfants", badge:"Bébé & Enfants", emoji:"👶",
-    feat:["🌸 Produits doux & sûrs","🚚 Livraison soignée","✅ Certifiés enfants"] },
-  services:  { primary:"#374151", dark:"#1F2937", light:"#F3F4F6", bg:"#f9fafb", surface:"#f3f4f6", text:"#111827", muted:"#6b7280", label:"🔧 Services & Professionnels",
-    heroImg:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&q=80",
-    heroOverlay:"rgba(55,65,81,0.7)", font:"'IBM Plex Sans',sans-serif", bodyFont:"'IBM Plex Sans',sans-serif",
+    feat:["🌸 Produits doux & sûrs","🚚 Livraison soignée","✅ Certifiés enfants"],
+  },
+
+  // 🎓 ÉDUCATION — Bleu académique, IBM Plex Sans
+  education: {
+    primary:"#1D4ED8", dark:"#1E40AF", light:"#DBEAFE",
+    bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b",
+    label:"🎓 Éducation & Formation",
+    heroImg:"https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'IBM Plex Sans',sans-serif", bodyFont:"'IBM Plex Sans',sans-serif",
+    tagline:"Investissez dans l'avenir de vos apprenants", badge:"Éducation", emoji:"🎓",
+    feat:["📚 Ressources complètes","🎯 Suivi personnalisé","🏆 Certifications"],
+  },
+
+  // 🔧 SERVICES — Gris pro, IBM Plex Sans
+  services: {
+    primary:"#374151", dark:"#1F2937", light:"#F3F4F6",
+    bg:"#f9fafb", surface:"#f3f4f6", text:"#111827", muted:"#6b7280",
+    label:"🔧 Services & Professionnels",
+    heroImg:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'IBM Plex Sans',sans-serif", bodyFont:"'IBM Plex Sans',sans-serif",
     tagline:"Des services professionnels de qualité", badge:"Services", emoji:"🔧",
-    feat:["⭐ Professionnels certifiés","📞 Support disponible","✅ Satisfaction garantie"] },
-  orange:    { primary:"#EA580C", dark:"#C2410C", light:"#FEF0E6", bg:"#fff", surface:"#f9f9f9", text:"#1a1a1a", muted:"#6b7280", label:"🏪 Boutique Générale",
-    heroImg:"https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=900&q=80",
-    heroOverlay:"rgba(234,88,12,0.55)", font:"'Plus Jakarta Sans',sans-serif", bodyFont:"'Plus Jakarta Sans',sans-serif",
+    feat:["⭐ Pros certifiés","📞 Support disponible","✅ Satisfaction garantie"],
+  },
+
+  // 🏪 GÉNÉRAL — Orange WaziBot
+  orange: {
+    primary:"#E85C0E", dark:"#C44D0B", light:"#FEF0E8",
+    bg:"#fff", surface:"#f9f9f9", text:"#1a1a1a", muted:"#6b7280",
+    label:"🏪 Boutique Générale",
+    heroImg:"https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=85&fit=crop",
+    heroOverlay:"rgba(0,0,0,0)", font:"'Plus Jakarta Sans',sans-serif", bodyFont:"'Plus Jakarta Sans',sans-serif",
     tagline:"Tout ce dont vous avez besoin", badge:"Boutique", emoji:"🛍️",
-    feat:["🚚 Livraison disponible","📱 Paiement Mobile Money","✅ Qualité garantie"] },
+    feat:["🚚 Livraison disponible","📱 Paiement Mobile Money","✅ Qualité garantie"],
+  },
 };
+
 
 const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   const shopName = merchant.shopName || merchant.name;
@@ -653,7 +744,7 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   html += "function closeCO(){document.getElementById('co-ov').classList.remove('open');}\n";
   html += "async function submitOrder(){var name=document.getElementById('co-name').value.trim(),ph=document.getElementById('co-ph').value.trim(),addr=document.getElementById('co-addr').value.trim(),pay=document.getElementById('co-pay').value;if(!name||!ph||!addr){alert('Remplissez tous les champs obligatoires (*)');return;}var btn=document.getElementById('co-btn');btn.disabled=true;btn.textContent='⏳ Envoi...';var items=Object.entries(cart).map(function(e){return{productId:e[0],quantity:e[1].qty};});try{var r=await fetch('/boutique/'+SLUG+'/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customerName:name,customerPhone:ph,address:addr,items:items,paymentMethod:pay})});var d=await r.json();if(d.success){cart={};updateCartUI();document.getElementById('co-body').innerHTML='<div class=\"co-ok-box\"><div class=\"co-ok\">🎉</div><h4>Commande confirmée !</h4><div class=\"co-num\">N° '+d.orderNumber+'</div><p>Le commerçant vous contactera bientôt.<br>Merci de votre confiance !</p><button onclick=\"closeCO()\" style=\"margin-top:18px;background:var(--p);color:white;border:none;padding:11px 26px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit\">Fermer</button></div>';}else{btn.disabled=false;btn.textContent='Confirmer la commande';alert(d.error||'Erreur');}}catch(e){btn.disabled=false;btn.textContent='Confirmer la commande';alert('Erreur de connexion.');}}\n";
   html += "function filterCat(cat,btn){document.querySelectorAll('.ftab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');document.querySelectorAll('.product-card').forEach(function(c){c.style.display=(cat==='all'||c.getAttribute('data-cat')===cat)?'':'none';});}\n";
-  html += "function changeTheme(t){document.querySelectorAll('.tdot').forEach(function(d){d.classList.remove('active');});event.target.classList.add('active');document.getElementById('tpan').classList.remove('open');var labels={'mode':'👗 Mode','food':'🍽️ Alimentation','beaute':'💄 Beauté','tech':'📱 High-Tech','epicerie':'🛒 Épicerie','artisanat':'🏺 Artisanat','sante':'💊 Santé','bijoux':'💍 Bijoux','sport':'⚽ Sport','maison':'🏠 Maison','bebe':'👶 Bébé','services':'🔧 Services','orange':'🏪 Général'};var lbl=document.getElementById('theme-lbl');if(lbl)lbl.textContent=labels[t]||t;fetch('/boutique/'+SLUG+'/theme',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:t,merchantId:MID})}).then(function(){location.reload();}).catch(function(){});}\n";
+  html += "function changeTheme(t){document.querySelectorAll('.tdot').forEach(function(d){d.classList.remove('active');});event.target.classList.add('active');document.getElementById('tpan').classList.remove('open');var labels={'mode':'👗 Mode','food':'🍽️ Alimentation','beaute':'💄 Beauté','tech':'📱 High-Tech','epicerie':'🛒 Épicerie','artisanat':'🏺 Artisanat','sante':'💊 Santé','bijoux':'💍 Bijoux','sport':'⚽ Sport','maison':'🏠 Maison','bebe':'👶 Bébé','services':'🔧 Services','education':'🎓 Éducation','orange':'🏪 Général'};var lbl=document.getElementById('theme-lbl');if(lbl)lbl.textContent=labels[t]||t;fetch('/boutique/'+SLUG+'/theme',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:t,merchantId:MID})}).then(function(){location.reload();}).catch(function(){});}\n";
   html += "(function(){fetch('/api/announcements/active').then(function(r){if(!r.ok)return null;return r.json();}).then(function(ann){if(!ann)return;if(sessionStorage.getItem('ann_'+ann.id))return;var C={info:{bg:'#1e3a5f',c:'#93c5fd',i:'ℹ️'},update:{bg:'#064e3b',c:'#6ee7b7',i:'🚀'},promo:{bg:'#78350f',c:'#fcd34d',i:'🎁'},warning:{bg:'#7f1d1d',c:'#fca5a5',i:'⚠️'}};var col=C[ann.type]||C.info;var b=document.getElementById('ann-banner');b.style.background=col.bg;b.style.color=col.c;document.getElementById('ann-ic').textContent=col.i;var te=document.getElementById('ann-txt'),txt=ann.title+' — '+ann.message;te.textContent=txt;if(txt.length>80)te.classList.add('scroll');b.dataset.annId=ann.id;b.classList.add('show');document.body.style.paddingTop=(b.offsetHeight+4)+'px';}).catch(function(){});})();\n";
   html += "function closeBanner(){var b=document.getElementById('ann-banner');if(!b)return;b.style.display='none';document.body.style.paddingTop='';try{if(b.dataset.annId)sessionStorage.setItem('ann_'+b.dataset.annId,'1');}catch(e){}}\n";
   html += "var chatO=false,chatS=false;\n";

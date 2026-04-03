@@ -77,6 +77,40 @@
   .spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg)}}
   @media(max-width:768px){nav{padding:16px 24px;}.container{grid-template-columns:1fr;gap:40px;padding:32px 16px;}.left{display:none;}}
+
+/* ── PLAN SELECTION ── */
+.plan-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.plan-card {
+  border: 2px solid var(--border); border-radius: 14px; padding: 18px 20px;
+  cursor: pointer; transition: all .2s; position: relative; background: white;
+}
+.plan-card:hover { border-color: var(--accent); }
+.plan-card.selected { border-color: var(--accent); background: rgba(232,92,14,.04); }
+.plan-card.popular { border-color: var(--accent); }
+.plan-popular-badge {
+  position: absolute; top: -10px; left: 20px;
+  background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+  padding: 3px 12px; border-radius: 20px; letter-spacing: .5px; text-transform: uppercase;
+}
+.plan-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.plan-name { font-size: 16px; font-weight: 700; color: var(--text); font-family: 'Poppins', sans-serif; }
+.plan-price { font-size: 20px; font-weight: 800; color: var(--accent); font-family: 'Poppins', sans-serif; }
+.plan-price span { font-size: 12px; font-weight: 400; color: var(--muted); }
+.plan-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.plan-features { display: flex; flex-wrap: wrap; gap: 6px; }
+.plan-feat { font-size: 11px; color: var(--text); background: var(--surface); padding: 3px 10px; border-radius: 20px; }
+.plan-select-dot {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.plan-card.selected .plan-select-dot { background: var(--accent); border-color: var(--accent); }
+.plan-card.selected .plan-select-dot::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+.trial-note {
+  background: rgba(0,128,96,.06); border: 1px solid rgba(0,128,96,.2);
+  border-radius: 10px; padding: 12px 16px; text-align: center;
+  font-size: 13px; color: #008060; font-weight: 500; margin-bottom: 16px;
+}
+
 </style>
 </head>
 <body>
@@ -99,11 +133,12 @@
   <div class="form-card">
     <div id="form-content">
       <h2>Créer votre boutique</h2>
-      <p class="subtitle">Étape <span id="step-num">1</span> sur 3 — Complétez en moins de 5 minutes</p>
+      <p class="subtitle">Étape <span id="step-num">1</span> sur 4 — Complétez en moins de 5 minutes</p>
       <div class="steps">
         <div class="step active" id="step-1">📋 Infos</div>
         <div class="step" id="step-2">🏪 Commerce</div>
         <div class="step" id="step-3">🛍️ Produits</div>
+        <div class="step" id="step-4">💳 Forfait</div>
       </div>
       <div class="form-page active" id="page-1">
         <div class="form-group"><label>Nom de votre boutique *</label><input type="text" id="f-name" placeholder="Ex: Boutique Ama, Chez Koffi Mode..." maxlength="60"></div>
@@ -177,10 +212,89 @@
         <button class="add-product" onclick="addProduct()">+ Ajouter un produit</button>
         <p class="error-msg" id="err-3">Ajoutez au moins un produit avec nom et prix.</p>
         <div class="loading" id="loading"><div class="spinner"></div><span style="color:var(--muted);font-size:14px;">Création de votre boutique...</span></div>
-        <button class="btn-next" onclick="submitForm()" id="btn-submit">🚀 Créer ma boutique gratuite</button>
+        <button class="btn-next" onclick="goStep(4)" id="btn-to-plan">Choisir mon forfait →</button>
         <button class="btn-back" onclick="goStep(2)">← Retour</button>
       </div>
     </div>
+
+      <!-- PAGE 4: Plan selection -->
+      <div class="form-page" id="page-4">
+        <div class="trial-note">
+          🎁 <strong>7 jours gratuits</strong> — Accès complet à toutes les fonctionnalités, sans carte bancaire. Vous choisissez votre forfait maintenant, le paiement commence après l'essai.
+        </div>
+
+        <label style="display:block;margin-bottom:14px;font-weight:600;font-size:14px;">Choisissez votre forfait</label>
+
+        <div class="plan-cards">
+
+          <div class="plan-card" id="plan-starter" onclick="selectPlan('starter',this)">
+            <div class="plan-card-header">
+              <div>
+                <div class="plan-name">Starter</div>
+                <div class="plan-desc">Idéal pour démarrer</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="plan-price">35 000 <span>XOF/mois</span></div>
+                <div class="plan-select-dot" id="dot-starter"></div>
+              </div>
+            </div>
+            <div class="plan-features">
+              <span class="plan-feat">✓ 15 produits</span>
+              <span class="plan-feat">✓ 250 messages IA/mois</span>
+              <span class="plan-feat">✓ Bot sur votre site</span>
+              <span class="plan-feat">✓ Commandes web</span>
+              <span class="plan-feat">✓ Dashboard</span>
+            </div>
+          </div>
+
+          <div class="plan-card popular" id="plan-pro" onclick="selectPlan('pro',this)">
+            <div class="plan-popular-badge">⭐ Plus populaire</div>
+            <div class="plan-card-header">
+              <div>
+                <div class="plan-name">Pro</div>
+                <div class="plan-desc">Pour les boutiques actives</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="plan-price">55 000 <span>XOF/mois</span></div>
+                <div class="plan-select-dot" id="dot-pro"></div>
+              </div>
+            </div>
+            <div class="plan-features">
+              <span class="plan-feat">✓ 50 produits</span>
+              <span class="plan-feat">✓ 1 000 messages IA/mois</span>
+              <span class="plan-feat">✓ Relances automatiques</span>
+              <span class="plan-feat">✓ Rapport hebdomadaire</span>
+              <span class="plan-feat">✓ Support prioritaire</span>
+            </div>
+          </div>
+
+          <div class="plan-card" id="plan-business" onclick="selectPlan('business',this)">
+            <div class="plan-card-header">
+              <div>
+                <div class="plan-name">Business</div>
+                <div class="plan-desc">Fort volume, tout illimité</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="plan-price">115 000 <span>XOF/mois</span></div>
+                <div class="plan-select-dot" id="dot-business"></div>
+              </div>
+            </div>
+            <div class="plan-features">
+              <span class="plan-feat">✓ Produits illimités</span>
+              <span class="plan-feat">✓ Messages illimités</span>
+              <span class="plan-feat">✓ Toutes les fonctionnalités Pro</span>
+              <span class="plan-feat">✓ Support dédié</span>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="error-msg" id="err-4">Veuillez choisir un forfait pour continuer.</p>
+        <div class="loading" id="loading-4"><div class="spinner"></div><span style="color:var(--muted);font-size:14px;">Création de votre boutique...</span></div>
+        <button class="btn-next" onclick="submitFormFinal()" id="btn-submit">🚀 Démarrer mon essai gratuit</button>
+        <button class="btn-back" onclick="goStep(3)">← Retour</button>
+      </div>
+
     <div class="success-screen" id="success">
       <div class="success-icon">🎉</div>
       <h3>Votre boutique est prête !</h3>
@@ -241,6 +355,17 @@ function goStep(step) {
   if (step === 3 && currentStep === 2) {
     if (!selectedCommerce) { document.getElementById('err-2').classList.add('show'); return; }
     document.getElementById('err-2').classList.remove('show');
+  }
+  if (step === 4 && currentStep === 3) {
+    const products = document.querySelectorAll('.product-item');
+    let hasProduct = false;
+    products.forEach(function(item) {
+      const name = item.querySelector('.product-name').value.trim();
+      const price = item.querySelector('.product-price').value;
+      if (name && price) hasProduct = true;
+    });
+    if (!hasProduct) { document.getElementById('err-3').classList.add('show'); return; }
+    document.getElementById('err-3').classList.remove('show');
   }
   document.querySelectorAll('.form-page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + step).classList.add('active');
@@ -331,7 +456,8 @@ function copyId() {
   });
 }
 
-async function submitForm() {
+async function submitForm(plan) {
+  plan = plan || selectedPlan || 'starter';
   const products = [];
   document.querySelectorAll('.product-item').forEach(item => {
     const name = item.querySelector('.product-name').value.trim();
@@ -345,6 +471,7 @@ async function submitForm() {
 
   const payload = {
     name: document.getElementById('f-name').value.trim(),
+    plan: plan || selectedPlan || 'starter',
     email: document.getElementById('f-email').value.trim(),
     city: document.getElementById('f-city').value.trim(),
     currency: window.selectedCurrency || 'USD',
@@ -453,6 +580,34 @@ function openInApp() {
     window.location.href = 'https://play.google.com/store/apps/details?id=com.wazibot.merchant';
   }, 2000);
 }
+
+// ── PLAN SELECTION JS ────────────────────────────────────────────────────────
+let selectedPlan = 'starter';
+function selectPlan(plan, el) {
+  selectedPlan = plan;
+  ['starter','pro','business'].forEach(function(p) {
+    const card = document.getElementById('plan-' + p);
+    const dot = document.getElementById('dot-' + p);
+    if (card) card.classList.remove('selected');
+    if (dot) { dot.style.background = ''; dot.style.borderColor = ''; }
+  });
+  if (el) el.classList.add('selected');
+  const dot = document.getElementById('dot-' + plan);
+  if (dot) { dot.style.background = 'var(--accent)'; dot.style.borderColor = 'var(--accent)'; }
+}
+async function submitFormFinal() {
+  if (!selectedPlan) { document.getElementById('err-4').style.display='block'; return; }
+  document.getElementById('err-4').style.display='none';
+  const loading4 = document.getElementById('loading-4');
+  const btnSubmit = document.getElementById('btn-submit');
+  if (loading4) loading4.style.display='flex';
+  if (btnSubmit) btnSubmit.style.display='none';
+  await submitForm(selectedPlan);
+}
+window.addEventListener('DOMContentLoaded', function() {
+  const starterCard = document.getElementById('plan-starter');
+  if (starterCard) selectPlan('starter', starterCard);
+});
 </script>
 </body>
 </html>
