@@ -298,7 +298,7 @@
     <div class="success-screen" id="success">
       <div class="success-icon">🎉</div>
       <h3>Votre boutique est prête !</h3>
-      <p>Votre assistant WhatsApp est configuré et opérationnel. Vous avez <strong>7 jours gratuits</strong> pour tester.</p>
+      <p>Votre boutique est configurée et opérationnelle. Vous avez <strong>7 jours gratuits</strong> pour tester.</p>
       <div class="success-info" id="success-info"></div>
 
       <!-- ID boutique mis en évidence -->
@@ -518,6 +518,14 @@ async function submitForm(plan) {
       // Afficher l'ID boutique
       document.getElementById('merchant-id-display').textContent = merchantId;
 
+      // Stocker l'ID et rediriger
+      localStorage.setItem('wz_merchant_id', merchantId);
+      const dashBtn = document.getElementById('btn-go-dashboard');
+      if (dashBtn) {
+        dashBtn.style.display = 'block';
+        dashBtn.onclick = function(){ window.location.href = '/merchant?id=' + encodeURIComponent(merchantId); };
+      }
+      setTimeout(function(){ window.location.href = '/merchant?id=' + encodeURIComponent(merchantId); }, 3000);
       // ── Deep Link vers l'app ──
       tryOpenApp(merchantId);
 
@@ -577,7 +585,7 @@ function openInApp() {
   window.location.href = 'wazibot://login?id=' + merchantId;
   // Fallback Play Store après 2s si l'app n'est pas installée
   setTimeout(() => {
-    window.location.href = 'https://play.google.com/store/apps/details?id=com.wazibot.merchant';
+    // window.location.href = 'https://play.google.com/store/apps/details?id=com.wazibot.merchant';
   }, 2000);
 }
 

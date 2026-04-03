@@ -702,8 +702,8 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   html += "<script>\n";
   html += "var SLUG='"+slug+"';var MID='"+mid+"';var CUR='"+currency+"';\n";
   html += "var cart={};\n";
-  html += "function addCartFromCard(b){addToCart(b.getAttribute('data-id'),b.getAttribute('data-name'),parseFloat(b.getAttribute('data-price')),b.getAttribute('data-img'));}\n";
-  html += "function addToCart(id,name,price,img){var isNew=!cart[id];if(cart[id])cart[id].qty++;else cart[id]={name:name,price:price,qty:1,img:img||''};updateCartUI();showAddedToast(name);if(!cOpen)openCart();if(isNew)fetch('/boutique/'+SLUG+'/notify-cart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productName:name,productPrice:price,currency:CUR})}).catch(function(){});}\\n";
+  html += "function addCartFromCard(b){var n=b.getAttribute('data-name'),p=parseFloat(b.getAttribute('data-price'));addToCart(b.getAttribute('data-id'),n,p,b.getAttribute('data-img'));fetch('/boutique/'+SLUG+'/notify-cart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productName:n,productPrice:p,currency:CUR})}).catch(function(){});}\n";
+  html += "function addToCart(id,name,price,img){if(cart[id])cart[id].qty++;else cart[id]={name:name,price:price,qty:1,img:img||''};updateCartUI();showAddedToast(name);if(!cOpen)openCart();}\n";
   html += "function updateCartUI(){\n";
   html += "  var tot=Object.values(cart).reduce(function(s,i){return s+i.qty;},0);\n";
   html += "  var amt=Object.values(cart).reduce(function(s,i){return s+i.price*i.qty;},0);\n";

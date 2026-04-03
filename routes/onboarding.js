@@ -21,15 +21,11 @@ router.get("/templates", (req, res) => {
 
 router.post("/create", async (req, res) => {
   try {
-    const { name, email, city, type, currency, products, ownerPhone } = req.body;
+    const { name, email, city, type, currency, products, ownerPhone, plan } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: "Nom obligatoire." });
     }
-    // Sanitisation des entrées
-    const safeName = name.replace(/<[^>]*>/g, '').trim().slice(0, 100);
-    const safeEmail = email ? email.replace(/<[^>]*>/g, '').trim().slice(0, 200) : '';
-    const safeCity = city ? city.replace(/<[^>]*>/g, '').trim().slice(0, 100) : '';
 
     // Vérifier double inscription par téléphone OU email
     let existing = null;
@@ -46,7 +42,7 @@ router.post("/create", async (req, res) => {
         error: "already_exists",
         message: "Un compte existe déjà avec ce numéro ou cet email.",
         merchantId: existing.id,
-        dashboardUrl: `${process.env.APP_BASE_URL || 'https://chatbot-saas-lcsl.onrender.com'}/merchant?id=${existing.id}`
+        dashboardUrl: `${process.env.APP_BASE_URL || ''}/dashboard?id=${existing.id}`
       });
     }
 
@@ -55,19 +51,24 @@ router.post("/create", async (req, res) => {
     // Créer la nouvelle boutique
     const merchant = await Merchant.create({
       id: uuidv4(),
-      name: safeName,
-      email: safeEmail,
-      city: safeCity,
+      name,
+      email: email || "",
+      city: city || "",
       country: "",
       currency: currency || "XOF",
       phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
       whatsappToken: process.env.WHATSAPP_TOKEN || "",
       ownerPhone: ownerPhone || "",
       shopSlug: generateSlug(name) + "-" + uuidv4().slice(0, 6),
-      siteTheme: "orange",
+      siteTheme: ({
+        mode:"mode",food:"food",beaute:"beaute",tech:"tech",
+        epicerie:"epicerie",artisanat:"artisanat",sante:"sante",
+        bijoux:"bijoux",sport:"sport",maison:"maison",bebe:"bebe",
+        education:"education",services:"services"
+      })[type] || "orange",
       siteActive: true,
       isActive: true,
-      plan: "starter",
+      plan: (["starter","pro","business"].includes(plan) ? plan : "starter"),
       subscriptionExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       ...templateConfig,
     });
@@ -97,7 +98,7 @@ router.post("/create", async (req, res) => {
       type: type || "general",
       productsCreated,
       trialEndsAt: merchant.subscriptionExpiresAt,
-      siteUrl: `${process.env.APP_BASE_URL || "https://chatbot-saas-lcsl.onrender.com"}/boutique/${merchant.shopSlug}`,
+      siteUrl: `${process.env.APP_BASE_URL || process.env.APP_BASE_URL || ""}/boutique/${merchant.shopSlug}`,
       message: `Boutique "${name}" créée avec ${productsCreated} produits. Essai gratuit de 7 jours activé !`,
     });
 

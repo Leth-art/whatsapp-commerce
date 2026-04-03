@@ -723,9 +723,18 @@ async function doLogin() {
   if (!id) return;
   const err = document.getElementById('login-error');
   err.style.display = 'none';
+  // Validate UUID format first
+  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRe.test(id)) {
+    err.textContent = "❌ Format invalide. Votre ID ressemble à : xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+    err.style.display = 'block'; return;
+  }
   try {
     const r = await fetch(`${BASE}/api/merchants/${id}`, { headers: H });
-    if (!r.ok) { err.style.display = 'block'; return; }
+    if (!r.ok) {
+      err.textContent = "❌ ID introuvable. Vérifiez votre email d'inscription pour votre ID boutique.";
+      err.style.display = 'block'; return;
+    }
     merchantId = id;
     localStorage.setItem('wz_merchant_id', id);
     await initDashboard();
