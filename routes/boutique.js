@@ -157,7 +157,7 @@ const THEMES = {
     primary:"#BE185D", dark:"#9D174D", light:"#FCE7F3",
     bg:"#fff", surface:"#fdf2f8", text:"#1a1a1a", muted:"#6b7280",
     label:"👗 Mode & Vêtements",
-    heroImg:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Playfair Display',serif", bodyFont:"'DM Sans',sans-serif",
     tagline:"Découvrez les dernières tendances mode", badge:"Mode & Vêtements", emoji:"👗",
     feat:["✂️ Tailles disponibles","🚚 Livraison rapide","↩️ Échanges faciles"],
@@ -168,7 +168,7 @@ const THEMES = {
     primary:"#D97706", dark:"#B45309", light:"#FEF3C7",
     bg:"#fffdf7", surface:"#fef9ee", text:"#1c1507", muted:"#78716c",
     label:"🍽️ Alimentation & Restauration",
-    heroImg:"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Abril Fatface',cursive", bodyFont:"'Nunito',sans-serif",
     tagline:"Des saveurs authentiques livrées chez vous", badge:"Alimentation", emoji:"🍽️",
     feat:["🌿 Produits frais du jour","⚡ Livraison express","🏠 Commande à domicile"],
@@ -179,7 +179,7 @@ const THEMES = {
     primary:"#7C3AED", dark:"#6D28D9", light:"#EDE9FE",
     bg:"#fdfcff", surface:"#f5f3ff", text:"#1a1a2e", muted:"#6b7280",
     label:"💄 Beauté & Cosmétiques",
-    heroImg:"https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Cormorant Garamond',serif", bodyFont:"'Jost',sans-serif",
     tagline:"Sublimez votre beauté naturelle", badge:"Beauté & Cosmétiques", emoji:"💄",
     feat:["🌸 Produits naturels","✨ Conseils beauté","🎁 Coffrets cadeaux"],
@@ -190,7 +190,7 @@ const THEMES = {
     primary:"#2563EB", dark:"#1D4ED8", light:"#DBEAFE",
     bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b",
     label:"📱 High-Tech & Électronique",
-    heroImg:"https://images.unsplash.com/photo-1593640408182-31c228d54d3c?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Space Grotesk',sans-serif", bodyFont:"'Inter',sans-serif",
     tagline:"La technologie à portée de main", badge:"High-Tech", emoji:"📱",
     feat:["🔧 Garantie incluse","📦 Livraison sécurisée","🛡️ Produits certifiés"],
@@ -201,7 +201,7 @@ const THEMES = {
     primary:"#15803D", dark:"#166534", light:"#DCFCE7",
     bg:"#f9fff9", surface:"#f0fdf4", text:"#14532d", muted:"#6b7280",
     label:"🛒 Épicerie & Supermarché",
-    heroImg:"https://images.unsplash.com/photo-1579113800032-c38bd7635818?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1542838132-92c53300491e?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Poppins',sans-serif", bodyFont:"'Poppins',sans-serif",
     tagline:"Votre épicerie du quartier en ligne", badge:"Épicerie", emoji:"🛒",
     feat:["🥦 Produits frais","🚚 Livraison quotidienne","💰 Prix imbattables"],
@@ -212,7 +212,7 @@ const THEMES = {
     primary:"#92400E", dark:"#78350F", light:"#FEF3C7",
     bg:"#fffdf7", surface:"#fefce8", text:"#1c1507", muted:"#78716c",
     label:"🏺 Artisanat & Décoration",
-    heroImg:"https://images.unsplash.com/photo-1489659639091-8b687bc4386e?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Libre Baskerville',serif", bodyFont:"'Source Sans Pro',sans-serif",
     tagline:"L'art et le savoir-faire africain", badge:"Artisanat & Déco", emoji:"🏺",
     feat:["🤝 Fait main","🌍 Artisans locaux","🎁 Pièces uniques"],
@@ -223,7 +223,7 @@ const THEMES = {
     primary:"#0D9488", dark:"#0F766E", light:"#CCFBF1",
     bg:"#f9fffd", surface:"#f0fdfa", text:"#0f3d38", muted:"#6b7280",
     label:"💊 Santé & Pharmacie",
-    heroImg:"https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Nunito',sans-serif", bodyFont:"'Nunito',sans-serif",
     tagline:"Votre santé, notre priorité", badge:"Santé & Pharmacie", emoji:"💊",
     feat:["✅ Produits certifiés","🚚 Livraison urgente","👨‍⚕️ Conseils santé"],
@@ -234,7 +234,7 @@ const THEMES = {
     primary:"#B45309", dark:"#92400E", light:"#FEF9C3",
     bg:"#fffef5", surface:"#fefce8", text:"#1c1507", muted:"#78716c",
     label:"💍 Bijoux & Accessoires",
-    heroImg:"https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Cormorant Garamond',serif", bodyFont:"'Lato',sans-serif",
     tagline:"Des bijoux d'exception pour chaque occasion", badge:"Bijoux & Accessoires", emoji:"💍",
     feat:["💎 Or & argent","📦 Coffret cadeau","🔐 Authenticité garantie"],
@@ -245,7 +245,7 @@ const THEMES = {
     primary:"#1E40AF", dark:"#1E3A8A", light:"#DBEAFE",
     bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b",
     label:"⚽ Sport & Fitness",
-    heroImg:"https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Barlow Condensed',sans-serif", bodyFont:"'Barlow',sans-serif",
     tagline:"Équipez-vous pour la performance", badge:"Sport & Fitness", emoji:"⚽",
     feat:["🏆 Équipement pro","🚚 Livraison rapide","🔄 Échanges faciles"],
@@ -256,7 +256,7 @@ const THEMES = {
     primary:"#4D7C0F", dark:"#3F6212", light:"#ECFCCB",
     bg:"#fafff5", surface:"#f7ffe8", text:"#1a2e05", muted:"#6b7280",
     label:"🏠 Maison & Mobilier",
-    heroImg:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Raleway',sans-serif", bodyFont:"'Raleway',sans-serif",
     tagline:"Créez l'intérieur de vos rêves", badge:"Maison & Mobilier", emoji:"🏠",
     feat:["🏡 Livraison à domicile","🔨 Installation possible","✨ Design exclusif"],
@@ -267,7 +267,7 @@ const THEMES = {
     primary:"#DB2777", dark:"#BE185D", light:"#FCE7F3",
     bg:"#fff9fc", surface:"#fdf2f8", text:"#1a1a1a", muted:"#9ca3af",
     label:"👶 Bébé & Enfants",
-    heroImg:"https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Nunito',sans-serif", bodyFont:"'Nunito',sans-serif",
     tagline:"Tout pour le bonheur de vos enfants", badge:"Bébé & Enfants", emoji:"👶",
     feat:["🌸 Produits doux & sûrs","🚚 Livraison soignée","✅ Certifiés enfants"],
@@ -278,7 +278,7 @@ const THEMES = {
     primary:"#1D4ED8", dark:"#1E40AF", light:"#DBEAFE",
     bg:"#f8faff", surface:"#eff6ff", text:"#0f172a", muted:"#64748b",
     label:"🎓 Éducation & Formation",
-    heroImg:"https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'IBM Plex Sans',sans-serif", bodyFont:"'IBM Plex Sans',sans-serif",
     tagline:"Investissez dans l'avenir de vos apprenants", badge:"Éducation", emoji:"🎓",
     feat:["📚 Ressources complètes","🎯 Suivi personnalisé","🏆 Certifications"],
@@ -289,7 +289,7 @@ const THEMES = {
     primary:"#374151", dark:"#1F2937", light:"#F3F4F6",
     bg:"#f9fafb", surface:"#f3f4f6", text:"#111827", muted:"#6b7280",
     label:"🔧 Services & Professionnels",
-    heroImg:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'IBM Plex Sans',sans-serif", bodyFont:"'IBM Plex Sans',sans-serif",
     tagline:"Des services professionnels de qualité", badge:"Services", emoji:"🔧",
     feat:["⭐ Pros certifiés","📞 Support disponible","✅ Satisfaction garantie"],
@@ -300,7 +300,7 @@ const THEMES = {
     primary:"#E85C0E", dark:"#C44D0B", light:"#FEF0E8",
     bg:"#fff", surface:"#f9f9f9", text:"#1a1a1a", muted:"#6b7280",
     label:"🏪 Boutique Générale",
-    heroImg:"https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=85&fit=crop",
+    heroImg:"https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1400&q=90&fit=crop&auto=format",
     heroOverlay:"rgba(0,0,0,0)", font:"'Plus Jakarta Sans',sans-serif", bodyFont:"'Plus Jakarta Sans',sans-serif",
     tagline:"Tout ce dont vous avez besoin", badge:"Boutique", emoji:"🛍️",
     feat:["🚚 Livraison disponible","📱 Paiement Mobile Money","✅ Qualité garantie"],
@@ -462,14 +462,14 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   // HERO — with image background
   html += ".hero{position:relative;min-height:480px;display:flex;align-items:center;overflow:hidden}\n";
   html += ".hero-bg{position:absolute;inset:0;background-image:url('"+theme.heroImg+"');background-size:cover;background-position:center;filter:brightness(1)}\n";
-  html += ".hero-overlay{display:none}\n";
+  html += ".hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.65) 0%,rgba(0,0,0,.35) 60%,rgba(0,0,0,.1) 100%)}\n";
   html += ".hero-in{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:60px 24px;width:100%}\n";
-  html += ".hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);color:white;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:20px;border:1px solid rgba(255,255,255,.3)}\n";
-  html += ".hero h1{font-family:"+hf+";font-size:clamp(32px,5vw,60px);font-weight:800;line-height:1.1;color:white;margin-bottom:14px;letter-spacing:-.5px;text-shadow:0 2px 16px rgba(0,0,0,.8),0 4px 32px rgba(0,0,0,.6);max-width:600px}\n";
+  html += ".hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px 18px;border-radius:20px;margin-bottom:20px;border:1px solid rgba(255,255,255,.4)}\n";
+  html += ".hero h1{font-family:"+hf+";font-size:clamp(30px,5vw,58px);font-weight:800;line-height:1.1;color:#fff;margin-bottom:14px;letter-spacing:-.5px;max-width:600px}\n";
   html += ".hero h1 em{font-style:normal;color:white;text-decoration:underline;text-decoration-color:"+p+";text-decoration-thickness:3px;text-underline-offset:6px}\n";
-  html += ".hero p{color:rgba(255,255,255,.95);font-size:17px;line-height:1.7;margin-bottom:32px;max-width:480px;text-shadow:0 2px 12px rgba(0,0,0,.9)}\n";
+  html += ".hero p{color:rgba(255,255,255,.9);font-size:16px;line-height:1.7;margin-bottom:24px;max-width:480px}\n";
 html += ".hero-feats{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;margin-bottom:24px}\n";
-  html += ".hero-feat{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);color:white;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.25)}\n";
+  html += ".hero-feat{background:rgba(255,255,255,.15);backdrop-filter:blur(10px);color:#fff;font-size:11px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.35)}\n";
   html += ".hero-cta{display:flex;gap:12px;flex-wrap:wrap}\n";
   html += ".btn-hp{background:white;color:var(--p);border:none;padding:14px 28px;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.15)}\n";
   html += ".btn-hp:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.2)}\n";

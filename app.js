@@ -9,15 +9,7 @@ const onboardingRouter = require("./routes/onboarding");
 const analyticsRouter = require("./routes/analytics");
 const boutiqueRouter = require("./routes/boutique");
 const { startCronJobs } = require("./modules/retention");
-const { Pool } = require('pg');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
-  family: 4 // 🔥 FORCE IPv4
-});
 // Optimisations (avec fallback si fichier absent)
 const safeRequire = (path) => { try { return require(path); } catch { return {}; } };
 
@@ -81,7 +73,7 @@ connectDB().then(async () => {
   await initQueue().catch(() => {});
 
   startCronJobs();
-  
+
   // Restaure les sessions Baileys au démarrage
   try {
     const { restoreAllSessions } = require('./core/baileys');
@@ -92,13 +84,9 @@ connectDB().then(async () => {
   }
 });
 
-app.use(express.static(__dirname + '/public', { dotfiles: 'deny' }));
-// sw.js doit être à la racine, pas dans /public
-app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));
-app.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/manifest.json'));
 app.use((req, res, next) => {
   if ((req.originalUrl === "/webhook" || req.originalUrl === "/subscription/webhook") && req.method === "POST") return next();
-  express.json()(req, res, next);
+  express.json({ limit: "10mb" })(req, res, next);
 });
 
 const requireApiKey = (req, res, next) => {
@@ -129,20 +117,6 @@ app.get("/maintenance", (req, res) => res.sendFile(path.join(__dirname, "mainten
 
 app.use("/webhook", webhookRouter);
 app.use("/onboarding", onboardingRouter);
-
-// ─── Route publique annonces (pas de clé API requise) ─────────────────────────
-app.get("/api/announcements/active", async (req, res) => {
-  try {
-    const { Announcement } = require("./models/index");
-    const ann = await Announcement.findOne({
-      where: { isActive: true, showBanner: true },
-      order: [["createdAt", "DESC"]],
-    });
-    if (!ann) return res.json(null);
-    res.json({ id: ann.id, title: ann.title, message: ann.message, type: ann.type });
-  } catch { res.json(null); }
-});
-
 app.use("/api", requireApiKey, apiRouter);
 app.use("/subscription", requireApiKey, subscriptionsRouter);
 app.use("/analytics", requireApiKey, analyticsRouter);
