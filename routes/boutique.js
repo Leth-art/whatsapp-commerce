@@ -310,7 +310,9 @@ const THEMES = {
 
 const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   const shopName = merchant.shopName || merchant.name;
-  const description = merchant.businessDescription || theme.tagline;
+  const description = (merchant.businessDescription && merchant.businessDescription.trim().length > 10)
+    ? merchant.businessDescription
+    : theme.tagline;
   const city = merchant.city || "";
   const currency = merchant.currency || "XOF";
   const cats = [...new Set(products.map(p => p.category || "Divers"))];
@@ -466,6 +468,8 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   html += ".hero h1{font-family:"+hf+";font-size:clamp(32px,5vw,60px);font-weight:800;line-height:1.1;color:white;margin-bottom:14px;letter-spacing:-.5px;text-shadow:0 2px 16px rgba(0,0,0,.8),0 4px 32px rgba(0,0,0,.6);max-width:600px}\n";
   html += ".hero h1 em{font-style:normal;color:white;text-decoration:underline;text-decoration-color:"+p+";text-decoration-thickness:3px;text-underline-offset:6px}\n";
   html += ".hero p{color:rgba(255,255,255,.95);font-size:17px;line-height:1.7;margin-bottom:32px;max-width:480px;text-shadow:0 2px 12px rgba(0,0,0,.9)}\n";
+html += ".hero-feats{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;margin-bottom:24px}\n";
+  html += ".hero-feat{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);color:white;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.25)}\n";
   html += ".hero-cta{display:flex;gap:12px;flex-wrap:wrap}\n";
   html += ".btn-hp{background:white;color:var(--p);border:none;padding:14px 28px;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.15)}\n";
   html += ".btn-hp:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.2)}\n";
@@ -621,6 +625,10 @@ const generateSiteHTML = ({ merchant, products, theme, whatsappNumber }) => {
   html += "<p>"+description+"</p>";
   html += "<div class='hero-cta'><a href='#catalogue' class='btn-hp'>Découvrir nos produits</a>";
   if (whatsappNumber) html += "<a href='https://wa.me/"+whatsappNumber+"' target='_blank' class='btn-hs'>💬 Commander</a>";
+  html += "</div>";
+  // Feature pills per theme
+  html += "<div class='hero-feats'>";
+  feats.forEach(function(f){ html += "<span class='hero-feat'>" + f + "</span>"; });
   html += "</div>";
   html += "<div class='hero-stats'>";
   html += "<div class='hstat'><div class='hstat-n'>"+products.length+"</div><div class='hstat-l'>Produits</div></div>";

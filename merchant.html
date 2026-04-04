@@ -509,9 +509,15 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
               <div style="font-size:12px;color:var(--muted);margin-bottom:6px">🔗 VOTRE SITE WAZIBOT</div>
               <div id="site-wazibot-url" style="font-size:13px;color:var(--accent2);font-weight:600;word-break:break-all"></div>
             </div>
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-ghost btn-sm" onclick="copySiteUrl()">📋 Copier le lien</button>
               <a id="site-open-btn" href="#" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">🔗 Ouvrir</a>
+              <button id="btn-site-toggle" class="btn btn-sm" onclick="toggleSiteActive()" style="margin-left:auto">⏸ Désactiver</button>
+            </div>
+            <!-- Site active status -->
+            <div id="site-status-bar" style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 14px;border-radius:10px;background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15)">
+              <div id="site-status-dot" style="width:8px;height:8px;border-radius:50%;background:#00e5a0;flex-shrink:0"></div>
+              <span id="site-status-txt" style="font-size:13px;font-weight:600;color:var(--text)">Boutique en ligne</span>
             </div>
 
           <!-- Thème de la boutique -->
@@ -549,6 +555,10 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
             <div class="form-group full">
               <label>Description / Persona IA</label>
               <textarea id="set-persona" placeholder="Ex: Tu es l'assistante de Ma Boutique Togolaise..."></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Description de votre boutique</label>
+              <textarea id="set-desc" rows="3" placeholder="Ex: Spécialiste mode africaine, livraison dans tout Lomé..." style="resize:vertical"></textarea>
             </div>
             <div class="form-group full">
               <label>Message de bienvenue</label>
@@ -1044,10 +1054,28 @@ async function loadStats(period, btn) {
 }
 
 // ── SETTINGS ─────────────────────────────────────────────────────────────────
+
+async function toggleSiteActive() {
+  const isActive = merchantData.siteActive !== false;
+  const newState = !isActive;
+  const r = await fetch(`${BASE}/api/merchants/${merchantId}`, {
+    method: 'PATCH', headers: H,
+    body: JSON.stringify({ siteActive: newState })
+  });
+  if (r.ok) {
+    merchantData.siteActive = newState;
+    loadSiteInfo();
+    toast(newState ? '✅ Boutique activée !' : '⏸ Boutique désactivée', newState ? 'success' : 'info');
+  } else toast('❌ Erreur', 'error');
+}
+
 async function saveSettings() {
+  const descEl = document.getElementById('set-desc');
+  const personaEl = document.getElementById('set-persona');
   const data = {
     shopName: document.getElementById('set-name').value.trim(),
-    aiPersona: document.getElementById('set-persona').value.trim(),
+    businessDescription: descEl ? descEl.value.trim() : '',
+    aiPersona: personaEl ? personaEl.value.trim() : '',
     welcomeMessage: document.getElementById('set-welcome').value.trim(),
   };
   const r = await fetch(`${BASE}/api/merchants/${merchantId}`, { method: 'PATCH', headers: H, body: JSON.stringify(data) });
@@ -1078,6 +1106,19 @@ function loadSiteInfo() {
 
   document.getElementById('site-wazibot-url').textContent = waziBotUrl || 'Non disponible';
   document.getElementById('site-open-btn').href = waziBotUrl || '#';
+
+  // Populate description
+  const descEl = document.getElementById('set-desc');
+  if (descEl) descEl.value = merchantData.businessDescription || '';
+
+  // siteActive status
+  const isActive = merchantData.siteActive !== false;
+  const dot = document.getElementById('site-status-dot');
+  const txt = document.getElementById('site-status-txt');
+  const btn = document.getElementById('btn-site-toggle');
+  if (dot) dot.style.background = isActive ? '#00e5a0' : '#9ca3af';
+  if (txt) txt.textContent = isActive ? '✅ Boutique en ligne' : '⏸ Boutique hors ligne';
+  if (btn) { btn.textContent = isActive ? '⏸ Désactiver' : '▶ Activer'; btn.style.background = isActive ? 'var(--danger-light,#fee2e2)' : 'var(--accent-light)'; btn.style.color = isActive ? '#dc2626' : 'var(--accent)'; }
 
   if (customUrl) {
     setSiteType('custom');

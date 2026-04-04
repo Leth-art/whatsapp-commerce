@@ -377,6 +377,10 @@ router.post("/merchants/:id/products/:pid/image", validateMerchantId, async (req
     if (product.merchantId !== req.params.id) return res.status(403).json({ error: "Accès refusé" });
 
     let imageUrl = "";
+    // Validate image size (max 5MB base64 ≈ 6.7MB string)
+    if (imageBase64.length > 7000000) {
+      return res.status(413).json({ error: "Image trop grande. Maximum 5MB." });
+    }
     try {
       const cloudinary = require("cloudinary").v2;
       cloudinary.config({
@@ -386,12 +390,12 @@ router.post("/merchants/:id/products/:pid/image", validateMerchantId, async (req
       });
       const result = await cloudinary.uploader.upload(imageBase64, {
         folder: "wazibot_products",
-        transformation: [{ width: 800, height: 800, crop: "limit", quality: "auto" }],
+        transformation: [{ width: 800, height: 800, crop: "limit", quality: "auto:good" }],
       });
       imageUrl = result.secure_url;
-    } catch {
-      // Fallback: store base64 directly (not recommended for production)
-      imageUrl = imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+    } catch(e) {
+      console.error("Cloudinary error:", e.message);
+      imageUrl = (imageBase64.length < 500000 && imageBase64.startsWith("data:")) ? imageBase64 : "";
     }
 
     await product.update({ imageUrl });
