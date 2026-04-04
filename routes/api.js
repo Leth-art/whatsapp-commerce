@@ -394,8 +394,13 @@ router.post("/merchants/:id/products/:pid/image", validateMerchantId, async (req
       });
       imageUrl = result.secure_url;
     } catch(e) {
-      console.error("Cloudinary error:", e.message);
-      imageUrl = (imageBase64.length < 500000 && imageBase64.startsWith("data:")) ? imageBase64 : "";
+      console.error("Cloudinary upload error:", e.message, "| cloud_name:", process.env.CLOUDINARY_CLOUD_NAME ? "SET" : "MISSING");
+      // Fallback: store base64 directly if Cloudinary not configured
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY) {
+        // No Cloudinary — store base64 directly (works for small images)
+        imageUrl = imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+        console.log("Cloudinary not configured — using base64 fallback, size:", imageUrl.length);
+      }
     }
 
     await product.update({ imageUrl });

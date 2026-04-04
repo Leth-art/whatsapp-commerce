@@ -10,9 +10,7 @@ const analyticsRouter = require("./routes/analytics");
 const boutiqueRouter = require("./routes/boutique");
 const { startCronJobs } = require("./modules/retention");
 
-// Optimisations (avec fallback si fichier absent)
 const safeRequire = (path) => { try { return require(path); } catch { return {}; } };
-
 const _cache = safeRequire("./core/cache");
 const _queue = safeRequire("./core/queue") || safeRequire("./core/messageQueue");
 const _indexes = safeRequire("./migrations/addIndexes");
@@ -29,38 +27,27 @@ const PORT = process.env.PORT || 3000;
 connectDB().then(async () => {
   try {
     const { sequelize } = require("./config/database");
-
     const constraints = await sequelize.query(`
       SELECT constraint_name FROM information_schema.table_constraints 
       WHERE table_name = 'Merchants' AND constraint_type = 'UNIQUE'
       AND constraint_name LIKE '%phoneNumberId%'
     `, { type: sequelize.QueryTypes.SELECT });
-
     for (const row of constraints) {
       await sequelize.query(`ALTER TABLE "Merchants" DROP CONSTRAINT IF EXISTS "${row.constraint_name}"`);
     }
-
     await sequelize.query(`ALTER TABLE "Merchants" DROP CONSTRAINT IF EXISTS "Merchants_phoneNumberId_key35"`).catch(() => {});
     await sequelize.query(`ALTER TABLE "Merchants" ALTER COLUMN "phoneNumberId" DROP NOT NULL`).catch(() => {});
     await sequelize.query(`ALTER TABLE "Merchants" ALTER COLUMN "whatsappToken" DROP NOT NULL`).catch(() => {});
     await sequelize.sync({ alter: true });
     console.log("✅ Base de données migrée et synchronisée");
-
     await runIndexMigration().catch(err => console.warn("⚠️ Index migration:", err.message));
-    
-    // Migration slugs pour anciens commerçants
     try {
       const { migrateSlugs } = require("./migrations/migrate_slugs");
       await migrateSlugs();
-    } catch (err) {
-      console.warn("⚠️ Slug migration:", err.message);
-    }
-  } catch (err) {
-    console.error("⚠️ Erreur migration DB:", err.message);
-  }
+    } catch (err) { console.warn("⚠️ Slug migration:", err.message); }
+  } catch (err) { console.error("⚠️ Erreur migration DB:", err.message); }
 
   await initRedis().catch(() => {});
-
   let sharedRedis = null;
   try {
     if (process.env.REDIS_URL) {
@@ -71,24 +58,21 @@ connectDB().then(async () => {
   } catch {}
   await initRateLimiter(sharedRedis).catch(() => {});
   await initQueue().catch(() => {});
-
   startCronJobs();
-
-  // Restaure les sessions Baileys au démarrage
   try {
     const { restoreAllSessions } = require('./core/baileys');
     const { handleBaileysMessage } = require('./core/router');
     await restoreAllSessions(handleBaileysMessage);
-  } catch (err) {
-    console.warn('⚠️ Baileys sessions non restaurées:', err.message);
-  }
+  } catch (err) { console.warn('⚠️ Baileys sessions non restaurées:', err.message); }
 });
 
+// ─── Body parsing — 10mb pour les images base64 ──────────────────────────────
 app.use((req, res, next) => {
   if ((req.originalUrl === "/webhook" || req.originalUrl === "/subscription/webhook") && req.method === "POST") return next();
   express.json({ limit: "10mb" })(req, res, next);
 });
 
+// ─── Middlewares auth ─────────────────────────────────────────────────────────
 const requireApiKey = (req, res, next) => {
   const key = req.headers["x-api-key"] || req.query.apiKey;
   const validKey = process.env.API_SECRET_KEY;
@@ -115,6 +99,20 @@ app.use(maintenanceMode);
 app.use(express.static(__dirname));
 app.get("/maintenance", (req, res) => res.sendFile(path.join(__dirname, "maintenance.html")));
 
+// ─── Routes publiques (AVANT requireApiKey) ───────────────────────────────────
+app.get("/api/announcements/active", async (req, res) => {
+  try {
+    const { Announcement } = require("./models/index");
+    const ann = await Announcement.findOne({
+      where: { isActive: true, showBanner: true },
+      order: [["createdAt", "DESC"]],
+    });
+    if (!ann) return res.json(null);
+    res.json({ id: ann.id, title: ann.title, message: ann.message, type: ann.type });
+  } catch { res.json(null); }
+});
+
+// ─── Routes protégées ─────────────────────────────────────────────────────────
 app.use("/webhook", webhookRouter);
 app.use("/onboarding", onboardingRouter);
 app.use("/api", requireApiKey, apiRouter);
@@ -122,6 +120,7 @@ app.use("/subscription", requireApiKey, subscriptionsRouter);
 app.use("/analytics", requireApiKey, analyticsRouter);
 app.use("/boutique", boutiqueRouter);
 
+// ─── Pages HTML ───────────────────────────────────────────────────────────────
 app.get("/merchant", (req, res) => res.sendFile(path.join(__dirname, "merchant.html")));
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 app.get("/signup", (req, res) => res.sendFile(path.join(__dirname, "signup.html")));
@@ -130,6 +129,10 @@ app.get("/guide", (req, res) => res.sendFile(path.join(__dirname, "guide.html"))
 app.get("/403", (req, res) => res.sendFile(path.join(__dirname, "403.html")));
 app.get("/dashboard", (req, res) => res.sendFile(path.join(__dirname, "dashboard.html")));
 app.get("/admin", requireAdminToken, (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+
+// ─── Serve sw.js et manifest.json depuis la racine (PWA) ──────────────────────
+app.get("/sw.js", (req, res) => res.sendFile(path.join(__dirname, "sw.js")));
+app.get("/manifest.json", (req, res) => res.sendFile(path.join(__dirname, "manifest.json")));
 
 app.use((err, req, res, next) => { res.status(500).json({ error: "Erreur interne" }); });
 
