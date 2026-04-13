@@ -43,6 +43,43 @@
 html{scroll-behavior:smooth}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
+
+/* ── RENEWAL MODAL ── */
+.renewal-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.renewal-modal.open{display:flex}
+.renewal-box{background:#fff;border-radius:20px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.renewal-box-header{background:linear-gradient(135deg,#008060,#00a878);padding:24px 24px 20px;border-radius:20px 20px 0 0;color:white;position:relative}
+.renewal-box-header h2{font-size:20px;font-weight:800;margin-bottom:4px}
+.renewal-box-header p{font-size:13px;opacity:.85}
+.renewal-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.renewal-body{padding:24px}
+.plan-card-full{border:2px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:.15s;margin-bottom:12px;position:relative}
+.plan-card-full:hover{border-color:var(--accent);background:#f0fdf8}
+.plan-card-full.selected{border-color:var(--accent);background:var(--accent-light)}
+.plan-card-full .popular-tag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#e85c0e;color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap}
+.plan-card-full .plan-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.plan-card-full .plan-name{font-size:17px;font-weight:800;color:var(--text)}
+.plan-card-full .plan-price{font-size:22px;font-weight:900;color:var(--accent)}
+.plan-card-full .plan-price span{font-size:13px;font-weight:500;color:var(--muted)}
+.plan-card-full .plan-features{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.plan-card-full .feat{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.plan-card-full .feat::before{content:"✓";color:var(--accent);font-weight:700;font-size:13px}
+.renewal-steps{background:#f6fef9;border:1px solid #c3e6d4;border-radius:12px;padding:16px;margin-bottom:18px}
+.renewal-steps h4{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px}
+.rstep{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:13px;color:var(--text)}
+.rstep-num{background:var(--accent);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px}
+.mtp-links{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.mtp-btn{background:var(--text);color:white;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.mtp-btn:hover{background:#333}
+.expiry-banner-cta{cursor:pointer;text-decoration:underline;font-weight:700}
+
+/* ── Plan selector enhanced ── */
+.plan-opt-v2{border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.15s;position:relative;text-align:left}
+.plan-opt-v2:hover{border-color:var(--accent);background:#f0fdf8}
+.plan-opt-v2.selected{border-color:var(--accent);background:var(--accent-light)}
+.plan-opt-v2 .pop{position:absolute;top:-10px;right:10px;background:#e85c0e;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+
 /* ── LOGIN ── */
 .login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:300}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px;width:100%;max-width:420px;text-align:center;box-shadow:var(--shadow)}
@@ -331,7 +368,10 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
       <div class="name" id="sb-name">—</div>
       <div class="status" id="sb-status"></div>
     </div>
-    <button class="btn-logout" onclick="logout()">🚪 Déconnexion</button>
+    <button onclick="openRenewalModal()" style="margin:0 12px 8px;padding:10px 14px;border-radius:8px;background:var(--accent);border:none;color:white;font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;width:calc(100% - 24px);font-weight:700;transition:.15s">
+    💳 Renouveler
+  </button>
+  <button class="btn-logout" onclick="logout()">🚪 Déconnexion</button>
   </aside>
 
   <!-- MAIN -->
@@ -624,8 +664,11 @@ select.status-sel{background:var(--bg);border:1px solid var(--border);color:var(
             <label>Référence de transaction My Touchpoint *</label>
             <input type="text" id="transaction-ref" placeholder="Ex: MTP-20260101-XXXXX">
           </div>
-          <button class="btn btn-primary" onclick="submitPaymentRequest()" id="payment-btn">
-            📤 Envoyer la demande de renouvellement
+          <button class="btn btn-primary" onclick="openRenewalModal()" style="margin-bottom:12px;width:100%">
+            💳 Ouvrir le formulaire de renouvellement
+          </button>
+          <button class="btn btn-primary" onclick="submitPaymentRequest()" id="payment-btn" style="background:var(--muted)">
+            📤 Envoyer via ce formulaire
           </button>
           <p id="payment-feedback" style="font-size:13px;margin-top:10px;display:none"></p>
         </div>
@@ -1225,6 +1268,8 @@ function checkExpiryWarning() {
   if (!expiry) return;
   const daysLeft = Math.ceil((new Date(expiry) - new Date()) / (1000 * 60 * 60 * 24));
   if (daysLeft > 7) return;
+  // Auto-open modal if expired
+  if (daysLeft <= 0) { setTimeout(() => openRenewalModal(true), 800); }
   
   const color = daysLeft <= 1 ? '#d82c0d' : daysLeft <= 3 ? '#c47a00' : '#0070f3';
   const msg = daysLeft <= 0 
@@ -1239,7 +1284,7 @@ function checkExpiryWarning() {
   const warning = document.createElement('div');
   warning.id = 'expiry-warning';
   warning.style.cssText = `background:${color};color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px`;
-  warning.innerHTML = '<span>' + msg + '</span><button onclick="showPage(\'settings\')" style="background:rgba(255,255,255,.2);border:none;color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;font-size:12px;">Renouveler →</button>';
+  warning.innerHTML = '<span>' + msg + '</span><button onclick="openRenewalModal()" style="background:rgba(255,255,255,.2);border:none;color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;font-size:12px;">Renouveler →</button>';
   
   const heroCard = document.querySelector('.hero-card');
   if (heroCard) heroCard.parentNode.insertBefore(warning, heroCard);
@@ -1535,7 +1580,217 @@ if (typeof initDashboard !== 'undefined') {
     setTimeout(requestPushPermission, 5000);
   };
 }
+
+
+// ═══ RENEWAL MODAL ═══════════════════════════════════════════════════════════
+let modalSelectedPlan = 'pro';
+let modalSelectedAmount = 55000;
+
+function openRenewalModal(isExpired = false) {
+  const modal = document.getElementById('renewal-modal');
+  const title = document.getElementById('renewal-modal-title');
+  const subtitle = document.getElementById('renewal-modal-subtitle');
+  const header = document.getElementById('renewal-modal-header');
+
+  if (isExpired) {
+    title.textContent = '🔒 Abonnement expiré';
+    subtitle.textContent = 'Renouvelez pour réactiver votre boutique immédiatement';
+    header.style.background = 'linear-gradient(135deg,#d82c0d,#e85c0e)';
+    // Hide close button if expired (force renewal)
+    // document.querySelector('.renewal-close').style.display = 'none';
+  } else {
+    title.textContent = 'Renouveler mon abonnement';
+    subtitle.textContent = 'Choisissez un forfait et payez via Mobile Money';
+    header.style.background = 'linear-gradient(135deg,#008060,#00a878)';
+  }
+
+  // Pre-select current plan
+  if (merchantData && merchantData.plan) {
+    const prices = {starter:35000, pro:55000, business:115000};
+    modalSelectedPlan = merchantData.plan;
+    modalSelectedAmount = prices[merchantData.plan] || 35000;
+    updateModalPlanDisplay();
+    document.querySelectorAll('.plan-card-full').forEach(el => {
+      el.classList.remove('selected');
+    });
+    const card = document.getElementById('mc-' + merchantData.plan);
+    if (card) card.classList.add('selected');
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRenewalModal() {
+  document.getElementById('renewal-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('modal-feedback').style.display = 'none';
+  document.getElementById('modal-transaction-ref').value = '';
+}
+
+function selectModalPlan(plan, amount) {
+  modalSelectedPlan = plan;
+  modalSelectedAmount = amount;
+  document.querySelectorAll('.plan-card-full').forEach(el => el.classList.remove('selected'));
+  const card = document.getElementById('mc-' + plan);
+  if (card) card.classList.add('selected');
+  updateModalPlanDisplay();
+}
+
+function updateModalPlanDisplay() {
+  const labels = {starter:'Starter', pro:'Pro', business:'Business'};
+  const fmt = new Intl.NumberFormat('fr-FR');
+  document.getElementById('modal-amount-display').textContent = fmt.format(modalSelectedAmount) + ' XOF';
+  document.getElementById('modal-plan-display').textContent = labels[modalSelectedPlan] || modalSelectedPlan;
+}
+
+async function submitModalPayment() {
+  const ref = document.getElementById('modal-transaction-ref').value.trim();
+  if (!ref || ref.length < 3) { toast('❌ Référence de transaction requise', 'error'); return; }
+  const btn = document.getElementById('modal-pay-btn');
+  const feedback = document.getElementById('modal-feedback');
+  btn.disabled = true; btn.textContent = '⏳ Envoi en cours...';
+  try {
+    const r = await fetch(`${BASE}/api/merchants/${merchantId}/payment-request`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ plan: modalSelectedPlan, transactionRef: ref, amount: modalSelectedAmount, currency: 'XOF' })
+    });
+    const data = await r.json();
+    if (data.success || r.ok) {
+      feedback.textContent = '✅ Demande envoyée ! Votre boutique sera réactivée sous 24h après validation par notre équipe.';
+      feedback.style.background = '#f0fdf4'; feedback.style.color = '#008060';
+      feedback.style.border = '1px solid #c3e6d4'; feedback.style.borderRadius = '8px';
+      feedback.style.display = 'block';
+      document.getElementById('modal-transaction-ref').value = '';
+      btn.textContent = '✅ Demande envoyée';
+      toast('✅ Demande de renouvellement envoyée !', 'success');
+      // Close modal after 3s
+      setTimeout(() => closeRenewalModal(), 3500);
+    } else {
+      feedback.textContent = '❌ ' + (data.error || 'Erreur. Vérifiez la référence et réessayez.');
+      feedback.style.background = '#fff5f5'; feedback.style.color = '#d82c0d';
+      feedback.style.border = '1px solid #ffc9c9'; feedback.style.borderRadius = '8px';
+      feedback.style.display = 'block';
+      btn.disabled = false; btn.textContent = '📤 Envoyer la demande de renouvellement';
+    }
+  } catch {
+    feedback.textContent = '❌ Erreur de connexion. Vérifiez votre réseau.';
+    feedback.style.background = '#fff5f5'; feedback.style.color = '#d82c0d';
+    feedback.style.border = '1px solid #ffc9c9'; feedback.style.borderRadius = '8px';
+    feedback.style.display = 'block';
+    btn.disabled = false; btn.textContent = '📤 Envoyer la demande de renouvellement';
+  }
+}
+
+// Close modal on backdrop click
+document.addEventListener('DOMContentLoaded', function() {
+  const m = document.getElementById('renewal-modal');
+  if (m) m.addEventListener('click', function(e) { if (e.target === this) closeRenewalModal(); });
+});
+// ═══════════════════════════════════════════════════════════════════════════════
+
 </script>
+
+
+<!-- ═══ RENEWAL MODAL ═══ -->
+<div class="renewal-modal" id="renewal-modal">
+  <div class="renewal-box">
+    <div class="renewal-box-header" id="renewal-modal-header">
+      <button class="renewal-close" onclick="closeRenewalModal()">✕</button>
+      <h2 id="renewal-modal-title">Renouveler mon abonnement</h2>
+      <p id="renewal-modal-subtitle">Choisissez un forfait et payez via Mobile Money</p>
+    </div>
+    <div class="renewal-body">
+
+      <!-- PLANS -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Choisissez votre forfait</div>
+
+      <div class="plan-card-full" id="mc-starter" onclick="selectModalPlan('starter',35000)">
+        <div class="plan-top">
+          <span class="plan-name">Starter</span>
+          <span class="plan-price">35 000 <span>XOF/mois</span></span>
+        </div>
+        <div class="plan-features">
+          <div class="feat">15 produits max</div>
+          <div class="feat">250 msgs IA/mois</div>
+          <div class="feat">Boutique en ligne</div>
+          <div class="feat">Bot IA 24h/24</div>
+        </div>
+      </div>
+
+      <div class="plan-card-full selected" id="mc-pro" onclick="selectModalPlan('pro',55000)" style="margin-top:18px">
+        <div class="popular-tag">⭐ Populaire</div>
+        <div class="plan-top">
+          <span class="plan-name">Pro</span>
+          <span class="plan-price" style="color:#e85c0e">55 000 <span>XOF/mois</span></span>
+        </div>
+        <div class="plan-features">
+          <div class="feat">50 produits max</div>
+          <div class="feat">1 000 msgs IA/mois</div>
+          <div class="feat">Tout Starter inclus</div>
+          <div class="feat">Relances automatiques</div>
+        </div>
+      </div>
+
+      <div class="plan-card-full" id="mc-business" onclick="selectModalPlan('business',115000)" style="margin-top:10px">
+        <div class="plan-top">
+          <span class="plan-name">Business</span>
+          <span class="plan-price">115 000 <span>XOF/mois</span></span>
+        </div>
+        <div class="plan-features">
+          <div class="feat">Produits illimités</div>
+          <div class="feat">Msgs IA illimités</div>
+          <div class="feat">Tout Pro inclus</div>
+          <div class="feat">Support dédié prioritaire</div>
+        </div>
+      </div>
+
+      <!-- SEPARATOR -->
+      <div style="height:1px;background:var(--border);margin:20px 0"></div>
+
+      <!-- STEPS -->
+      <div class="renewal-steps">
+        <h4>📱 Comment payer avec My Touchpoint ?</h4>
+        <div class="rstep"><div class="rstep-num">1</div><div>Téléchargez l'application <strong>My Touchpoint</strong> ci-dessous</div></div>
+        <div class="rstep"><div class="rstep-num">2</div><div>Ouvrez l'app et effectuez le paiement par <strong>Mobile Money</strong> (MTN, Moov, Orange, Wave)</div></div>
+        <div class="rstep"><div class="rstep-num">3</div><div>Copiez la <strong>référence de transaction</strong> reçue par SMS</div></div>
+        <div class="rstep"><div class="rstep-num">4</div><div>Collez-la dans le champ ci-dessous et cliquez <strong>Envoyer</strong></div></div>
+        <div class="mtp-links">
+          <a href="https://play.google.com/store/apps/details?id=com.intouch.mytouchpoint" target="_blank" class="mtp-btn">▶ Google Play</a>
+          <a href="https://apps.apple.com/app/mytouchpoint/id6451056179" target="_blank" class="mtp-btn"> App Store</a>
+        </div>
+      </div>
+
+      <!-- AMOUNT RECAP -->
+      <div id="modal-amount-recap" style="background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px">Montant à payer</div>
+          <div style="font-size:20px;font-weight:900;color:var(--accent)" id="modal-amount-display">55 000 XOF</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--muted);font-weight:600">Forfait sélectionné</div>
+          <div style="font-size:15px;font-weight:800;color:var(--text)" id="modal-plan-display">Pro</div>
+        </div>
+      </div>
+
+      <!-- TRANSACTION REF INPUT -->
+      <div class="form-group" style="margin-bottom:14px">
+        <label style="font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:6px">Référence de transaction My Touchpoint *</label>
+        <input type="text" id="modal-transaction-ref" placeholder="Ex: MTP-20260101-XXXXX" style="width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-size:13px;font-family:inherit;transition:.15s">
+      </div>
+
+      <!-- SUBMIT -->
+      <button onclick="submitModalPayment()" id="modal-pay-btn" style="width:100%;background:var(--accent);color:white;border:none;padding:14px;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:.15s">
+        📤 Envoyer la demande de renouvellement
+      </button>
+      <div id="modal-feedback" style="font-size:13px;margin-top:10px;display:none;padding:10px 14px;border-radius:8px"></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center;line-height:1.6">
+        Votre boutique sera réactivée sous <strong>24h</strong> après validation.<br>
+        Besoin d'aide ? <a href="https://wa.me/22871454079" target="_blank" style="color:var(--accent);font-weight:600">Contactez le support WhatsApp →</a>
+      </p>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
