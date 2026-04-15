@@ -1752,7 +1752,15 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="renewal-steps">
         <h4>📱 Comment payer avec My Touchpoint ?</h4>
         <div class="rstep"><div class="rstep-num">1</div><div>Téléchargez l'application <strong>My Touchpoint</strong> ci-dessous</div></div>
-        <div class="rstep"><div class="rstep-num">2</div><div>Ouvrez l'app et effectuez le paiement par <strong>Mobile Money</strong> (MTN, Moov, Orange, Wave)</div></div>
+        <div class="rstep"><div class="rstep-num">2</div><div>Ouvrez l'app et effectuez le paiement par <strong>Mobile Money</strong> au numéro :</div></div>
+        <div style="background:white;border:2px solid var(--accent);border-radius:12px;padding:14px 18px;margin:6px 0 10px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Numéro de paiement</div>
+            <div style="font-size:22px;font-weight:900;color:var(--accent);letter-spacing:1px">+228 90 58 35 22</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Mixx By Yas · Togo</div>
+          </div>
+          <button onclick="navigator.clipboard.writeText('+22890583522').then(()=>toast('✅ Numéro copié !','success'))" style="background:var(--accent-light);border:1px solid var(--accent);color:var(--accent);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;white-space:nowrap">📋 Copier</button>
+        </div>
         <div class="rstep"><div class="rstep-num">3</div><div>Copiez la <strong>référence de transaction</strong> reçue par SMS</div></div>
         <div class="rstep"><div class="rstep-num">4</div><div>Collez-la dans le champ ci-dessous et cliquez <strong>Envoyer</strong></div></div>
         <div class="mtp-links">
